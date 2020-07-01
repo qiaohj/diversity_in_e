@@ -67,6 +67,9 @@ for (i in 1:length(unique)) {
     ppp$pc2<-extract(pc2, ppp[, c("x", "y")])
     ppp<-ppp[complete.cases(ppp),]
     saveRDS(ppp, target)
+    if (nrow(ppp)<=3){
+      next()
+    }
     fit <- cov.rob(ppp[, c("pc1", "pc2")], quantile.used=NDquntil(nrow(ppp), 0.95),  method = "mve")
     saveRDS(fit, gsub("\\.rda", "\\.fit\\.rda", target))
     mve<-cov_center(data = ppp, mve = T, level = 0.95, vars = 4:5)
