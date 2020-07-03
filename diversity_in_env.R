@@ -37,8 +37,13 @@ source("genCircle.R")
 in_Ellipsoid <- stats::qchisq(0.95, 2)
 mask<-raster("../Raster/mask.tif")
 
+
 k=44
-for (k in c(0:nrow(coms))){
+args = commandArgs(trailingOnly=TRUE)
+kk<-as.numeric(args[1])
+#for (k in c(0:nrow(coms))){
+for (k in c(kk)){
+  
   if (k==0){
     rasters<-stack(c("../Raster/Bioclim/PCs/Present/pc1.tif", "../Raster/Bioclim/PCs/Present/pc2.tif"))
     p<-data.frame(rasterToPoints(rasters))
