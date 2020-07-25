@@ -13,13 +13,6 @@ unique <- unique(sp_df@data$binomial)
 unique<-as.character(unique)
 
 
-bio1<-raster("../Raster/Bioclim/Present/bio1.tif")
-bio5<-raster("../Raster/Bioclim/Present/bio5.tif")
-bio6<-raster("../Raster/Bioclim/Present/bio6.tif")
-bio12<-raster("../Raster/Bioclim/Present/bio12.tif")
-bio13<-raster("../Raster/Bioclim/Present/bio13.tif")
-bio14<-raster("../Raster/Bioclim/Present/bio14.tif")
-
 NDquntil <- function(nD, level) {
   n <- floor(nD * level)
   if (n > nD) 
@@ -27,13 +20,19 @@ NDquntil <- function(nD, level) {
   return(n)
 }
 
+tmax<-list()
+tmin<-list()
+prec<-list()
+for (month in c(1:12)){
+  tmax[[month]]<-raster(sprintf("../Raster/Bioclim 2.1/Present/variable/tmax_%d.tif", month))
+}
 i=1
 for (i in 1:length(unique)) {
   
   bi<-unique[i]
   #bi="Pseudophryne occidentalis"
   print(paste(i, length(unique), bi))
-  target<-sprintf("../Object/IUCN_Distribution/6Variables/Amphibians/%s.rda", gsub(" ", "_", bi))
+  target<-sprintf("../Object/IUCN_Distribution/Monthly/Amphibians/%s.rda", gsub(" ", "_", bi))
   if (file.exists(target)){
     next()
   }
@@ -64,11 +63,16 @@ for (i in 1:length(unique)) {
     values(rp)[no_na]<-1
     ppp<-data.frame(rasterToPoints(rp))
     print(target)
+    vartypes<-c("bioc", "prec", "tmax", "tmin")
+    month=1
+    for (month in (1:12)){
+      ppp1<-ppp
+      ppp1$temp<-extract(), ppp[, c("x", "y")])
+      ppp1$prec<-extract(bio13, ppp[, c("x", "y")])
+    }
     #ppp$bio1<-extract(bio1, ppp[, c("x", "y")])
     
-    ppp1<-ppp
-    ppp1$temp<-extract(bio5, ppp[, c("x", "y")])
-    ppp1$prec<-extract(bio13, ppp[, c("x", "y")])
+    
     
     #ppp$bio12<-extract(bio12, ppp[, c("x", "y")])
     ppp2<-ppp
