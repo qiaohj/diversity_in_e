@@ -1,0 +1,101 @@
+
+File ../../Data/Raw/ENV/EC-Earth3-Veg/SSP119/pr_day_EC-Earth3-Veg_historical_SSP119_r1i1p1f1_gr_18500101-21001231.nc (NC_FORMAT_NETCDF4_CLASSIC):
+
+     4 variables (excluding dimension variables):
+        double time_bnds[bnds,time]   
+        double lon_bnds[bnds,lon]   
+        double lat_bnds[bnds,lat]   
+        float pr[lon,lat,time]   
+            standard_name: precipitation_flux
+            long_name: Precipitation
+            units: kg m-2 s-1
+            _FillValue: 1.00000002004088e+20
+            missing_value: 1.00000002004088e+20
+            comment: includes both liquid and solid phases
+            cell_methods: area: time: mean
+            cell_measures: area: areacella
+            history: 2019-06-05T10:17:45Z altered by CMOR: Reordered dimensions, original order: lat lon time.
+
+     4 dimensions:
+        time  Size:91676   *** is unlimited ***
+            standard_name: time
+            long_name: time
+            bounds: time_bnds
+            units: days since 1850-01-01 00:00:00
+            calendar: proleptic_gregorian
+            axis: T
+        bnds  Size:2
+[1] "vobjtovarid4: **** WARNING **** I was asked to get a varid for dimension named bnds BUT this dimension HAS NO DIMVAR! Code will probably fail at this point"
+        lon  Size:512
+            standard_name: longitude
+            long_name: Longitude
+            units: degrees_east
+            axis: X
+            bounds: lon_bnds
+        lat  Size:256
+            standard_name: latitude
+            long_name: Latitude
+            units: degrees_north
+            axis: Y
+            bounds: lat_bnds
+
+    47 global attributes:
+        CDI: Climate Data Interface version 1.9.8 (https://mpimet.mpg.de/cdi)
+        
+2019-06-05T10:15:32Z ; CMOR rewrote data to be consistent with CMIP6, CF-1.7 CMIP-6.2 and CF standards.;
+processed by ece2cmor vv1.1.0, git rev. 032f6287076b212e5c49922af94a0ddecb191a16
+The cmor-fixer version v2.1 script has been applied.
+        source: EC-Earth3-Veg (2019): 
+aerosol: none
+atmos: IFS cy36r4 (TL255, linearly reduced Gaussian grid equivalent to 512 x 256 longitude/latitude; 91 levels; top level 0.01 hPa)
+atmosChem: none
+land: HTESSEL (land surface scheme built in IFS) and LPJ-GUESS v4
+landIce: none
+ocean: NEMO3.6 (ORCA1 tripolar primarily 1 degree with meridional refinement down to 1/3 degree in the tropics; 362 x 292 longitude/latitude; 75 levels; top grid cell 0-1 m)
+ocnBgchem: none
+seaIce: LIM3
+        institution: AEMET, Spain; BSC, Spain; CNR-ISAC, Italy; DMI, Denmark; ENEA, Italy; FMI, Finland; Geomar, Germany; ICHEC, Ireland; ICTP, Italy; IDL, Portugal; IMAU, The Netherlands; IPMA, Portugal; KIT, Karlsruhe, Germany; KNMI, The Netherlands; Lund University, Sweden; Met Eireann, Ireland; NLeSC, The Netherlands; NTNU, Norway; Oxford University, UK; surfSARA, The Netherlands; SMHI, Sweden; Stockholm University, Sweden; Unite ASTR, Belgium; University College Dublin, Ireland; University of Bergen, Norway; University of Copenhagen, Denmark; University of Helsinki, Finland; University of Santiago de Compostela, Spain; Uppsala University, Sweden; Utrecht University, The Netherlands; Vrije Universiteit Amsterdam, the Netherlands; Wageningen University, The Netherlands. Mailing address: EC-Earth consortium, Rossby Center, Swedish Meteorological and Hydrological Institute/SMHI, SE-601 76 Norrkoping, Sweden
+        Conventions: CF-1.7 CMIP-6.2
+        activity_id: CMIP
+        branch_method: standard
+        branch_time_in_child: 0
+        branch_time_in_parent: 65744
+        contact: cmip6-data@ec-earth.org
+        creation_date: 2019-06-05T10:17:46Z
+        data_specs_version: 01.00.30
+        experiment: all-forcing simulation of the recent past
+        experiment_id: historical
+        external_variables: areacella
+        forcing_index: 1
+        frequency: day
+        further_info_url: https://furtherinfo.es-doc.org/CMIP6.EC-Earth-Consortium.EC-Earth3-Veg.historical.none.r1i1p1f1
+        grid: T255L91-ORCA1L75
+        grid_label: gr
+        initialization_index: 1
+        institution_id: EC-Earth-Consortium
+        mip_era: CMIP6
+        nominal_resolution: 100 km
+        parent_activity_id: CMIP
+        parent_experiment_id: piControl
+        parent_mip_era: CMIP6
+        parent_source_id: EC-Earth3-Veg
+        parent_time_units: days since 1850-01-01
+        parent_variant_label: r1i1p1f1
+        physics_index: 1
+        product: model-output
+        realization_index: 1
+        realm: atmos
+        source_id: EC-Earth3-Veg
+        source_type: AOGCM
+        sub_experiment: none
+        sub_experiment_id: none
+        table_id: day
+        table_info: Creation Date:(09 May 2019) MD5:cde930676e68ac6780d5e4c62d3898f6
+        title: EC-Earth3-Veg output prepared for CMIP6
+        variable_id: pr
+        variant_label: r1i1p1f1
+        license: CMIP6 model data produced by EC-Earth-Consortium is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (https://creativecommons.org/licenses). Consult https://pcmdi.llnl.gov/CMIP6/TermsOfUse for terms of use governing CMIP6 output, including citation requirements and proper acknowledgment. Further information about this data, including some limitations, can be found via the further_info_url (recorded as a global attribute in this file) and at http://www.ec-earth.org. The data producers and data providers make no warranty, either express or implied, including, but not limited to, warranties of merchantability and fitness for a particular purpose. All liabilities arising from the supply of the information (including any liability arising in negligence) are excluded to the fullest extent permitted by law.
+        cmor_version: 3.4.0
+        tracking_id: hdl:21.14100/cecc9931-3518-46c0-b177-08ab95b77b44
+        CDO: Climate Data Operators version 1.9.8 (https://mpimet.mpg.de/cdo)
+> 
