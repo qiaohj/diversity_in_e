@@ -29,7 +29,7 @@ i=1
 j=1
 k=1
 
-dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
+dispersals<-data.frame(M=c(0:5), N=rep(1,6))
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, -1), N=c(rep(1,5), c(2:5), 2, 1))
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 
@@ -46,7 +46,7 @@ for (j in c(1:nrow(layer_df))){
   for (k in c(1:nrow(dispersals))){
     layer$M<-dispersals[k, "M"]
     layer$N<-dispersals[k, "N"]
-    target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d_%d", group, layer$LABEL, layer$M, layer$N)
+    target_folder<-sprintf("../../Objects/Diversity_with_human/%s/%s_%d_%d", group, layer$LABEL, layer$M, layer$N)
     if (dir.exists(target_folder)){
       print(paste("Skip ", target_folder))
       next()
@@ -63,7 +63,7 @@ for (j in c(1:nrow(layer_df))){
         next()
       }
       #print(paste(Sys.time(), 1))
-      enm_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s/dispersal", group, item$sp)
+      enm_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s/dispersal_with_human", group, item$sp)
       print(sprintf("%s/%s_%s_%d_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M, layer$N))
       env_item_all<-readRDS(sprintf("%s/%s_%s_%d_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M, layer$N))
       env_item_all<-env_item_all[, c("x", "y", "YEAR")]
@@ -118,7 +118,7 @@ for (j in c(1:nrow(layer_df))){
     saveRDS(diversity_df, sprintf("%s/diversity_df.rda", target_folder))
   }
   
- 
+  
   
 }
 

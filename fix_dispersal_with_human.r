@@ -5,8 +5,16 @@ library(raster)
 #library(cluster)
 library(dplyr)
 #library(ggplot2)
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("addEllipse.R")
 source("genCircle.R")
+if (F){
+  HFP<-raster("../../Raster/HFP2009_int.tif")
+  mask<-raster("../../Raster/mask_index.tif")
+  HFP_100<-projectRaster(HFP, mask, res=res(mask), crs=crs(mask))
+  writeRaster(HFP_100, "../../Raster/HFP2009_Low.tif", overwrite=T)
+}
+HFP<-raster("../../Raster/HFP2009_Low.tif")
 NDquntil <- function(nD, level) {
   n <- floor(nD * level)
   if (n > nD) 
@@ -31,12 +39,12 @@ args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 if (is.na(group)){
-  group<-"Birds"
+  group<-"Mammals"
 }
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
-VARs<-c("pr", "tasmax", "tasmin")
+
 
 predict_range<-c(2015:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
@@ -44,9 +52,11 @@ layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=1
-dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
+dispersals<-data.frame(M=c(0:5), N=c(rep(1,6)))
+#dispersals<-data.frame(M=c(0), N=c(rep(1,1)))
 df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
-xxx=1
+item<-df_list[which(df_list$sp=="Euryoryzomys nitidus"),]
+i<-6432
 for (i in c(1:nrow(df_list))){
   
   item<-df_list[i,]
@@ -57,14 +67,19 @@ for (i in c(1:nrow(df_list))){
   #target_folders<-c(sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp),
   #                  sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp))
   target_folders<-c(sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp))
-  target_folder<-target_folders[2]
+  target_folder<-target_folders[1]
   for (target_folder in target_folders){
-    target<-sprintf("%s/dispersal", target_folder)
+    target<-sprintf("%s/dispersal_with_human", target_folder)
     model<-"Normal"
     if (grepl("Mean_GCM", target)){
       model<-"Mean"
     }
-    j=1
+    if (dir.exists(target)){
+      #next()
+    }
+    
+    #dir.create(target, showWarnings = F)
+    j=7
     for (j in c(1:nrow(layer_df))){
       layer_item<-layer_df[j,]
       year<-predict_range[1]
@@ -73,46 +88,21 @@ for (i in c(1:nrow(df_list))){
       start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
       colnames(start_dis)<-c("x", "y")
       k=1
-      distributoins<-list()
       
+      print("Init all potential distributions")
+      distributoins<-list()
+      for (year in predict_range){
+        #print(year)
+        print(sprintf("%s/%s_%d.rda", enm_folder, layer_item$LABEL, year))
+        env_item<-readRDS(sprintf("%s/%s_%d.rda", enm_folder, layer_item$LABEL, year))
+        distributoins[[as.character(year)]]<-env_item
+      }
       for (k in c(1:nrow(dispersals))){
         dispersal<-dispersals[k,]
-        tda_target<-sprintf("%s/%s_%d_%d.rda", target, layer_item$LABEL, dispersal$M, dispersal$N)
-        if (file.exists(tda_target)){
-          next()
-          print(paste("Testing", tda_target))
-          print(paste(item$sp, layer_item$LABEL, 
-                      j, ":", nrow(layer_df), "/",
-                      i, ":", nrow(df_list), "/",
-                      k, ":", nrow(dispersals), "/",
-                      model))
-          temp_df<-NULL
-          tryCatch({
-             temp_df<-readRDS(tda_target)
-          }, warning = function(w) {
-            #
-          }, error = function(e) {
-            print("Error")
-          }, finally = {
-           #
-          })
-          if (!is.null(temp_df)){
+        target_rda<-sprintf("%s/%s_%d_%d.rda", target, layer_item$LABEL, dispersal$M, dispersal$N)
+        if (file.exists(target_rda)){
+          if (file.size(target_rda)>50){
             next()
-          }
-        }
-        if (!dir.exists(target)){
-          dir.create(target, showWarnings = F)
-        }
-        #xxx=xxx+1
-        #next()
-        saveRDS(NULL, tda_target)
-        
-        if (length(distributoins)==0){
-          print("Init all potential distributions")
-          for (year in predict_range){
-            #print(year)
-            env_item<-readRDS(sprintf("%s/%s_%d.rda", enm_folder, layer_item$LABEL, year))
-            distributoins[[as.character(year)]]<-env_item
           }
         }
         prev_dis<-start_dis
@@ -139,7 +129,12 @@ for (i in c(1:nrow(df_list))){
               prev_dis$N<-dispersal$N
               prev_dis$N_Step<-mt
               prev_dis$YEAR<-year
-              dispersal_log<-bind(dispersal_log, prev_dis)
+              prev_dis$HFP<-extract(HFP, prev_dis[, c("x", "y")])/50
+              prev_dis$RAND<-runif(nrow(prev_dis))
+              prev_dis<-prev_dis%>%dplyr::filter(RAND>=HFP)
+              if (nrow(prev_dis)>0){
+                dispersal_log<-bind(dispersal_log, prev_dis)
+              }
             }
             if (F){
               ggplot(env_item, aes(x=x, y=y, color=dist)) + geom_point() +
@@ -148,7 +143,7 @@ for (i in c(1:nrow(df_list))){
             }
           }
         }
-        saveRDS(dispersal_log, tda_target)
+        saveRDS(dispersal_log, target_rda)
         if (F){
           for (year in predict_range){
             env_item<-distributoins[[as.character(year)]]

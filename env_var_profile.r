@@ -51,5 +51,27 @@ p<-ggplot(mean_env_year, aes(x=Y, y=V, linetype=factor(GCM), color=factor(SSP)))
 ggsave(p, file="../../Figures/Env/GCM_Curves.png", width=10, height=10)
 
 
+head(mean_env_year)
+mean_env_year_item<-mean_env_year%>%dplyr::filter(Y>2014)
+env_se<-mean_env_year_item%>%dplyr::group_by(GCM, SSP, VAR, label)%>%
+  dplyr::summarise(min_V=min(V),
+                   max_V=max(V))
+env_se$speed<-(env_se$max_V-env_se$min_V)/(2100-2014)
+env_se_mean<-env_se%>%dplyr::group_by(SSP, VAR)%>%
+  dplyr::summarise(mean_speed=mean(speed),
+                   sd_speed=sd(speed))
 
-
+#type                          direction mean_speed sd_speed
+#<chr>                             <dbl>      <dbl>    <dbl>
+#  1 Maximum Monthly Precipitation        -1    0.00651  0.00422
+#2 Maximum Monthly Precipitation         1    0.00561  0.00271
+#3 Maximum Monthly Temperature          -1    0.0302   0.0228 
+#4 Maximum Monthly Temperature           1    0.0202   0.00956
+#5 Minimum Monthly Temperature          -1    0.0269   0.0137 
+#6 Minimum Monthly Temperature           1    0.0259   0.0121
+env_se_mean$history_speed<-0
+env_se_mean[which(env_se_mean$VAR=="tasmax"), "history_speed"]<-0.0202/100
+env_se_mean[which(env_se_mean$VAR=="tasmin"), "history_speed"]<-0.0259/100
+env_se_mean[which(env_se_mean$VAR=="pr"), "history_speed"]<-0.00561/100 * 365
+env_se_mean$times<-env_se_mean$mean_speed/env_se_mean$history_speed
+env_se_mean$
