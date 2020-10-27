@@ -31,15 +31,8 @@ i=1
 j=1
 k=1
 dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
-if (F){
-  mask<-raster("../../Raster/mask.tif")
-  plot(mask)
-  v<-values(mask)[which(!is.na(values(mask)))]
-  v<-c(1:length(v))
-  values(mask)[which(!is.na(values(mask)))]<-v
-  writeRaster(mask, "../../Raster/mask_indices.tif")
-}
-mask<-raster("../../Raster/mask_indices.tif")
+
+mask<-raster("../../Raster/mask_index.tif")
 points<-as_tibble(rasterToPoints(mask))
 add_location<-function(indices, location, type){
   location$metric<-indices

@@ -96,6 +96,7 @@ for (i in c(1:nrow(df_list))){
 
 
 if (F){
+  df<-readRDS(target_rda)
   test<-df[2,]
   t_mask_index<-test$mask_index
   t_GCM<-test$GCM

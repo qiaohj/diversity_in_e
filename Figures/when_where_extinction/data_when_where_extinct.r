@@ -3,9 +3,11 @@ library(dplyr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 if (F){
   sp_dis_all<-readRDS("../../Figures/N_SPECIES/sp_dis_all.rda")
+  test<-sp_dis_all%>%filter((M==0)&(sp=="Guibemantis_kathrinae")&(TYPE=="Diversity"))
   extinct_sp<-sp_dis_all%>%dplyr::filter(year==2100)
   extinct_sp<-extinct_sp%>%dplyr::filter(N_type=="EXTINCT")
   extinct_sp<-extinct_sp%>%dplyr::filter(M==0)
+  extinct_sp<-extinct_sp%>%dplyr::filter(TYPE=="Diversity")
   saveRDS(extinct_sp, "../../Objects/when_where_extinction/extinct_sp.rda")
 }
 extinct_sp<-readRDS("../../Objects/when_where_extinction/extinct_sp.rda")

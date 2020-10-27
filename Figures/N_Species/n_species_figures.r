@@ -86,24 +86,34 @@ if (F){
 }
 
 if (F){
-  N_SP<-sp_dis_all%>%dplyr::group_by(group, TYPE)%>%dplyr::summarise(N_SP=n_distinct(sp))
-  
   sp_dis_all<-readRDS("../../Figures/N_SPECIES/sp_dis_all.rda")
-  sp_dis_all<-inner_join(sp_dis_all, N_SP, by="group")
+  N_SP<-sp_dis_all%>%dplyr::group_by(group)%>%dplyr::summarise(N_SP=n_distinct(sp))
+  sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
   sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
   sp_dis_all$Label2<-paste(sp_dis_all$M, sp_dis_all$N)
   saveRDS(sp_dis_all, "../../Figures/N_SPECIES/sp_dis_all_fixed.rda")
 }
+colnames(sp_dis_all)
 sp_dis_all<-readRDS("../../Figures/N_SPECIES/sp_dis_all_fixed.rda")
 sp_dis_all_sub<-sp_dis_all%>%dplyr::filter(year==2100)
 sp_dis_all_sub<-sp_dis_all_sub%>%dplyr::filter(N_type=="EXTINCT")
-
-sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, Label2, GCM, SSP, M, N, N_type, N_SP)%>%
+sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, Label2, GCM, SSP, M, N, N_type, N_SP, TYPE)%>%
   dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
 sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
-p<-ggplot(sp_dis_all_sub_N, aes(y=persentile, x=Label1, fill=factor(Label2)))+
-  geom_bar(stat="identity", position=position_dodge())+
+sp_dis_all_sub_N_mean<-sp_dis_all_sub_N%>%dplyr::group_by(group, Label2, SSP, M, N, N_type, N_SP, TYPE)%>%
+  dplyr::summarise(persentile_MEAN=mean(persentile),
+                   persentile_SD=sd(persentile))
+
+head(sp_dis_all_sub_N)
+
+p<-ggplot(sp_dis_all_sub_N_mean, aes(y=persentile_MEAN, x=SSP))+
+  geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(Label2)))+
+  geom_errorbar(position=position_dodge(.9), width=0.2,
+                aes(ymin=persentile_MEAN-persentile_SD, 
+                    ymax=persentile_MEAN+persentile_SD,
+                    group=factor(Label2))) +
   theme_bw()+
   theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
-  facet_wrap( ~ group, ncol=1, scales = 'free')
+  facet_wrap( ~ group+TYPE, ncol=2)
 ggsave(p, filename="../../Figures/N_SPECIES/Extinction.pdf", width=15, height=20)
+ggsave(p, filename="../../Figures/N_SPECIES/Extinction.png", width=5, height=8)
