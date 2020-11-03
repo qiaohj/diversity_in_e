@@ -21,3 +21,11 @@ r2<-projectRaster(slope, crs=proj.re, res=res(mask))
 writeRaster(r2, 
             "../../Raster/ALT/slope_eck4.tif", 
             format="GTiff", overwrote=T)
+
+
+r2<-projectRaster(r, crs=proj.re, res=c(10000, 10000))
+plot(r2)
+writeRaster(r2, 
+            "../../Raster/ALT/alt_eck4_high_res.tif", 
+            format="GTiff", overwrite=T)
+raster("../../Raster/ALT/alt_eck4.tif")
