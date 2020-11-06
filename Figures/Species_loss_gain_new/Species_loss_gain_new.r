@@ -1,100 +1,124 @@
 library(raster)
+#library(rgdal)
+#library(rgeos)
+#library(vegan)
+library(data.table)
 library(dplyr)
-library(RColorBrewer)
-library(Rmisc)
+library(ggplot2)
+library(tidyr)
+
+rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
+
 source("functions.r")
-SSPs<-c("SSP119", "SSP245", "SSP585")
-GCMs<-c("EC-Earth3-Veg", "UKESM1", "MRI-ESM2-0")
-dispersals<-data.frame(M=c(0:5), N=1)
-years<-c(2014:2100)
 args = commandArgs(trailingOnly=TRUE)
-f<-args[1]
-g<-args[2]
-if (is.na(f)){
-  f<-"Diversity"
+group<-args[1]
+if (is.na(group)){
+  group<-"Mammals"
 }
-if (is.na(g)){
-  g<-"Amphibians"
-}
-SSP_i<-SSPs[3]
-GCM_i<-GCMs[1]
-dis_i<-2
-y=2014
-y=2100
-slope<-raster("../../Raster/ALT/slope_eck4.tif")
-alt<-raster("../../Raster/ALT/alt_eck4.tif")
+
+
+GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
+SSPs<-c("SSP119", "SSP245", "SSP585")
+
+
+predict_range<-c(2015:2100)
+layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
+layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
+
+df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+i=1
+j=1
+k=1
+#dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
+dispersals<-data.frame(M=c(0:5), N=1)
+
 mask<-raster("../../Raster/mask_index.tif")
-mask_p<-data.frame(rasterToPoints(mask))
+points<-data.frame(rasterToPoints(mask))
+add_location<-function(indices, location, type){
+  location$metric<-indices
+  location$type<-type
+  location
+}
+named_group_split <- function(.tbl, ...) {
+  grouped <- group_by(.tbl, ...)
+  names <- rlang::eval_bare(rlang::expr(paste(!!!group_keys(grouped), sep = " / ")))
+  
+  grouped %>% 
+    group_split() %>% 
+    rlang::set_names(names)
+}
 
-
-loss <- colorRampPalette(c("white","blue"))
-gain <- colorRampPalette(c("white","red"))
-result<-NULL
-#for (f in c("Diversity", "Diversity_with_human")){
-#  for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-    for (SSP_i in SSPs){
-      for (dis_i in c(1:nrow(dispersals))){
-        dis<-dispersals[dis_i,]
-        for (y in years){
-          item<-data.frame(type=f, group=g, SSP=SSP_i, M=dis$M, N=dis$N, year=y)
-          print(paste(f, g, SSP_i, dis$M, dis$N, y))
-          points<-NULL
-          for (GCM_i in GCMs){
-            #print(GCM_i)
-            r<-raster(sprintf("../../Figures/%s/%s/species.richness/%s_%s_%d_%d/%d.tif", f, g, GCM_i, SSP_i, dis$M, dis$N, y))
-            if (y==2014){
-              r_raw<-r
-              p_raw<-data.frame(rasterToPoints(r_raw))
-              colnames(p_raw)<-c("x", "y", "v_raw")
-              p_raw$slope<-extract(slope, p_raw[, c("x", "y")])
-              p_raw$alt<-extract(alt, p_raw[, c("x", "y")])
-            }else{
-              p_r<-data.frame(rasterToPoints(r))
-              colnames(p_r)<-c("x", "y", "v")
-              p_r<-left_join(p_raw, p_r, by=c("x", "y"))
-              p_r[is.na(p_r)]<-0
-              p_r$gain_loss<-p_r$v-p_r$v_raw
-              p_r$gain_loss_ratio<-p_r$gain_loss/p_r$v_raw
-              p_r$GCM<-GCM_i
-              points<-bind(points, p_r)
-              if (F){
-                r_temp<-mask
-                p_temp<-mask_p
-                p_temp<-left_join(p_temp, p_r, by=c("x", "y"))
-                values(r_temp)[!is.na(values(r_temp))]<-p_temp$gain_loss
-                r_temp_1<-r_temp
-                values(r_temp_1)[values(r_temp_1)>0]<-NA
-                r_temp_2<-r_temp
-                values(r_temp_2)[values(r_temp_2)<=0]<-NA
-                plot(r_temp_1, col=loss(100))
-                plot(r_temp_2, col=gain(100), add=T)
-                values(r_temp)[!is.na(values(r_temp))]<-p_temp$gain_loss_ratio
-                plot(r_temp)
-              }
-            }
-            
+for (j in c(1:nrow(layer_df))){
+  layer<-layer_df[j,]
+  for (k in c(1:nrow(dispersals))){
+    layer$M<-dispersals[k, "M"]
+    layer$N<-dispersals[k, "N"]
+    
+    target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d_%d", group, layer$LABEL, layer$M, layer$N)
+    target<-sprintf("%s/loss_gain.rda", target_folder)
+    if (file.exists(target)){
+      next()
+    }
+    saveRDS(NULL, target)
+    print(paste("READING DATA", target_folder))
+    diversity_df<-readRDS(sprintf("%s/diversity_df.rda", target_folder))
+    YYYY<-names(diversity_df)[1]
+    loss_gain_df<-NULL
+    
+    for (YYYY in names(diversity_df)){
+      
+      diversity<-diversity_df[[YYYY]]
+      print(paste("BINDING DATA", YYYY, target_folder))
+      diversity<-rbindlist(diversity)
+      diversity<-diversity%>%distinct()
+      
+      print(paste("EXTRACTING DATA", YYYY, target_folder))
+      if (F){
+        system.time({
+          diversity$mask_index<-raster::extract(mask, diversity[, c("x", "y")])  
+        })
+      }
+      system.time({
+        diversity<-inner_join(diversity, points, by=c("x", "y"))
+      })
+      print(paste("SPLITING DATA", YYYY, target_folder))
+      diversity<-diversity[complete.cases(diversity),]
+      diversity$mask_index_str<-paste("i", diversity$mask_index, sep="_")
+      diversity_split<-diversity %>% 
+        named_group_split(mask_index_str)
+      print(paste("CALCULATING LOSS/GAIN DATA", YYYY, target_folder))
+      if (YYYY=="2014"){
+        base_diversity<-diversity_split
+      }else{
+        id<-names(diversity_split)[1000]
+        for (id in names(diversity_split)){
+          if (id %in% names(base_diversity)){
+            base_sp<-base_diversity[[id]]$sp
+          }else{
+            base_sp<-c()
           }
-          if (y==2014){
-            next()
-          }
-          points_se<-points%>%dplyr::group_by(x, y, v_raw, slope, alt)%>%
-            dplyr::summarise(mean_v=mean(v),
-                             mean_gain_loss=mean(gain_loss),
-                             sd_v=sd(v),
-                             sd_gain_loss=sd(gain_loss),
-                             CI_v=CI(v)[2]-CI(v)[3],
-                             CI_gain_loss=CI(gain_loss)[2]-CI(gain_loss)[3])
-          points_se$type<-item$type
-          points_se$group<-item$group
-          points_se$SSP<-item$SSP
-          points_se$M<-item$M
-          points_se$N<-item$N
-          points_se$year<-item$year
-          result<-bind(result, points_se)
+          
+          new_sp<-diversity_split[[id]]$sp
+          intersect_sp<-intersect(base_sp, new_sp)
+          n_overlap<-length(intersect_sp)
+          loss<-length(base_sp)-n_overlap
+          gain<-length(new_sp)-n_overlap
+          item<-data.frame(YEAR=YYYY, 
+                           mask_index=diversity_split[[id]][1, "mask_index"],
+                           x=diversity_split[[id]][1, "x"],
+                           y=diversity_split[[id]][1, "y"],
+                           n_overlap=n_overlap,
+                           n_loss=loss,
+                           n_gain=gain
+                           )
+          loss_gain_df<-bind(loss_gain_df, item)
         }
       }
+      
     }
-saveRDS(result, sprintf("../../Figures/Species_gain_loss/%s_%s.rda", f, g))
-  #}
-#}
+    saveRDS(loss_gain_df, target)
+
+    
+  }
+}
