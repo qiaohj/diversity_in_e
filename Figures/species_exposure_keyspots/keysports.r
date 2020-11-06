@@ -151,6 +151,7 @@ if (F){
 #3: out of range because of the prec
 #4: out of range because of the prec and temp
 
+source("colors.r")
 all_df<-readRDS("../../Figures/Species_Exposure/Species_Exposure.rda")
 
 
@@ -159,6 +160,18 @@ p<-ggplot(all_df, aes(x=year, y=mean, color=factor(group)))+
   theme_bw()+
   facet_wrap(vars(name))
 ggsave(p, file="../../Figures/Species_Exposure/species_exposure_overall.png", width=12, height=6)
+names(all_df)[21]<-"Group"
+p<-ggplot(all_df%>%dplyr::filter(name=="Global"), aes(x=year, y=mean, color=Group))+
+  geom_errorbar(aes(ymin=mean-CI, ymax=mean+CI, color=Group), alpha=0.7, width=0.25)+
+  geom_line(aes(linetype=SSP))+
+  scale_color_manual(values=color_groups)+
+  scale_linetype_manual(values=linetype_ssp)+
+  xlab("Year")+
+  ylab("Species exposure proportion")+
+  theme_bw()
+p
+ggsave(p, file="../../Figures/Species_Exposure/species_exposure_global_only.png", width=12, height=6)
+
 
 all_env_df<-readRDS("../../Figures/Species_Exposure/all_env_df.rda")
 p<-ggplot(all_env_df, aes(x=year, y=mean_TEMP_MAX))+

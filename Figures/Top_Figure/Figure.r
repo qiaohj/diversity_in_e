@@ -9,7 +9,7 @@ library(raster)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 #alt<-raster("../../Raster/ALT/alt_eck4.tif")
 alt<-raster("../../Raster/ALT/alt_eck4_high_res.tif")
-
+source("colors.r")
 p2<-data.frame(rasterToPoints(alt))
 p2[which(p2$x<=-12103059), "alt_eck4_high_res"]<-NA
 p2[which((p2$x>12912000)&(p2$y>5000000)), "alt_eck4_high_res"]<-NA
@@ -69,19 +69,16 @@ for (j in c(j_index)){
   layer_item<-layer_df[j,]
   smooth_path<-readRDS(sprintf("../../Figures/Top_Figure/smooth_path_%s.rda", layer_item$LABEL))
   print(sprintf("../../Figures/Top_Figure/smooth_path_%s.rda", layer_item$LABEL))
-  colors<-c("Amphibians"="darkolivegreen", 
-            "Birds"="deepskyblue4", 
-            "Mammals"="firebrick4", 
-            "Reptiles"="darkgoldenrod4")
+
   smooth_path$line_group<-paste(smooth_path$sp, smooth_path$continent_i)
-  smooth_path$alpha<-((smooth_path$YEAR-2020)/80)^5
+  smooth_path$alpha<-((smooth_path$YEAR-2014)/86)^5
   p<-p_bak+geom_path(data=smooth_path, aes(x=x, y=y, alpha=alpha, color=group,
                                            group=line_group))+
     scale_alpha_continuous()+
-    scale_color_manual(values = colors)
+    scale_color_manual(values = color_groups)
   
   width<-10
-  height<-8
+  height<-6
   ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_ALL_%s.png", layer_item$LABEL), width=width, height = height)
   ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_ALL_%s.pdf", layer_item$LABEL), width=width, height = height)
   
@@ -90,7 +87,7 @@ for (j in c(j_index)){
     p<-p_bak+geom_path(data=smooth_path%>%dplyr::filter(group==g), 
                        aes(x=x, y=y, alpha=alpha, color=group, group=line_group))+
       scale_alpha_continuous()+
-      scale_color_manual(values = colors)
+      scale_color_manual(values = color_groups)
     
     
     ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_%s_%s.png", g, layer_item$LABEL), width=width, height = height)

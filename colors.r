@@ -11,3 +11,21 @@ colors_black<-c("#ffffff", "#f0f0f0", "#d9d9d9", "#bdbdbd", "#969696",
                  "#737373", "#525252", "#252525", "#000000")
 
 color_two<-c(colors_red[8], colors_blue[8])
+
+color_ssp<-c("SSP119"=colors_blue[7],
+             "SSP245"=colors_green[7],
+             "SSP585"=colors_red[7])
+
+linetype_gcm<-c("EC-Earth3-Veg"=1,
+                "MRI-ESM2-0"=2,
+                "UKESM1"=5)
+
+
+linetype_ssp<-c("SSP119"=1,
+             "SSP245"=2,
+             "SSP585"=5)
+
+color_groups<-c("Amphibians"=colors_green[7],
+             "Birds"=colors_blue[7],
+             "Reptiles"=colors_purple[7],
+             "Mammals"=colors_red[7])

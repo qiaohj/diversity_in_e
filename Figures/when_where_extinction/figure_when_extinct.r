@@ -5,7 +5,7 @@ library(Rmisc)
 library(ggpubr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("functions.r")
-
+source("colors.r")
 if (F){
   g<-"Amphibians"
   df<-readRDS(sprintf("../../Objects/when_where_extinction/%s.rda", g))
@@ -61,12 +61,32 @@ if (F){
 }
 
 when_extinct<-readRDS("../../Objects/when_where_extinction/when_extinct_final.rda")
+names(when_extinct)[1]<-"Group"
+p1<-ggplot(when_extinct, aes(x=extinct_year, y=mean_n_sp, color=Group))+
+  #geom_errorbar(aes(ymin=mean_n_sp-CI_n_sp, ymax=mean_n_sp+CI_n_sp, color=Group), alpha=0.7, width=0.25)+
+  geom_line(aes(linetype=SSP))+
+  scale_color_manual(values=color_groups)+
+  scale_linetype_manual(values=linetype_ssp)+
+  xlab("Year")+
+  ylab("Average number of extinctions")+
+  theme_bw()
+p1
 
-p1<-ggplot(when_extinct, aes(x=extinct_year, y=mean_n_sp, color=factor(group)))+
-  geom_line(aes(linetype=factor(SSP)))+theme_bw()
+p2<-ggplot(when_extinct, aes(x=extinct_year, y=extinct_ratio, color=Group))+
+  geom_line(aes(linetype=SSP))+
+  scale_color_manual(values=color_groups)+
+  scale_linetype_manual(values=linetype_ssp)+
+  xlab("Year")+
+  ylab("Extinction proportion")+
+  theme_bw()
+p2
+legend_g<-get_legend(p1)
+p<-ggarrange(p1, p2, ncol=1, common.legend = T, legend="right", legend.grob=legend_g)
+ggsave(p, filename="../../Figures/when_where_extinction/when.pdf", width=12, height=12)
+ggsave(p, filename="../../Figures/when_where_extinction/when.png", width=12, height=12)
 
-p2<-ggplot(when_extinct, aes(x=extinct_year, y=extinct_ratio, color=factor(group)))+
-  geom_line(aes(linetype=factor(SSP)))+theme_bw()
+ggsave(p1, filename="../../Figures/when_where_extinction/when_number.pdf", width=12, height=6)
+ggsave(p1, filename="../../Figures/when_where_extinction/when_number.png", width=12, height=6)
 
-p<-ggarrange(p1, p2, ncol=1)
-ggsave(p, filename="../../Figures/when_where_extinction/when.pdf")
+ggsave(p2, filename="../../Figures/when_where_extinction/when_proportion.pdf", width=12, height=6)
+ggsave(p2, filename="../../Figures/when_where_extinction/when_proportion.png", width=12, height=6)

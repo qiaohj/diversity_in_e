@@ -40,11 +40,7 @@ for (f in c("Diversity", "Diversity_with_human")){
     diversity<-readRDS(sprintf("../../Figures/%s/%s/%s.rda", f, g, g))
     diversity_se<-diversity%>%dplyr::group_by(group, SSP, M, N, year, type, name)%>%
       dplyr::summarise(mean_mean=mean(mean))
-    g_legend<-function(a.gplot){
-      tmp <- ggplot_gtable(ggplot_build(a.gplot))
-      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-      legend <- tmp$grobs[[leg]]
-      return(legend)}
+    
     
     diversity_item<-diversity_se%>%dplyr::filter(type=="species.richness")
     df[which((df$M==0)&(df$mean_gain_loss>0)), "mean_gain_loss"]<-0

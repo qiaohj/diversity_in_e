@@ -20,7 +20,7 @@ layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
-i=2
+i=10
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
 dispersals<-data.frame(M=1, N=1)
 df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
@@ -34,10 +34,15 @@ for (i in c(1:nrow(df_list))){
     next()
   }
   target_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp)
+  start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
+  #start_dis<-start_dis%>%dplyr::filter(in_out==1)
+  start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
+  colnames(start_dis)<-c("x", "y")
+  start_dis$mask_index<-extract(mask, start_dis)
   
   target<-sprintf("%s/dispersal", target_folder)
   model<-"Mean"
-  j=1
+  j=3
   for (j in c(1:nrow(layer_df))){
     layer_item<-layer_df[j,]
     k=1
@@ -48,11 +53,7 @@ for (i in c(1:nrow(df_list))){
       if (is.null(dispersal_log)){
         next()
       }
-      start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
-      #start_dis<-start_dis%>%dplyr::filter(in_out==1)
-      start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
-      colnames(start_dis)<-c("x", "y")
-      start_dis$mask_index<-extract(mask, start_dis)
+      
       
       dispersal_log_end<-dispersal_log%>%dplyr::filter(YEAR==2100)
       dispersal_log_others<-dispersal_log%>%dplyr::filter((YEAR!=2100)&!(mask_index %in% c(start_dis$mask_index, dispersal_log_end$mask_index)))%>%
@@ -83,10 +84,12 @@ for (i in c(1:nrow(df_list))){
       if (is.null(final_df)){
         final_df<-dispersal_log_others
       }else{
-        final_df<-left_join(final_df, dispersal_log_others, by=c("mask_index", "YEAR", "GCM", "SSP"))
+        final_df<-full_join(final_df, dispersal_log_others, by=c("mask_index", "YEAR", "GCM", "SSP"))
+        
         final_df[is.na(final_df)]<-0
         final_df$N_SP<-final_df$N_SP.x+final_df$N_SP.y
         final_df<-final_df[, c("mask_index", "YEAR", "GCM", "SSP", "N_SP")]
+        print(nrow(final_df))
       }
       
     }
