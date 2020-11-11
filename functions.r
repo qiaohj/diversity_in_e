@@ -13,3 +13,7 @@ g_legend<-function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)
 }
+
+min_dist<-function(x, y, points){
+  min(sqrt((x-points$x)^2+(y-points$y)^2), na.rm = T)
+}

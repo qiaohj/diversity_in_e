@@ -9,8 +9,11 @@ colors_purple<-c("#fcfbfd", "#efedf5", "#dadaeb", "#bcbddc", "#9e9ac8",
                "#807dba", "#6a51a3", "#54278f", "#3f007d")
 colors_black<-c("#ffffff", "#f0f0f0", "#d9d9d9", "#bdbdbd", "#969696",
                  "#737373", "#525252", "#252525", "#000000")
+map_background<-"#f5f5f2"
+mask_color<-colors_black[3]
 
 color_two<-c(colors_red[8], colors_blue[8])
+color_two_map<-c(colors_red[8], colors_blue[4])
 
 color_ssp<-c("SSP119"=colors_blue[7],
              "SSP245"=colors_green[7],
@@ -29,3 +32,20 @@ color_groups<-c("Amphibians"=colors_green[7],
              "Birds"=colors_blue[7],
              "Reptiles"=colors_purple[7],
              "Mammals"=colors_red[7])
+
+
+map_theme<-theme(
+  axis.line = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  plot.background = element_rect(fill = map_background, color = NA), 
+  panel.background = element_blank(), 
+  legend.background = element_rect(fill = map_background, color = NA),
+  panel.border = element_blank(),
+  legend.position="none"
+)

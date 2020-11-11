@@ -14,7 +14,7 @@ if (is.na(group)){
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
-
+source("functions.r")
 predict_range<-c(2015:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
@@ -37,8 +37,14 @@ for (i in c(1:nrow(df_list))){
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
   #start_dis<-start_dis%>%dplyr::filter(in_out==1)
   start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
+  if (is.null(start_dis)){
+    next()
+  }
+  if (nrow(start_dis)==0){
+    next()
+  }
   colnames(start_dis)<-c("x", "y")
-  start_dis$mask_index<-extract(mask, start_dis)
+  
   
   target<-sprintf("%s/dispersal", target_folder)
   model<-"Mean"
@@ -56,8 +62,32 @@ for (i in c(1:nrow(df_list))){
       
       
       dispersal_log_end<-dispersal_log%>%dplyr::filter(YEAR==2100)
+      if (is.null(dispersal_log_end)){
+        next()
+      }
+      if (nrow(dispersal_log_end)==0){
+        next()
+      }
+      
+      dist_ma<-start_dis%>%dplyr::rowwise()%>%dplyr::mutate(dist=min_dist(x, y, dispersal_log_end)/100000)
+      min_d<-min(dist_ma$dist)
+      if (min_d<=1){
+        next()
+      }
+
+      if (!("mask_index" %in% names(start_dis))){
+        print("EXTINCT INDEX")
+        start_dis$mask_index<-extract(mask, start_dis)
+      }
       dispersal_log_others<-dispersal_log%>%dplyr::filter((YEAR!=2100)&!(mask_index %in% c(start_dis$mask_index, dispersal_log_end$mask_index)))%>%
         dplyr::distinct(x, y, mask_index, YEAR)
+      if (is.null(dispersal_log_others)){
+        next()
+      }
+      if (nrow(dispersal_log_others)==0){
+        next()
+      }
+      
       
       #points<-st_sfc(st_point(as.matrix(start_dis[, c("x", "y")])))
       points<-as.matrix(bind_rows(start_dis[, c("x", "y")], dispersal_log_end[, c("x", "y")]))

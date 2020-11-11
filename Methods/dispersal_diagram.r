@@ -5,6 +5,7 @@ library(rgeos)
 library(MASS)
 library(cluster)
 library(dplyr)
+library(ggpubr)
 
 setwd("Y:/Script/diversity_in_e")
 
@@ -96,11 +97,10 @@ for (year in c(2015:2099)){
   
   
   g2<-ggplot()+
-    geom_raster(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
-    geom_raster(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8])+
-    geom_raster(data=p_next_1 %>% dplyr::filter(!is.na(dist)), aes(x=x, y=y), fill=colors_blue[8], alpha=0.5)+
-    geom_raster(data=p2 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_red[8], alpha=0.5)+
-    
+    geom_tile(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
+    geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8])+
+    geom_tile(data=p_next_1 %>% dplyr::filter(!is.na(dist)), aes(x=x, y=y), fill=colors_blue[8], alpha=0.5)+
+    geom_tile(data=p2 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_red[8], alpha=0.5)+
     xlim(c(-8000000, -3000000))+
     ylim(c(-3300000, 1500000))+
     ggtitle(year)+
@@ -111,6 +111,70 @@ for (year in c(2015:2099)){
           axis.text.y=element_blank(),axis.ticks=element_blank(),
           axis.title.x=element_blank(),
           axis.title.y=element_blank(),legend.position="none")
+  
+  if (F){
+    g_item1<-ggplot()+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
+      geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8])+
+      xlim(c(-8000000, -3000000))+
+      ylim(c(-3300000, 1500000))+
+      ggtitle("Before dispersal")+
+      theme_bw()+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), axis.line = element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),legend.position="none")
+    
+    g_item2<-ggplot()+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
+      geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8])+
+      geom_tile(data=p_next_1 %>% dplyr::filter(!is.na(dist)), aes(x=x, y=y), fill=colors_blue[8], alpha=0.5)+
+      xlim(c(-8000000, -3000000))+
+      ylim(c(-3300000, 1500000))+
+      ggtitle("After dispersal, before detecting the suitable area")+
+      theme_bw()+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), axis.line = element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),legend.position="none")
+    
+    g_item3<-ggplot()+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
+      geom_tile(data=p2 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_red[8], alpha=0.5)+
+      xlim(c(-8000000, -3000000))+
+      ylim(c(-3300000, 1500000))+
+      ggtitle("After remoing the unsuitable area")+
+      theme_bw()+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), axis.line = element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),legend.position="none")
+    
+    g_item4<-ggplot()+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=colors_black[3])+
+      geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8])+
+      geom_tile(data=p_next_1 %>% dplyr::filter(!is.na(dist)), aes(x=x, y=y), fill=colors_blue[8], alpha=0.5)+
+      geom_tile(data=p2 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_red[8], alpha=0.5)+
+      xlim(c(-8000000, -3000000))+
+      ylim(c(-3300000, 1500000))+
+      ggtitle("Combined")+
+      theme_bw()+
+      theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), axis.line = element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),legend.position="none")
+    
+    ppp<-ggarrange(g_item1, g_item2, g_item3, g_item4)
+    ggsave(ppp, filename=sprintf("../../Figures/Methods/example_%d.png", year), width = 12, height=10)
+  }
   #g2
   ggsave(g2, filename=sprintf("../../Figures/Methods/dispersal_diagram/%d.png", year), width = 6, height=5)
 }

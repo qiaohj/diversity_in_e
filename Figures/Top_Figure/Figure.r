@@ -32,21 +32,7 @@ p_bak<-ggplot() +
   new_scale_fill() + 
   geom_tile(data = dem_spdf, aes(x = x, y = y, fill = value), alpha=0.4) + 
   scale_fill_gradientn(colours = rev(terrain.colors(10))) + 
-  theme(
-    axis.line = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    plot.background = element_rect(fill = "#f5f5f2", color = NA), 
-    panel.background = element_blank(), 
-    legend.background = element_rect(fill = "#f5f5f2", color = NA),
-    panel.border = element_blank(),
-    legend.position="none"
-  )
+  map_theme
 
 args = commandArgs(trailingOnly=TRUE)
 j_index<-as.numeric(args[1])
