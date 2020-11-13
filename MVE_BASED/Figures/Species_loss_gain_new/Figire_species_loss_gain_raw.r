@@ -148,3 +148,6 @@ for (SSP_i in SSPs){
     
   }
 }
+
+#/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/Species_gain_loss/Movies/RawValue/3D/rough/ALL
+#ffmpeg -r 2 -start_number 2015 -i %04d.png -y ../../../../gain_loss_3D.mp4
