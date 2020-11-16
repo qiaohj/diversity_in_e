@@ -47,8 +47,8 @@
 #' @export
 
 addEllipse <- function(mu, sigma, m = NULL, n = 100, p.interval = NULL , 
-                        ci.mean = FALSE, small.sample = FALSE, 
-                        do.plot = TRUE, ...){
+                       ci.mean = FALSE, small.sample = FALSE, 
+                       do.plot = TRUE, ...){
   
   # ----------------------------------------------------------------------------
   # Some error checking
@@ -73,16 +73,16 @@ addEllipse <- function(mu, sigma, m = NULL, n = 100, p.interval = NULL ,
   # below. Else it divides the radius calculation below by sqrt(m) to include
   # the conversion from standard deviation to standard error of the mean.
   ifelse(ci.mean, 
-           c.scale <- m,
-           c.scale <- 1
-         )
+         c.scale <- m,
+         c.scale <- 1
+  )
   
   # The small.sample toggles on and off (default) the small sample size 
   # correction to essentially plot the SEAc in place of the SEA. It can be 
   # used inconjuction with any prediction ellipse.
   ifelse(small.sample,
-           q <- (m - 1) / (m - 2),
-           q <- 1)
+         q <- (m - 1) / (m - 2),
+         q <- 1)
   
   
   # if p is NULL then plot a standard ellipse with r = 1
@@ -91,10 +91,10 @@ addEllipse <- function(mu, sigma, m = NULL, n = 100, p.interval = NULL ,
   # based on the chi-squared distribution.
   # p defaults to NULL.
   ifelse(is.null(p.interval), 
-           r <- 1, 
-           r <- sqrt(stats::qchisq(p.interval, df=2))
-         )
-
+         r <- 1, 
+         r <- sqrt(stats::qchisq(p.interval, df=2))
+  )
+  
   
   # get the eigenvalues and eigenvectors of sigma
   # if ci.mean = T then the covariance matrix is divided by the sample size
@@ -121,9 +121,9 @@ addEllipse <- function(mu, sigma, m = NULL, n = 100, p.interval = NULL ,
   
   ML.ellipse = t(apply(cc,1, back.trans))
   
-  if(grDevices::dev.cur() > 1 & do.plot) {graphics::lines(ML.ellipse, ...)}
-
+  #if(grDevices::dev.cur() > 1 & do.plot) {graphics::lines(ML.ellipse, ...)}
+  
   # optional return of x and y coordinates of the plotted ellipse
-  #return(ML.ellipse)
-
+  return(ML.ellipse)
+  
 }
