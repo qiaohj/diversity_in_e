@@ -14,17 +14,18 @@ no_na<-!is.na(values(mask))
 if (is.na(j_index)){
   j_index<-1
 }
-source("functions.r")
+source("commonFuns/functions.r")
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
 
-predict_range<-c(2015:2100)
+predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 if (T){
+  threshold<-5
   smooth_path<-NULL
   plot.new()
   #for (j in c(nrow(layer_df):1)){
@@ -34,10 +35,10 @@ if (T){
       df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
       i=1
       #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-      dispersals<-data.frame(M=1, N=1)
+      dispersals<-c(1:2)
       df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
       final_df<-NULL
-      colors<-rainbow(length(2014:2100))
+      colors<-rainbow(length(2021:2100))
       #p<-ggplot()
       
       for (i in c(1:nrow(df_list))){
@@ -47,15 +48,19 @@ if (T){
         if (item$area<=0){
           next()
         }
-        target_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp)
+        target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
         
-        target<-sprintf("%s/dispersal", target_folder)
-        model<-"Mean"
+        if (threshold==5){
+          target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+        }else{
+          target<-sprintf("%s/dispersal", target_folder)
+        }
         
         k=1
         
-        dispersal<-dispersals[k,]
-        ttt<-sprintf("../../Objects/dispersal_path/%s/%s_%s_%d_%d.rda", group, item$sp, layer_item$LABEL, dispersal$M, dispersal$N)
+        dispersal<-dispersals[k]
+        ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
+                     threshold, group, item$sp, layer_item$LABEL, dispersal)
         
         all_c<-readRDS(ttt)
         if (is.null(all_c)){

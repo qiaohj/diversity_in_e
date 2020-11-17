@@ -10,6 +10,10 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 if (is.na(group)){
   group<-"Reptiles"
 }
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-5
+}
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -32,7 +36,11 @@ for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
   for (k in c(1:length(dispersals))){
     layer$M<-dispersals[k]
-    target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d", group, layer$LABEL, layer$M)
+    if (threshold==1){
+      target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d", group, layer$LABEL, layer$M)
+    }else{
+      target_folder<-sprintf("../../Objects/Diversity_5/%s/%s_%d", group, layer$LABEL, layer$M)
+    }
     if (dir.exists(target_folder)){
       print(paste("Skip ", target_folder))
       next()
@@ -49,7 +57,11 @@ for (j in c(1:nrow(layer_df))){
         next()
       }
       #print(paste(Sys.time(), 1))
-      enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal", group, item$sp)
+      if (threshold==1){
+        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal", group, item$sp)
+      }else{
+        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_5", group, item$sp)
+      }
       print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-readRDS(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-env_item_all[, c("x", "y", "mask_index", "YEAR")]

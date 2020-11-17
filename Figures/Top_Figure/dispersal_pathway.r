@@ -1,4 +1,3 @@
-library(dplyr)
 library(raster)
 library(raster)
 library(dplyr)
@@ -32,22 +31,23 @@ if (F){
   writeRaster(r2, "../../Raster/Continent_ect4.tif", overwrite=T)
   plot(r2)
 }
+threshold<-5
 continent<-raster("../../Raster/Continent_ect4.tif")
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
 
-predict_range<-c(2015:2100)
+predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=1
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-dispersals<-data.frame(M=1, N=1)
+dispersals<-c(1:2)
 df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
-colors<-rainbow(length(2014:2100))
+colors<-rainbow(length(2021:2100))
 for (i in c(1:nrow(df_list))){
   print(paste(i, nrow(df_list)))
   item<-df_list[i,]
@@ -55,42 +55,47 @@ for (i in c(1:nrow(df_list))){
   if (item$area<=0){
     next()
   }
-  target_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp)
+  target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
   
-  target<-sprintf("%s/dispersal", target_folder)
-  model<-"Mean"
+  if (threshold==5){
+    target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+  }else{
+    target<-sprintf("%s/dispersal", target_folder)
+  }
+  
   j=1
   no_na<-!is.na(values(mask))
   for (j in c(1:nrow(layer_df))){
     layer_item<-layer_df[j,]
     k=1
-    for (k in c(1:nrow(dispersals))){
-      dispersal<-dispersals[k,]
-      ttt<-sprintf("../../Objects/dispersal_path/%s/%s_%s_%d_%d.rda", group, item$sp, layer_item$LABEL, dispersal$M, dispersal$N)
+    for (k in c(1:length(dispersals))){
+      dispersal<-dispersals[k]
+      ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
+                   threshold, group, item$sp, layer_item$LABEL, dispersal)
       if (file.exists(ttt)){
         next()
       }
+      dir.create(sprintf("../../Objects/dispersal_path_%d/%s", 
+                         threshold, group), showWarnings = F, recursive = T)
       saveRDS(NULL, ttt)
-      dispersal_log<-readRDS(sprintf("%s/%s_%d_%d.rda", target, layer_item$LABEL, dispersal$M, dispersal$N))
+      dispersal_log<-readRDS(sprintf("%s/%s_%d.rda", target, layer_item$LABEL, dispersal))
       if (is.null(dispersal_log)){
         next()
       }
       
       start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
       #start_dis<-start_dis%>%dplyr::filter(in_out==1)
-      start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
-      colnames(start_dis)<-c("x", "y")
-      start_dis$mask_index<-extract(mask, start_dis)
-      start_dis$YEAR<-2014
+      start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y, mask_index)
+      start_dis$YEAR<-2020
       dispersal_log<-bind_rows(dispersal_log[, c("x", "y", "mask_index", "YEAR")], start_dis)
-      dispersal_log$continent_i<-extract(continent, dispersal_log[, c("x", "y")])
+      dispersal_log$continent_i<-raster::extract(continent, dispersal_log[, c("x", "y")])
       dispersal_log<-dispersal_log%>%dplyr::filter(!is.na(continent_i))
       if (nrow(dispersal_log)==0){
         next()
       }
-      year=2014
+      year=2020
       if (F){
-        for (year in c(2014:2100)){
+        for (year in c(2020:2100)){
           item_y<-dispersal_log%>%dplyr::filter(YEAR==year)
           item_y$N<-1
           p<-left_join(mask_p, item_y, by="mask_index")
@@ -98,11 +103,7 @@ for (i in c(1:nrow(df_list))){
           if (F){
             r<-mask
             values(r)[no_na]<-p$N
-            if (year!=2014){
-              plot(r, main=year, col=colors[year-2013])
-            }else{
-              plot(r, main=year, col=colors[year-2013])
-            }
+            plot(r, main=year, col=colors[year-2019])
           }
           v<-readline(prompt="X=exit ")
           if (toupper(v)=="X"){

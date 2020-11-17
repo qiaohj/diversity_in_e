@@ -1,6 +1,6 @@
 library(raster)
 #library(rgdal)
-#library(rgeos)
+library(dplyr)
 library(vegan)
 library(data.table)
 library(ggplot2)
@@ -15,7 +15,7 @@ if (is.na(group)){
   group<-"Amphibians"
 }
 
-
+threshold<-5
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
@@ -45,7 +45,7 @@ for (j in c(1:nrow(layer_df))){
     layer$M<-dispersals[k]
     
     
-    target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d", group, layer$LABEL, layer$M)
+    target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
     target<-sprintf("%s/indices_df.rda", target_folder)
     if (file.exists(target)){
       next()
@@ -67,8 +67,6 @@ for (j in c(1:nrow(layer_df))){
       diversity<-rbindlist(diversity)
       diversity<-unique(diversity)
       print(paste("COUNTING DATA", YYYY, target_folder))
-      n_dis<-diversity[, .(count = .N, xabsmin = min(abs(x))), by = .(year, sp)]
-      
       n_dis<-diversity%>%dplyr::group_by(year, sp)%>%
         dplyr::summarise(N=n(),
                          xabsmin=min(abs(x)),
@@ -95,7 +93,7 @@ for (j in c(1:nrow(layer_df))){
       print(paste("Matrix DATA", YYYY, target_folder))
       t_m<-pivot_wider(diversity, id_cols=index, names_from = sp, values_from=v, values_fill=0)
       d2<-t_m[,-1]
-      points_item<-left_join(t_m[,1], points, by=c("index"="mask_indices"))
+      points_item<-left_join(t_m[,1], points, by=c("index"="mask_index"))
       
       print(paste("simpson", YYYY, target_folder))
       simpson <- diversity(d2, "simpson")

@@ -122,6 +122,8 @@ for (i in c(1:nrow(df_list))){
           env_item<-env_item[exposure<exposure_threshold]
           #Step 5. set is_new
           env_item$is_new<-F
+          
+          
           prev_dis<-env_item
           
           if (nrow(prev_dis)>0){

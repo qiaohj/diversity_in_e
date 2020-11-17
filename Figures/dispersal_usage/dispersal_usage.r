@@ -14,18 +14,19 @@ if (is.na(group)){
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
-source("functions.r")
-predict_range<-c(2015:2100)
+source("commonFuns/functions.r")
+predict_range<-c(2021:2100)
+threshold<-5
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
-i=10
+i=100
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-dispersals<-data.frame(M=1, N=1)
+dispersals<-c(1:2)
 df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
-beginCluster()
+#beginCluster()
 for (i in c(1:nrow(df_list))){
   print(paste(i, nrow(df_list)))
   item<-df_list[i,]
@@ -33,35 +34,48 @@ for (i in c(1:nrow(df_list))){
   if (item$area<=0){
     next()
   }
-  target_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, item$sp)
+  target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
+  model<-readRDS(sprintf("%s/fit.rda", target_folder))
+  model[, c("range_PR_sd_min", "range_PR_sd_max", "range_TEMP_sd_min", "range_TEMP_sd_max")]
   #start_dis<-start_dis%>%dplyr::filter(in_out==1)
-  start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
+  start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y, mask_index)
   if (is.null(start_dis)){
     next()
   }
   if (nrow(start_dis)==0){
     next()
   }
-  colnames(start_dis)<-c("x", "y")
+  #colnames(start_dis)<-c("x", "y")
   
-  
-  target<-sprintf("%s/dispersal", target_folder)
-  model<-"Mean"
+  if (threshold==5){
+    target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+  }else{
+    target<-sprintf("%s/dispersal", target_folder)
+  }
   j=3
   for (j in c(1:nrow(layer_df))){
     layer_item<-layer_df[j,]
     k=1
-    for (k in c(1:nrow(dispersals))){
-      dispersal<-dispersals[k,]
+    for (k in c(1:length(dispersals))){
+      dispersal<-dispersals[k]
       
-      dispersal_log<-readRDS(sprintf("%s/%s_%d_%d.rda", target, layer_item$LABEL, dispersal$M, dispersal$N))
+      dispersal_log<-readRDS(sprintf("%s/%s_%d.rda", target, layer_item$LABEL, dispersal))
       if (is.null(dispersal_log)){
         next()
       }
       
       
       dispersal_log_end<-dispersal_log%>%dplyr::filter(YEAR==2100)
+      if (F){
+        plot(dispersal_log_end$x, dispersal_log_end$y)
+        range(dispersal_log_end$PR)
+        range(dispersal_log_end[which(dispersal_log_end$exposure==0),]$PR)
+        range(dispersal_log_end[which(dispersal_log_end$exposure==0),]$TEMP)
+        model[, c("range_PR_sd_min", "range_PR_sd_max", "range_TEMP_sd_min", "range_TEMP_sd_max")]
+        table(dispersal_log_end$exposure)
+        points(start_dis$x, start_dis$y, col="red")
+      }
       if (is.null(dispersal_log_end)){
         next()
       }
@@ -125,5 +139,5 @@ for (i in c(1:nrow(df_list))){
     }
   }
 }
-saveRDS(final_df, sprintf("../../Figures/dispersal_usage/%s.rda", group))
-endCluster()
+saveRDS(final_df, sprintf("../../Figures/dispersal_usage_%d/%s.rda", threshold, group))
+#endCluster()
