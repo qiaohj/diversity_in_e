@@ -10,11 +10,11 @@ library(tidyr)
 rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 
-source("functions.r")
+source("commonFuns/functions.r")
 args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 if (is.na(group)){
-  group<-"Mammals"
+  group<-"Amphibians"
 }
 
 
@@ -22,7 +22,7 @@ GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
 
-predict_range<-c(2015:2100)
+predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
@@ -31,7 +31,7 @@ i=1
 j=1
 k=1
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
-dispersals<-data.frame(M=c(0:5), N=1)
+dispersals<-c(0:2)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-data.frame(rasterToPoints(mask))
@@ -48,14 +48,12 @@ named_group_split <- function(.tbl, ...) {
     group_split() %>% 
     rlang::set_names(names)
 }
-
+threshold<-5
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
-  for (k in c(1:nrow(dispersals))){
-    layer$M<-dispersals[k, "M"]
-    layer$N<-dispersals[k, "N"]
-    
-    target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d_%d", group, layer$LABEL, layer$M, layer$N)
+  for (k in c(1:length(dispersals))){
+    layer$M<-dispersals[k]
+    target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
     target<-sprintf("%s/loss_gain.rda", target_folder)
     if (file.exists(target)){
       next()
@@ -79,16 +77,16 @@ for (j in c(1:nrow(layer_df))){
           diversity$mask_index<-raster::extract(mask, diversity[, c("x", "y")])  
         })
       }
-      system.time({
-        diversity<-inner_join(diversity, points, by=c("x", "y"))
-      })
+      #system.time({
+      #  diversity<-inner_join(diversity, points, by=c("x", "y", "mask_index"))
+      #})
       print(paste("SPLITING DATA", YYYY, target_folder))
       diversity<-diversity[complete.cases(diversity),]
       diversity$mask_index_str<-paste("i", diversity$mask_index, sep="_")
       diversity_split<-diversity %>% 
         named_group_split(mask_index_str)
       print(paste("CALCULATING LOSS/GAIN DATA", YYYY, target_folder))
-      if (YYYY=="2014"){
+      if (YYYY=="2020"){
         base_diversity<-diversity_split
       }else{
         id<-names(diversity_split)[1000]

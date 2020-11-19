@@ -14,6 +14,7 @@ no_na<-!is.na(values(mask))
 if (is.na(j_index)){
   j_index<-1
 }
+
 source("commonFuns/functions.r")
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
@@ -25,7 +26,11 @@ layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 if (T){
-  threshold<-5
+  threshold<-as.numeric(args[2])
+  if (is.na(threshold)){
+    threshold<-5
+  }
+  
   smooth_path<-NULL
   plot.new()
   #for (j in c(nrow(layer_df):1)){

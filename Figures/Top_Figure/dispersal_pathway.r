@@ -12,6 +12,10 @@ mask_p<-data.frame(rasterToPoints(mask))
 if (is.na(group)){
   group<-"Amphibians"
 }
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-5
+}
 if (F){
   r<-raster("../../Raster/Continent.tif")
   plot(r)
@@ -31,7 +35,7 @@ if (F){
   writeRaster(r2, "../../Raster/Continent_ect4.tif", overwrite=T)
   plot(r2)
 }
-threshold<-5
+#threshold<-5
 continent<-raster("../../Raster/Continent_ect4.tif")
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")

@@ -15,7 +15,10 @@ if (is.na(group)){
   group<-"Amphibians"
 }
 
-threshold<-5
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-5
+}
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
@@ -44,8 +47,12 @@ for (j in c(1:nrow(layer_df))){
   for (k in c(1:length(dispersals))){
     layer$M<-dispersals[k]
     
+    if (threshold==5){
+      target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
+    }else{
+      target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d", group, layer$LABEL, layer$M)
+    }
     
-    target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
     target<-sprintf("%s/indices_df.rda", target_folder)
     if (file.exists(target)){
       next()
