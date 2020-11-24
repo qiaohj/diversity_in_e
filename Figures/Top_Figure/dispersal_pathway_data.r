@@ -1,10 +1,8 @@
-library(dplyr)
-library(raster)
 library(raster)
 library(dplyr)
-#library(alphahull)
 library(concaveman)
 library(sf)
+library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 j_index<-as.numeric(args[1])
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
@@ -107,7 +105,7 @@ if (T){
         }
       }
     }
-    saveRDS(smooth_path, sprintf("../../Figures/Top_Figure/smooth_path_%s.rda", layer_item$LABEL))
+    saveRDS(smooth_path, sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
   }
 }
 

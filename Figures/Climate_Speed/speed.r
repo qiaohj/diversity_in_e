@@ -1,4 +1,6 @@
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
+library(dplyr)
+library(ggplot2)
 if (F){
   library("DBI")
   library("mgcv")
@@ -107,7 +109,7 @@ if (F){
 library(dplyr)
 library(ggplot2)
 library(hrbrthemes)
-source("colors.r")
+source("commonFuns/colors.r")
 env_se<-readRDS("../../Figures/Climate_Speed/env_se.rda")
 env_se_item<-env_se%>%dplyr::group_by(group, type, direction)%>%dplyr::summarise(
   mean_year=mean(year),
@@ -161,6 +163,7 @@ p<-ggplot() +
   theme(legend.position = "none")+
   ggtitle("Temperature (120kbp ~ present)")
 ggsave(p, filename="../../Figures/Climate_Speed/temp_past.png", width=10, height=5)
+ggsave(p, filename="../../Figures/Climate_Speed/temp_past.pdf", width=10, height=5)
 
 
 env_df<-env_se%>%dplyr::filter(type=="Maximum Monthly Precipitation")
@@ -201,23 +204,35 @@ df<-readRDS("../../Objects/mean_env_year.rda")
 df_se<-df%>%dplyr::group_by(Y, GCM,  SSP, VAR)%>%dplyr::summarise(annul_prec=sum(V),
                                                                   annul_max_temp=max(V),
                                                                   annual_min_temp=min(V))
-df_se_2014<-df_se%>%dplyr::filter(Y==2014)
-colnames(df_se_2014)<-c("Y2", "GCM", "SSP", "VAR", "prec_2014", "max_temp_2014", "min_temp_2014")
-df_se_speed<-left_join(df_se, df_se_2014, by=c("GCM", "SSP", "VAR"))
-df_se_speed$max_temp_speed<-(df_se_speed$annul_max_temp-df_se_speed$max_temp_2014)*100/(df_se_speed$Y-df_se_speed$Y2)
+df_se_2020<-df_se%>%dplyr::filter(Y==2020)
+colnames(df_se_2020)<-c("Y_2020", "GCM", "SSP", "VAR", "prec_2020", "max_temp_2020", "min_temp_2020")
+df_se_1850<-df_se%>%dplyr::filter(Y==1850)
+colnames(df_se_1850)<-c("Y_1850", "GCM", "SSP", "VAR", "prec_1850", "max_temp_1850", "min_temp_1850")
 
-p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2015, 2100))), aes(x=Y, y=annul_max_temp, color=SSP, linetype=GCM))+
+df_se_speed<-left_join(df_se, df_se_2020, by=c("GCM", "SSP", "VAR"))
+df_se_speed<-left_join(df_se_speed, df_se_1850, by=c("GCM", "SSP", "VAR"))
+
+df_se_speed$max_temp_speed_2020<-(df_se_speed$annul_max_temp-df_se_speed$max_temp_2020)*100/(df_se_speed$Y-df_se_speed$Y_2020)
+df_se_speed$max_temp_speed_1850<-(df_se_speed$annul_max_temp-df_se_speed$max_temp_1850)*100/(df_se_speed$Y-df_se_speed$Y_1850)
+
+p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2021, 2100))), aes(x=Y, y=annul_max_temp, color=SSP, linetype=GCM))+
   geom_line()+
-  geom_line(data=df_se%>%filter((VAR=="tasmax")&(between(Y, 2000, 2014))), 
+  geom_line(data=df_se%>%filter((VAR=="tasmax")&(between(Y, 1850, 2020))), 
             aes(x=Y, y=annul_max_temp, linetype=GCM),  color=colors_black[5])+
-  geom_vline(xintercept = 2015, color=colors_black[6], linetype=3)+
-  geom_text(data=df_se%>%dplyr::filter((VAR=="tasmax")&(Y==2014)), 
-            aes(x=Y, y=round(annul_max_temp, 2), label=round(annul_max_temp, 2)), color=colors_black[9])+
+  geom_vline(xintercept = 2020, color=colors_black[6], linetype=3)+
+  geom_text(data=df_se_speed%>%dplyr::filter((VAR=="tasmax")&(Y==2020)&(SSP=="SSP119")), 
+            aes(x=Y, y=round(annul_max_temp, 2), 
+                label=paste(round(annul_max_temp, 2), " Speed=", round(max_temp_speed_1850, 3), sep="")),
+                color=colors_black[9])+
+  geom_text(data=df_se_speed%>%dplyr::filter((VAR=="tasmax")&(Y==1850)&(SSP=="SSP119")), 
+            aes(x=Y, y=round(annul_max_temp, 2), 
+                label=round(annul_max_temp, 2)),
+            color=colors_black[9])+
   geom_text(data=df_se_speed%>%dplyr::filter((VAR=="tasmax")&(Y==2100)), 
             aes(x=Y, y=round(annul_max_temp, 2), 
-                label=paste(round(annul_max_temp, 2), " Speed=", round(max_temp_speed, 3), sep=""),
+                label=paste(round(annul_max_temp, 2), " Speed=", round(max_temp_speed_2020, 3), sep=""),
                 color=SSP, hjust=-0.1))+
-  xlim(c(2000, 2130))+
+  xlim(c(1850, 2160))+
   scale_color_manual(values=color_ssp)+
   scale_linetype_manual(values=linetype_gcm)+
   xlab("Year")+
@@ -225,3 +240,5 @@ p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2015, 2100))), aes(x=Y, y=
   theme_bw()
 
 ggsave(p2, filename="../../Figures/Climate_Speed/temp_future.png", width=10, height=5)
+ggsave(p2, filename="../../Figures/Climate_Speed/temp_future.pdf", width=10, height=5)
+write.csv(df_se_speed, "../../Figures/Climate_Speed/speed_future.csv")

@@ -3,7 +3,7 @@ library(dplyr)
 library(Rmisc)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 g<-"Amphibians"
-source("functions.r")
+source("commonFuns/functions.r")
 if (F){
   df_all<-NULL
   for (y in c(2021:2100)){
@@ -23,22 +23,30 @@ if (F){
   }
   saveRDS(df_all, "../../Figures/Min_distance_to_Dispersal/full.rda")
 }
+source("commonFuns/colors.r")
 df_all<-readRDS("../../Figures/Min_distance_to_Dispersal/full.rda")
-p<-ggplot(df_all%>%dplyr::filter(year %in% c(2015, 2100)), 
-       aes(x=dist_min_mean, y = ..density.., color=factor(group))) +
-  geom_density(aes(linetype=factor(year)))+scale_x_log10()+theme_bw()+
+p<-ggplot(df_all%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)), 
+       aes(x=dist_min_mean, fill=group)) +
+  geom_histogram(bins=20, position="dodge")+theme_bw()+
+  scale_fill_manual(values=color_groups)+
+  xlab("Minimum distance need to dispersal")+
+  ylab("Number of species")+
   facet_wrap(~SSP, ncol=1)
   
-
+p
 ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/start_end.png")
 
 df_all_se<-df_all%>%dplyr::group_by(SSP, group, year)%>%
   dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
                    sd_dist_mean=sd(dist_min_mean))
 
-p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=factor(group)))+
+p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
   geom_line()+theme_bw()+
+  xlab("Year")+
+  ylab("Average distance need to dispersal")+
+  scale_color_manual(values=color_groups)+
   facet_wrap(~SSP, ncol=1)
+p
 ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year.png")
 
 #p<-ggplot(df_all, aes(x=year, y = dist_min_mean, color=factor(group)))+
@@ -49,8 +57,11 @@ df_all_se<-df_all%>%dplyr::filter(dist_min_mean>=1)%>%dplyr::group_by(SSP, group
   dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
                    sd_dist_mean=sd(dist_min_mean))
 
-p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=factor(group)))+
+p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
   geom_line()+theme_bw()+
+  xlab("Year")+
+  ylab("Average distance need to dispersal")+
+  scale_color_manual(values=color_groups)+
   facet_wrap(~SSP, ncol=1)
 ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year_without_zero.png")
 

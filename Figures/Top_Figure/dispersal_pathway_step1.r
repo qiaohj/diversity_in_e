@@ -1,7 +1,5 @@
 library(raster)
-library(raster)
 library(dplyr)
-#library(alphahull)
 library(concaveman)
 library(sf)
 args = commandArgs(trailingOnly=TRUE)
@@ -77,7 +75,11 @@ for (i in c(1:nrow(df_list))){
       ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
                    threshold, group, item$sp, layer_item$LABEL, dispersal)
       if (file.exists(ttt)){
-        next()
+        ddddd<-readRDS(ttt)
+        if (!is.null(ddddd)){
+          next()
+        }
+        
       }
       dir.create(sprintf("../../Objects/dispersal_path_%d/%s", 
                          threshold, group), showWarnings = F, recursive = T)

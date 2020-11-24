@@ -13,7 +13,7 @@ map_background<-"#f5f5f2"
 mask_color<-colors_black[3]
 
 color_two<-c(colors_red[8], colors_blue[8])
-color_two_map<-c(colors_red[8], colors_blue[4])
+color_two_map<-c(colors_red[8], colors_blue[2])
 
 color_ssp<-c("SSP119"=colors_blue[7],
              "SSP245"=colors_green[7],

@@ -24,16 +24,22 @@ df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=100
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
 dispersals<-c(1:2)
-df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
+#df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 #beginCluster()
-for (i in c(1:nrow(df_list))){
-  print(paste(i, nrow(df_list)))
+for (i in c(1961:nrow(df_list))){
+  
   item<-df_list[i,]
   item$sp<-gsub(" ", "_", item$sp)
+  #if ((i<10)|(item$sp=="Physalaemus_evangelistai")){
+    
+  #}else{
+  #  next()
+  #}
   if (item$area<=0){
     next()
   }
+  print(paste(i, nrow(df_list), item$sp))
   target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
   model<-readRDS(sprintf("%s/fit.rda", target_folder))
@@ -93,7 +99,8 @@ for (i in c(1:nrow(df_list))){
         print("EXTINCT INDEX")
         start_dis$mask_index<-extract(mask, start_dis)
       }
-      dispersal_log_others<-dispersal_log%>%dplyr::filter((YEAR!=2100)&!(mask_index %in% c(start_dis$mask_index, dispersal_log_end$mask_index)))%>%
+      dispersal_log_others<-dispersal_log%>%
+        dplyr::filter((YEAR!=2100)&!(mask_index %in% c(start_dis$mask_index, dispersal_log_end$mask_index)))%>%
         dplyr::distinct(x, y, mask_index, YEAR)
       if (is.null(dispersal_log_others)){
         next()

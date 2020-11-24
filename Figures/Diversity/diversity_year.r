@@ -2,10 +2,10 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 library(ggplot2)
 library(dplyr)
 g<-"Amphibians"
-f<-"Diversity"
-source("functions.r")
+f<-"Diversity_5"
+source("commonFuns/functions.r")
 
-for (f in c("Diversity", "Diversity_with_human")){
+for (f in c("Diversity_5")){
   for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
     print(sprintf("../../Figures/%s/%s/%s.rda", f, g, g))
     df_o<-readRDS(sprintf("../../Figures/%s/%s/%s.rda", f, g, g))
@@ -17,15 +17,11 @@ for (f in c("Diversity", "Diversity_with_human")){
         dplyr::summarise(mean_v=mean(mean), 
                          sd_v=mean(sd),
                          CI_v=mean(CI))
-      f_l<-"With HFP"
-      if (f=="Diversity"){
-        f_l<-"Without HFP"
-      }
       p<-ggplot(df_se, aes(x=year, y=mean_v, color=factor(M)))+
         #geom_point()+
         geom_line(aes(linetype=factor(SSP)))+
         theme_bw()+
-        labs(title=paste(g, metric, f_l))+
+        labs(title=paste(g, metric))+
         facet_wrap(~name, scale="free", ncol=2)
       ggsave(p, file=sprintf("../../Figures/%s/%s_%s.png", f, g, metric))
     }

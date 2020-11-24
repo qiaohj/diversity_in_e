@@ -9,11 +9,11 @@ library(raster)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 #alt<-raster("../../Raster/ALT/alt_eck4.tif")
 alt<-raster("../../Raster/ALT/alt_eck4_high_res.tif")
-source("colors.r")
-p2<-data.frame(rasterToPoints(alt))
-p2[which(p2$x<=-12103059), "alt_eck4_high_res"]<-NA
-p2[which((p2$x>12912000)&(p2$y>5000000)), "alt_eck4_high_res"]<-NA
-values(alt)[!is.na(values(alt))]<-p2$alt_eck4_high_res
+source("commonFuns/colors.r")
+#p2<-data.frame(rasterToPoints(alt))
+#p2[which(p2$x<=-12103059), "alt_eck4_high_res"]<-NA
+#p2[which((p2$x>12912000)&(p2$y>5000000)), "alt_eck4_high_res"]<-NA
+#values(alt)[!is.na(values(alt))]<-p2$alt_eck4_high_res
 
 slope = terrain(alt, opt='slope')
 aspect = terrain(alt, opt='aspect')
@@ -46,18 +46,18 @@ GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
 
-predict_range<-c(2015:2100)
+predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 #for (j in c(1:nrow(layer_df))){
 for (j in c(j_index)){
   layer_item<-layer_df[j,]
-  smooth_path<-readRDS(sprintf("../../Figures/Top_Figure/smooth_path_%s.rda", layer_item$LABEL))
-  print(sprintf("../../Figures/Top_Figure/smooth_path_%s.rda", layer_item$LABEL))
+  smooth_path<-readRDS(sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
+  print(sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
 
   smooth_path$line_group<-paste(smooth_path$sp, smooth_path$continent_i)
-  smooth_path$alpha<-((smooth_path$YEAR-2014)/86)^5
+  smooth_path$alpha<-((smooth_path$YEAR-2021)/80)^5
   p<-p_bak+geom_path(data=smooth_path, aes(x=x, y=y, alpha=alpha, color=group,
                                            group=line_group))+
     scale_alpha_continuous()+
@@ -65,8 +65,8 @@ for (j in c(j_index)){
   
   width<-10
   height<-6
-  ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_ALL_%s.png", layer_item$LABEL), width=width, height = height)
-  ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_ALL_%s.pdf", layer_item$LABEL), width=width, height = height)
+  ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_ALL_%s.png", layer_item$LABEL), width=width, height = height)
+  ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_ALL_%s.pdf", layer_item$LABEL), width=width, height = height)
   
   for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
     print(g)
@@ -76,8 +76,8 @@ for (j in c(j_index)){
       scale_color_manual(values = color_groups)
     
     
-    ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_%s_%s.png", g, layer_item$LABEL), width=width, height = height)
-    ggsave(p, filename=sprintf("../../Figures/Top_Figure/Top_Figure_%s_%s.pdf", g, layer_item$LABEL), width=width, height = height)
+    ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_%s_%s.png", g, layer_item$LABEL), width=width, height = height)
+    ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_%s_%s.pdf", g, layer_item$LABEL), width=width, height = height)
   }
   
 }
