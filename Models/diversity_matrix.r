@@ -47,11 +47,7 @@ for (j in c(1:nrow(layer_df))){
   for (k in c(1:length(dispersals))){
     layer$M<-dispersals[k]
     
-    if (threshold==5){
-      target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
-    }else{
-      target_folder<-sprintf("../../Objects/Diversity/%s/%s_%d", group, layer$LABEL, layer$M)
-    }
+    target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%d", threshold, group, layer$LABEL, layer$M)
     
     target<-sprintf("%s/indices_df.rda", target_folder)
     if (file.exists(target)){

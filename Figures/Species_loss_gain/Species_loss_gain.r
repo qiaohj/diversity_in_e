@@ -16,7 +16,10 @@ group<-args[1]
 if (is.na(group)){
   group<-"Amphibians"
 }
-
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-1
+}
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -48,7 +51,7 @@ named_group_split <- function(.tbl, ...) {
     group_split() %>% 
     rlang::set_names(names)
 }
-threshold<-5
+
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
   for (k in c(1:length(dispersals))){

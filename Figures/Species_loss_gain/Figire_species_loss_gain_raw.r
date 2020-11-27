@@ -31,7 +31,7 @@ j=1
 k=1
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
 #dispersals<-data.frame(M=c(0:5), N=1)
-dispersals<-c(1:2)
+dispersals<-c(0)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-data.frame(rasterToPoints(mask))
@@ -40,6 +40,8 @@ slope<-raster("../../Raster/ALT/slope_eck4.tif")
 SSP_i<-SSPs[1]
 year_i<-2025
 GCM_i<-GCMs[1]
+output_figures<-T
+threshold<-5
 for (SSP_i in SSPs){
   for (k in c(1:length(dispersals))){
     if (T){
@@ -49,8 +51,8 @@ for (SSP_i in SSPs){
       for (year_i in c(2021:2100)){
         df_end_full<-NULL
         for (GCM_i in GCMs){
-          print(paste(SSP_i, k, year_i, GCM_i))
-          target_folder<-sprintf("../../Objects/Diversity_5/%s/%s_%s_%d", group, GCM_i, SSP_i, dispersals[k])
+          print(paste(group, SSP_i, dispersals[k], year_i, GCM_i, threshold))
+          target_folder<-sprintf("../../Objects/Diversity_%d/%s/%s_%s_%d", threshold, group, GCM_i, SSP_i, dispersals[k])
           target<-sprintf("%s/loss_gain.rda", target_folder)
           df<-readRDS(target)
           
@@ -86,12 +88,16 @@ for (SSP_i in SSPs){
         df_end_full_list[[as.character(year_i)]]<-df_end_se
         
       }
-      saveRDS(data.frame(max_2020=max_2020, max_year=max_year), sprintf("../../Figures/Species_gain_loss_5/%s_%s_%d_min_max.rda", group, SSP_i, dispersals[k]))
-      saveRDS(df_end_full_list, sprintf("../../Figures/Species_gain_loss_5/%s_%s_%d.rda", group, SSP_i, dispersals[k]))
+      saveRDS(data.frame(max_2020=max_2020, max_year=max_year), 
+              sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d_min_max.rda", threshold, group, SSP_i, dispersals[k]))
+      saveRDS(df_end_full_list, 
+              sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d.rda", threshold, group, SSP_i, dispersals[k]))
     }
-    #next()
-    df_end_full_list<-readRDS(sprintf("../../Figures/Species_gain_loss_5/%s_%s_%d.rda", group, SSP_i, dispersals[k]))
-    min_max<-readRDS(sprintf("../../Figures/Species_gain_loss_5/%s_%s_%d_min_max.rda", group, SSP_i, dispersals[k]))
+    if (!output_figures){
+      next()
+    }
+    df_end_full_list<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d.rda", threshold, group, SSP_i, dispersals[k]))
+    min_max<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d_min_max.rda", threshold, group, SSP_i, dispersals[k]))
     year_str<-"2021"
     for (year_str in names(df_end_full_list)){
       df_end_se<-df_end_full_list[[year_str]]
@@ -104,13 +110,13 @@ for (SSP_i in SSPs){
         scale_color_gradient(low=colors_black[4], high=colors_red[8])+
         #ggtitle(paste(group, ", ", SSP_i, ", Dispersal distance=", dispersals[k], sep=""))+
         theme(legend.position = "none")
-      t_dir<-sprintf("../../Figures/Species_gain_loss_5/Movies/RawValue/2D/fine/%s/%s/%d", group, SSP_i, dispersals[k])
+      t_dir<-sprintf("../../Figures/Species_gain_loss_%d/Movies/RawValue/2D/fine/%s/%s/%d", threshold, group, SSP_i, dispersals[k])
       dir.create(t_dir, recursive = T, showWarnings = F)
       ggsave(g1, filename=sprintf("%s/%s.png", t_dir, year_str))
       
       plot_gg(g1, multicore = F, raytrace = F, width = 5, height = 5,
               scale = 100, windowsize = c(1400,866), zoom = 0.6, phi = 30)
-      t_dir<-sprintf("../../Figures/Species_gain_loss_5/Movies/RawValue/3D/fine/%s/%s/%d", group, SSP_i, dispersals[k])
+      t_dir<-sprintf("../../Figures/Species_gain_loss_%d/Movies/RawValue/3D/fine/%s/%s/%d", threshold, group, SSP_i, dispersals[k])
       dir.create(t_dir, recursive = T, showWarnings = F)
       render_snapshot(filename=sprintf("%s/%s.png", t_dir, year_str), clear = TRUE)
       
@@ -135,13 +141,13 @@ for (SSP_i in SSPs){
         #ggtitle(paste(group, ", ", SSP_i, ", Dispersal distance=", dispersals[k], sep=""))+
         theme(legend.position = "none",
               axis.text.x = element_text( angle = 90 ))
-      t_dir<-sprintf("../../Figures/Species_gain_loss_5/Movies/RawValue/2D/rough/%s/%s/%d", group, SSP_i, dispersals[k])
+      t_dir<-sprintf("../../Figures/Species_gain_loss_%d/Movies/RawValue/2D/rough/%s/%s/%d", threshold, group, SSP_i, dispersals[k])
       dir.create(t_dir, recursive = T, showWarnings = F)
       ggsave(gg, filename=sprintf("%s/%s.png", t_dir, year_str))
       
       plot_gg(gg, multicore = F, raytrace = F, width = 5, height = 5,
               scale = 100, windowsize = c(1400,866), zoom = 0.6, phi = 30)
-      t_dir<-sprintf("../../Figures/Species_gain_loss_5/Movies/RawValue/3D/rough/%s/%s/%d", group, SSP_i, dispersals[k])
+      t_dir<-sprintf("../../Figures/Species_gain_loss_%d/Movies/RawValue/3D/rough/%s/%s/%d", threshold, group, SSP_i, dispersals[k])
       dir.create(t_dir, recursive = T, showWarnings = F)
       render_snapshot(filename=sprintf("%s/%s.png", t_dir, year_str), clear = TRUE)
     }

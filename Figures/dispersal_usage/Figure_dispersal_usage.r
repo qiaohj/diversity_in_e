@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 
 library(Rmisc)
-setwd("Y:/Script/diversity_in_e")
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 g<-"Reptiles"
 
 mask<-raster("../../Raster/mask_index.tif")
@@ -13,7 +13,7 @@ groups<-c("Amphibians", "Birds", "Mammals", "Reptiles")
 p_list<-list()
 for (g in groups){
   print(g)
-  final_df<-readRDS(sprintf("../../Figures/dispersal_usage/%s.rda", g))
+  final_df<-readRDS(sprintf("../../Figures/dispersal_usage_5/%s.rda", g))
   
   final_df_sum<-final_df%>%dplyr::group_by(mask_index, GCM, SSP)%>%
     dplyr::summarise(N_SP_SUM=sum(N_SP))
@@ -40,5 +40,5 @@ p<-ggarrange(p_list[[groups[1]]],
           p_list[[groups[4]]],
           ncol=1)
 p
-ggsave(p, filename="../../Figures/dispersal_usage/dispersal_usage.png", width=10, height=12)
-ggsave(p, filename="../../Figures/dispersal_usage/dispersal_usage.pdf")
+ggsave(p, filename="../../Figures/dispersal_usage_5/dispersal_usage.png", width=10, height=12)
+ggsave(p, filename="../../Figures/dispersal_usage_5/dispersal_usage.pdf", width=10, height=12)

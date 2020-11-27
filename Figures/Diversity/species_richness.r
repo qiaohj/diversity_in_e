@@ -7,7 +7,7 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
 g<-"Reptiles"
-threshold<-5
+threshold<-1
 mask<-raster("../../Raster/mask_index.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 
@@ -48,14 +48,14 @@ if (F){
         }
       }
     }
-    saveRDS(p_full, file=sprintf("../../Figures/Diversity_5/species.richness.%s.rda", g))
+    saveRDS(p_full, file=sprintf("../../Figures/Diversity_%d/species.richness.%s.rda", threshold, g))
   }
 }
 myPalette <- colorRampPalette(c(color_two_map[2], color_two_map[1]))
 
 for (g in groups){
   print(g)
-  p_full<-readRDS(sprintf("../../Figures/Diversity_5/species.richness.%s.rda", g))
+  p_full<-readRDS(sprintf("../../Figures/Diversity_%d/species.richness.%s.rda", threshold, g))
   p_full_se<-p_full%>%dplyr::group_by(x, y, mask_index, M, YEAR, SSP)%>%
     dplyr::summarise(MEAN_V=mean(V, na.rm=T))
   colors<-myPalette(max(p_full_se$MEAN_V, na.rm=T))
@@ -88,6 +88,6 @@ for (g in groups){
   p<-ggarrange(p1, ggarrange(p2, p3, ncol=1, nrow=2), 
                common.legend = T, legend = "right", legend.grob = g_legend, widths = c(6, 8))  
   p
-  ggsave(p, filename=sprintf("../../Figures/Diversity_5/MAP.%s.species.richness.png",g),
+  ggsave(p, filename=sprintf("../../Figures/Diversity_%d/MAP.%s.species.richness.png", thresohld, g),
          width=14, height=5)
 }

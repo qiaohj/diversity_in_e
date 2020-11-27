@@ -32,7 +32,7 @@ j=1
 k=1
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
 #dispersals<-data.frame(M=c(0:5), N=1)
-dispersals<-c(1:2)
+dispersals<-c(0:2)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-data.frame(rasterToPoints(mask))
@@ -40,14 +40,15 @@ alt<-raster("../../Raster/ALT/alt_eck4.tif")
 slope<-raster("../../Raster/ALT/slope_eck4.tif")
 SSP_i<-SSPs[1]
 year_i<-2025
+threshold<-1
 threshold_N<-0.1
 threshold_left<-0.3
 for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
   df_end_full_all<-NULL
   for (SSP_i in SSPs){
     for (k in c(1:length(dispersals))){
-      print(paste(group, SSP_i, k))
-      df_end_full_list<-readRDS(sprintf("../../Figures/Species_gain_loss_5/%s_%s_%d.rda", group, SSP_i, dispersals[k]))
+      print(paste(group, SSP_i, dispersals[k]))
+      df_end_full_list<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d.rda", threshold, group, SSP_i, dispersals[k]))
       df_end_full<-rbindlist(df_end_full_list)
       threshold_N_2020<-quantile(df_end_full[(mean_n_2020>0)&(YEAR==2100),]$mean_n_2020, c(threshold_N, 1-threshold_N))
       threshold_N_year<-quantile(df_end_full[(mean_n_year>0),]$mean_n_year, c(threshold_N, 1-threshold_N))
@@ -72,7 +73,7 @@ for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
       df_end_full_all<-bind(df_end_full_all, df_end_full)
     }
   }
-  saveRDS(df_end_full_all, file = sprintf("../../Figures/Species_gain_loss_5/%s_threshold.%d.rda", group, threshold_N*100))
+  saveRDS(df_end_full_all, file = sprintf("../../Figures/Species_gain_loss_%d/%s_threshold.%d.rda", threshold, group, threshold_N*100))
 }
 types<-c("LOW", "HIGH")
 types_list<-expand.grid(a=types, b=types, c=types)
@@ -81,7 +82,7 @@ df_threshold<-NULL
 
 for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
   print(group)
-  df_end_full_all<-readRDS(file = sprintf("../../Figures/Species_gain_loss_5/%s_threshold.%d.rda", group, threshold_N*100))
+  df_end_full_all<-readRDS(file = sprintf("../../Figures/Species_gain_loss_%d/%s_threshold.%d.rda", threshold, group, threshold_N*100))
   df_end_full_all_sub<-df_end_full_all[type %in% types_list$type]
   df_end_full_all_sub$group<-group
   df_threshold<-bind(df_threshold, df_end_full_all_sub)
@@ -91,7 +92,10 @@ df_threshold$type_index<-as.factor(df_threshold$type)
 df_threshold$type_index_number<-as.numeric(df_threshold$type_index)
 
 
-saveRDS(df_threshold, file = sprintf("../../Figures/Species_gain_loss_5/threshold_all.%d.rda", threshold_N*100))
+saveRDS(df_threshold, file = sprintf("../../Figures/Species_gain_loss_%d/threshold_all.%d.rda", threshold, threshold_N*100))
+
+
+df_threshold<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/threshold_all.%d.rda", threshold, threshold_N*100))
 colors_types<-c("HIGH HIGH HIGH"=colors_red[9],
                 "HIGH LOW HIGH"=colors_red[7],
                 "LOW HIGH HIGH"=colors_red[5],
@@ -103,7 +107,7 @@ colors_types<-c("HIGH HIGH HIGH"=colors_red[9],
 
 
 
-unique(df_sm[, c("type", "type_index_number")])
+#unique(df_sm[, c("type", "type_index_number")])
 
 df_sm<-df_threshold%>%dplyr::group_by(YEAR, type, M, SSP, type_index, type_index_number, group)%>%
   dplyr::summarise(N=n())
@@ -112,8 +116,11 @@ p<-ggplot(df_sm%>%dplyr::filter(M==1))+geom_line(aes(x=YEAR, y=N, color=type, li
   scale_color_manual(values=colors_types)+
   theme_bw()+
   facet_wrap(~group, scale="free", ncol=1)
-ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_5/threshold.%d.png", threshold_N*100),
+
+ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.png", threshold, threshold_N*100),
                            width=8, height=8)  
+ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.pdf", threshold, threshold_N*100),
+       width=8, height=8)  
 group_i<-"Amphibians"
 p<-ggplot()+geom_tile(data=points, aes(x=x, y=y), fill=colors_black[3])+
   geom_tile(data=df_threshold, aes(x=x, y=y, fill=type))+
@@ -144,9 +151,12 @@ for (year_i in c(2021:2100)){
     
   }
   ppp<-ggarrange(plotlist=p_list, nrow=4, ncol=3, common.legend = T, legend = "right", legend.grob = legend_g)
+  #ggsave(ppp, 
+  #       filename=sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d/%d.png", threshold, threshold_N*100, year_i),
+  #       width=12, height = 9)
   ggsave(ppp, 
-         filename=sprintf("../../Figures/Species_gain_loss_5/threshold_map_year.%d/%d.png", threshold_N*100, year_i),
+         filename=sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d/%d.pdf", threshold, threshold_N*100, year_i),
          width=12, height = 9)
 }
 
-#ffmpeg -r 2 -start_number 2015 -i %04d.png -y ../threshold_map_year.10.mp4
+  #ffmpeg -r 2 -start_number 2021 -i %04d.png -y ../threshold_map_year.10.mp4

@@ -40,3 +40,5 @@ for (year_i in c(2081:2100)){
   ggsave(p, filename=sprintf("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/Species_gain_loss_5/Movies/RawValue/3D/rough/ALL/%d.png", year_i),
          width=11, height=8)
 }
+#/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/Species_gain_loss_5/Movies/RawValue/3D/rough/ALL
+#ffmpeg -r 2 -start_number 2015 -i %04d.png -y ../../../../gain_loss_3D.mp4

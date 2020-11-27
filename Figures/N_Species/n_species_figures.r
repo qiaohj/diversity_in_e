@@ -11,7 +11,7 @@ rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 
-threshold<-5
+threshold<-1
 if (F){
   GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
   SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -80,7 +80,7 @@ if (F){
   sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
   sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
   sp_dis_all$Label2<-paste(sp_dis_all$M, sp_dis_all$N)
-  saveRDS(sp_dis_all, "../../Figures/N_SPECIES_5/sp_dis_all.rda")
+  saveRDS(sp_dis_all, sprintf("../../Figures/N_SPECIES_%d/sp_dis_all.rda", threshold))
 }
 
 

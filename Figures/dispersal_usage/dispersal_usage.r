@@ -16,7 +16,7 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 
 source("commonFuns/functions.r")
 predict_range<-c(2021:2100)
-threshold<-5
+threshold<-1
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
@@ -27,7 +27,7 @@ dispersals<-c(1:2)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 #beginCluster()
-for (i in c(1961:nrow(df_list))){
+for (i in c(1:nrow(df_list))){
   
   item<-df_list[i,]
   item$sp<-gsub(" ", "_", item$sp)
@@ -39,8 +39,9 @@ for (i in c(1961:nrow(df_list))){
   if (item$area<=0){
     next()
   }
-  print(paste(i, nrow(df_list), item$sp))
+  
   target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
+  print(paste(i, nrow(df_list), item$sp, target_folder))
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
   model<-readRDS(sprintf("%s/fit.rda", target_folder))
   model[, c("range_PR_sd_min", "range_PR_sd_max", "range_TEMP_sd_min", "range_TEMP_sd_max")]
@@ -65,7 +66,7 @@ for (i in c(1961:nrow(df_list))){
     k=1
     for (k in c(1:length(dispersals))){
       dispersal<-dispersals[k]
-      
+      print(sprintf("%s/%s_%d.rda", target, layer_item$LABEL, dispersal))
       dispersal_log<-readRDS(sprintf("%s/%s_%d.rda", target, layer_item$LABEL, dispersal))
       if (is.null(dispersal_log)){
         next()

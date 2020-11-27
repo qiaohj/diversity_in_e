@@ -24,7 +24,7 @@ no_na<-!is.na(values(mask))
 proj4string(keyspots)<-crs(mask)
 y=2020
 div_i<-"species.richness"
-threshold<-5
+threshold<-1
 diectory<-sprintf("Diversity_%d", threshold)
 dis_i<-1
 #for (g in Groups){

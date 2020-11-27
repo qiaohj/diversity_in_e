@@ -12,7 +12,7 @@ if (is.na(group)){
 }
 threshold<-as.numeric(args[2])
 if (is.na(threshold)){
-  threshold<-5
+  threshold<-1
 }
 if (F){
   r<-raster("../../Raster/Continent.tif")
