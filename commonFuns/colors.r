@@ -19,6 +19,10 @@ color_ssp<-c("SSP119"=colors_blue[7],
              "SSP245"=colors_green[7],
              "SSP585"=colors_red[7])
 
+color_dispersal<-c(colors_blue[7],
+             colors_green[7],
+             colors_red[7])
+
 linetype_gcm<-c("EC-Earth3-Veg"=1,
                 "MRI-ESM2-0"=2,
                 "UKESM1"=5)

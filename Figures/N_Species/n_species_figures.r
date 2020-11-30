@@ -10,6 +10,7 @@ library(tidyr)
 rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
+source("commonFuns/colors.r")
 
 threshold<-1
 if (F){
@@ -79,32 +80,41 @@ if (F){
   N_SP<-sp_dis_all%>%dplyr::group_by(group)%>%dplyr::summarise(N_SP=n_distinct(sp))
   sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
   sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
-  sp_dis_all$Label2<-paste(sp_dis_all$M, sp_dis_all$N)
-  saveRDS(sp_dis_all, sprintf("../../Figures/N_SPECIES_%d/sp_dis_all.rda", threshold))
+  saveRDS(sp_dis_all, sprintf("../../Figures/N_SPECIES/sp_dis_all_%d.rda", threshold))
 }
 
+sp_dis_all_sub_N_all<-NULL
+for (threshold in c(1, 5)){
+  rda<-sprintf("../../Figures/N_SPECIES/sp_dis_all_%d.rda", threshold)
+  print(paste("Reading", rda))
+  sp_dis_all<-readRDS(rda)
+  sp_dis_all_sub<-sp_dis_all%>%dplyr::filter(year==2100)
+  sp_dis_all_sub<-sp_dis_all_sub%>%dplyr::filter(N_type=="EXTINCT")
+  sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, GCM, SSP, M, N_type, N_SP, TYPE)%>%
+    dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
+  sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
+  
+  sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (Exposure year: ", threshold, ")", sep="")
+  sp_dis_all_sub_N_all<-bind_dplyr(sp_dis_all_sub_N_all, sp_dis_all_sub_N)
+}
 
-colnames(sp_dis_all)
-sp_dis_all<-readRDS("../../Figures/N_SPECIES_5/sp_dis_all.rda")
-sp_dis_all_sub<-sp_dis_all%>%dplyr::filter(year==2100)
-sp_dis_all_sub<-sp_dis_all_sub%>%dplyr::filter(N_type=="EXTINCT")
-sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, Label2, GCM, SSP, M, N_type, N_SP, TYPE)%>%
-  dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
-sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
-sp_dis_all_sub_N_mean<-sp_dis_all_sub_N%>%dplyr::group_by(group, Label2, SSP, M, N_type, N_SP, TYPE)%>%
+sp_mean<-sp_dis_all_sub_N_all%>%dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label)%>%
   dplyr::summarise(persentile_MEAN=mean(persentile),
                    persentile_SD=sd(persentile))
-
-head(sp_dis_all_sub_N)
-
-p<-ggplot(sp_dis_all_sub_N_mean, aes(y=persentile_MEAN, x=SSP))+
-  geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(Label2)))+
+p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
+  geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(M)))+
   geom_errorbar(position=position_dodge(.9), width=0.2,
                 aes(ymin=persentile_MEAN-persentile_SD, 
                     ymax=persentile_MEAN+persentile_SD,
-                    group=factor(Label2))) +
+                    group=factor(M))) +
   theme_bw()+
   #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
-  facet_wrap( ~ group+TYPE, ncol=2)
-ggsave(p, filename="../../Figures/N_SPECIES_5/Extinction.pdf", width=6, height=6)
-ggsave(p, filename="../../Figures/N_SPECIES_5/Extinction.png", width=6, height=6)
+  facet_wrap( ~ Label, nrow=2)+
+  scale_fill_manual(values=color_dispersal, breaks = c(0:2))+
+  labs(fill = "Dispersal ability")+
+  ylab("Mean extinction proportion")
+p
+
+
+ggsave(p, filename="../../Figures/N_SPECIES/Extinction.pdf", width=10, height=6)
+ggsave(p, filename="../../Figures/N_SPECIES/Extinction.png", width=10, height=6)

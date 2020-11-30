@@ -18,6 +18,17 @@ group<-args[1]
 if (is.na(group)){
   group<-"Amphibians"
 }
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-1
+}
+
+dispersal<-as.numeric(args[3])
+if (is.na(dispersal)){
+  dispersal<-1
+}
+
+
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
@@ -31,7 +42,7 @@ j=1
 k=1
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
 #dispersals<-data.frame(M=c(0:5), N=1)
-dispersals<-c(0)
+dispersals<-c(dispersal)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-data.frame(rasterToPoints(mask))
@@ -41,7 +52,7 @@ SSP_i<-SSPs[1]
 year_i<-2025
 GCM_i<-GCMs[1]
 output_figures<-T
-threshold<-5
+
 for (SSP_i in SSPs){
   for (k in c(1:length(dispersals))){
     if (T){
@@ -120,18 +131,19 @@ for (SSP_i in SSPs){
       dir.create(t_dir, recursive = T, showWarnings = F)
       render_snapshot(filename=sprintf("%s/%s.png", t_dir, year_str), clear = TRUE)
       
-      cuts_x<-seq(0, ceiling(min_max$max_2020/10)*10, by=10)
-      cuts_y<-seq(0, ceiling(min_max$max_year/10)*10, by=10)
+      cuts_x<-seq(0, ceiling(min_max$max_2020/10)*10, by=ceiling(min_max$max_2020/10)/2)
+      cuts_y<-seq(0, ceiling(min_max$max_year/10)*10, by=ceiling(min_max$max_year/10)/2)
       
-      df_end_se$p_2020_cut<-cut2(df_end_se$mean_n_2020+0.001, cuts=cuts_x, levels.mean=F)
-      df_end_se$p_year_cut<-cut2(df_end_se$mean_n_year+0.001, cuts=cuts_y, levels.mean=F)
+      df_end_se$p_2020_cut<-cut(df_end_se$mean_n_2020, breaks=cuts_x, labels=cuts_x[2:length(cuts_x)])
+      df_end_se$p_year_cut<-cut(df_end_se$mean_n_year, breaks=cuts_y, labels=cuts_y[2:length(cuts_y)])
       df_end_full_se<-df_end_se%>%dplyr::group_by(p_2020_cut, p_year_cut)%>%dplyr::summarise(mean_left=mean(mean_left_2020))
-      cuts_factor_x<-cut2(c(1:max(cuts_x)), cuts=cuts_x)
-      cuts_factor_y<-cut2(c(1:max(cuts_y)), cuts=cuts_y)
+      cuts_factor_x<-unique(cut(c(1:max(cuts_x)), breaks=cuts_x, labels=cuts_x[2:length(cuts_x)]))
+      cuts_factor_y<-unique(cut(c(1:max(cuts_y)), breaks=cuts_y, labels=cuts_y[2:length(cuts_y)]))
       
       expand_df<-expand.grid(p_2020_cut=cuts_factor_x, p_year_cut=cuts_factor_y)
       df_end_full_se<-full_join(expand_df, df_end_full_se, by=c("p_2020_cut", "p_year_cut"))
       df_end_full_se[is.na(df_end_full_se$mean_left), "mean_left"]<-0
+      
       
       gg<-ggplot()+
         geom_tile(data=df_end_full_se, aes(x=p_2020_cut, y=p_year_cut, fill = mean_left), color=colors_black[7])+

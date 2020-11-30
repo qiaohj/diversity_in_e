@@ -40,14 +40,17 @@ alt<-raster("../../Raster/ALT/alt_eck4.tif")
 slope<-raster("../../Raster/ALT/slope_eck4.tif")
 SSP_i<-SSPs[1]
 year_i<-2025
-threshold<-1
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-1
+}
 threshold_N<-0.1
 threshold_left<-0.3
 for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
   df_end_full_all<-NULL
   for (SSP_i in SSPs){
     for (k in c(1:length(dispersals))){
-      print(paste(group, SSP_i, dispersals[k]))
+      print(paste(group, SSP_i, dispersals[k], "threshold", threshold))
       df_end_full_list<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/%s_%s_%d.rda", threshold, group, SSP_i, dispersals[k]))
       df_end_full<-rbindlist(df_end_full_list)
       threshold_N_2020<-quantile(df_end_full[(mean_n_2020>0)&(YEAR==2100),]$mean_n_2020, c(threshold_N, 1-threshold_N))

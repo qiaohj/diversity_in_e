@@ -8,7 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 if (is.na(group)){
-  group<-"Reptiles"
+  group<-"Amphibians"
 }
 threshold<-as.numeric(args[2])
 if (is.na(threshold)){
@@ -53,64 +53,61 @@ for (j in c(1:nrow(layer_df))){
         next()
       }
       #print(paste(Sys.time(), 1))
-      enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", threshold, group, item$sp)
-      print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
+      if (threshold==1){
+        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal", group, item$sp)
+      }else{
+        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold) 
+      }
+      
+      #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-readRDS(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-env_item_all[, c("x", "y", "mask_index", "YEAR")]
+      
+      source_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
+      start_dis<-readRDS(sprintf("%s/occ_with_env.rda", source_folder))
+      selected_cols<-c("x", "y", "mask_index")
+      start_dis<-unique(start_dis[, ..selected_cols])
+      start_dis$YEAR<-2020
+      
+      
       if (is.null(env_item_all)){
-        next()
+        env_item_all<-start_dis
+      }else{
+        env_item_all<-rbindlist(list(env_item_all, start_dis))
       }
       colnames(env_item_all)[4]<-"year"
-      print(paste(layer$LABEL, layer$M, item$sp, i, nrow(df_list)))
+      print(paste(group, layer$LABEL, layer$M, item$sp, i, nrow(df_list), "threshold", threshold))
       splited<-split(env_item_all, by="year")
-      YYYY=2021
+      YYYY=2020
       for (YYYY in c(2020:2100)){
-        #print(paste(Sys.time(), 3, YYYY))
         diversity<-diversity_df[[as.character(YYYY)]]
-        #print(paste(Sys.time(), 4, YYYY))
-        if (YYYY==2020){
-          source_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
-          start_dis<-readRDS(sprintf("%s/occ_with_env.rda", source_folder))
-          selected_cols<-c("x", "y", "mask_index")
-          start_dis<-unique(start_dis[, ..selected_cols])
-          start_dis$year<-2020
-          start_dis$sp<-item$sp
-          if (is.null(diversity)){
-            diversity<-list(start_dis)
-          }else{
-            diversity[[length(diversity)+1]]<-start_dis
-          }
-        }else{
-          
-          env_item<-splited[[as.character(YYYY)]]
-          #print(paste(Sys.time(), 6, YYYY))
-          if (is.null(env_item)){
-            next()
-          }
-          if (nrow(env_item)==0){
-            next()
-          }
-          #print(paste(Sys.time(), 7, YYYY))
-          env_item$sp<-item$sp
-          if (is.null(diversity)){
-            diversity<-list(env_item)
-          }else{
-            diversity[[length(diversity)+1]]<-env_item
-          }
-          #print(paste(Sys.time(), 8, YYYY))
+        env_item<-splited[[as.character(YYYY)]]
+        if (is.null(env_item)){
+          next()
         }
-        #print(paste(Sys.time(), 9))
+        if (nrow(env_item)==0){
+          next()
+        }
+        env_item$sp<-item$sp
+        if (is.null(diversity)){
+          diversity<-list(env_item)
+        }else{
+          diversity[[length(diversity)+1]]<-env_item
+        }
         diversity_df[[as.character(YYYY)]]<-diversity
-        #print(paste(Sys.time(), 10))
       }
     }
     saveRDS(diversity_df, sprintf("%s/diversity_df.rda", target_folder))
   }
-  
- 
-  
 }
 
 if (F){
-  tt<-rbindlist(diversity_df[[69]])
+  tt<-"../../Objects/Diversity_1/Amphibians/EC-Earth3-Veg_SSP119_1"
+  temp<-readRDS(sprintf("%s/diversity_df.rda", tt))
+  
+  temp_sub<-temp[["2020"]]
+  temp_sub<-rbindlist(temp_sub)
+  
+  
+  length(unique(temp_sub$sp))
 }

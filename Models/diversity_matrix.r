@@ -17,7 +17,7 @@ if (is.na(group)){
 
 threshold<-as.numeric(args[2])
 if (is.na(threshold)){
-  threshold<-5
+  threshold<-1
 }
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -70,6 +70,7 @@ for (j in c(1:nrow(layer_df))){
       diversity<-rbindlist(diversity)
       diversity<-unique(diversity)
       print(paste("COUNTING DATA", YYYY, target_folder))
+
       n_dis<-diversity%>%dplyr::group_by(year, sp)%>%
         dplyr::summarise(N=n(),
                          xabsmin=min(abs(x)),
