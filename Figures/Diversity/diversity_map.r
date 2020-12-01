@@ -24,7 +24,10 @@ no_na<-!is.na(values(mask))
 proj4string(keyspots)<-crs(mask)
 y=2020
 div_i<-"species.richness"
-threshold<-1
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-5
+}
 diectory<-sprintf("Diversity_%d", threshold)
 dis_i<-1
 #for (g in Groups){
@@ -36,7 +39,7 @@ for (SSP_i in SSPs){
       df<-readRDS(sprintf("../../Objects/%s/%s/%s_%s_%d/indices_df.rda",
                           diectory, g, GCM_i, SSP_i, dis))
       for (y in c(2020:2100)){
-        print(paste(g, SSP_i, dis, GCM_i, y))
+        print(paste(g, SSP_i, dis, GCM_i, y, threshold))
         for (div_i in names(df[[as.character(y)]])){
           df_item<-df[[as.character(y)]][[div_i]]
           dir.create(sprintf("../../Figures/%s/%s/%s", diectory, g, div_i), showWarnings = F, recursive = T)

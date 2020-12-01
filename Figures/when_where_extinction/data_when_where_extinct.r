@@ -1,27 +1,31 @@
 library(dplyr)
 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-threshold<-1
+threshold<-5
 if (F){
-  sp_dis_all<-readRDS(sprintf("../../Figures/N_SPECIES_%d/sp_dis_all.rda", threshold))
+  sp_dis_all<-readRDS(sprintf("../../Figures/N_SPECIES/sp_dis_all_%d.rda", threshold))
   extinct_sp<-sp_dis_all%>%dplyr::filter(year==2100)
   extinct_sp<-extinct_sp%>%dplyr::filter(N_type=="EXTINCT")
   extinct_sp<-extinct_sp%>%dplyr::filter(M==0)
   extinct_sp<-extinct_sp%>%dplyr::filter(TYPE==sprintf("Diversity_%d", threshold))
   saveRDS(extinct_sp, sprintf("../../Objects/when_where_extinction_%d/extinct_sp.rda", threshold))
 }
-extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp.rda", threshold))
 i=1
 args = commandArgs(trailingOnly=TRUE)
 g<-args[1]
 if (is.na(g)){
   g<-"Amphibians"
 }
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-1
+}
+extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp.rda", threshold))
 extinct_sp<-extinct_sp%>%filter(group==g)
 source("commonFuns/functions.r")
 df<-NULL
 for (i in c(1:nrow(extinct_sp))){
-  print(paste(i, nrow(extinct_sp), g, sep=" - "))
+  print(paste(i, nrow(extinct_sp), g, threshold, sep=" - "))
   item<-extinct_sp[i,]
   #item$sp<-"Bunomys_fratrorum"
   #item$group<-"Mammals"
