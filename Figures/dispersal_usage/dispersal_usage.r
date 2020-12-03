@@ -16,12 +16,15 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 
 source("commonFuns/functions.r")
 predict_range<-c(2021:2100)
-threshold<-1
+threshold<-as.numeric(args[2])
+if (is.na(threshold)){
+  threshold<-1
+}
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
-i=100
+i=3369
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
 dispersals<-c(1:2)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
@@ -60,7 +63,7 @@ for (i in c(1:nrow(df_list))){
   }else{
     target<-sprintf("%s/dispersal", target_folder)
   }
-  j=3
+  j=7
   for (j in c(1:nrow(layer_df))){
     layer_item<-layer_df[j,]
     k=1
@@ -130,17 +133,18 @@ for (i in c(1:nrow(df_list))){
       dispersal_log_others$GCM<-layer_item$GCM
       dispersal_log_others$SSP<-layer_item$SSP
       dispersal_log_others$N_SP<-1
+      dispersal_log_others$dispersal<-dispersal
       if (nrow(dispersal_log_others)==0){
         next()
       }
       if (is.null(final_df)){
         final_df<-dispersal_log_others
       }else{
-        final_df<-full_join(final_df, dispersal_log_others, by=c("mask_index", "YEAR", "GCM", "SSP"))
+        final_df<-full_join(final_df, dispersal_log_others, by=c("mask_index", "YEAR", "GCM", "SSP", "dispersal"))
         
         final_df[is.na(final_df)]<-0
         final_df$N_SP<-final_df$N_SP.x+final_df$N_SP.y
-        final_df<-final_df[, c("mask_index", "YEAR", "GCM", "SSP", "N_SP")]
+        final_df<-final_df[, c("mask_index", "YEAR", "GCM", "SSP", "N_SP", "dispersal")]
         print(nrow(final_df))
       }
       
@@ -149,3 +153,8 @@ for (i in c(1:nrow(df_list))){
 }
 saveRDS(final_df, sprintf("../../Figures/dispersal_usage_%d/%s.rda", threshold, group))
 #endCluster()
+
+if (F){
+  df1<-readRDS("../../Objects/Niche_Models/Amphibians/Leptopelis_zebra/dispersal/EC-Earth3-Veg_SSP585_1.rda")
+  df2<-readRDS("../../Objects/Niche_Models/Amphibians/Leptopelis_zebra/dispersal/UKESM1_SSP245_2.rda")
+  }

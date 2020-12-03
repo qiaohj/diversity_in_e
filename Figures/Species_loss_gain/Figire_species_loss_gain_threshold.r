@@ -49,6 +49,7 @@ threshold_N<-0.1
 threshold_left<-0.3
 
 if (F){
+  
   for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
     df_end_full_all<-NULL
     for (SSP_i in SSPs){
@@ -101,68 +102,85 @@ if (F){
   saveRDS(df_threshold, file = sprintf("../../Figures/Species_gain_loss_%d/threshold_all.%d.rda", threshold, threshold_N*100))
 }
 
-df_threshold<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/threshold_all.%d.rda", threshold, threshold_N*100))
-colors_types<-c("HIGH HIGH HIGH"=colors_red[9],
-                "HIGH LOW HIGH"=colors_red[7],
-                "LOW HIGH HIGH"=colors_red[5],
-                "LOW LOW HIGH"=colors_red[3],
-                "HIGH HIGH LOW"=colors_blue[3],
-                "HIGH LOW LOW"=colors_blue[5],
-                "LOW HIGH LOW"=colors_blue[7],
-                "LOW LOW LOW"=colors_blue[9])
-
-
-
-#unique(df_sm[, c("type", "type_index_number")])
-
-df_sm<-df_threshold%>%dplyr::group_by(YEAR, type, M, SSP, type_index, type_index_number, group)%>%
-  dplyr::summarise(N=n())
-p<-ggplot(df_sm%>%dplyr::filter(M==1))+geom_line(aes(x=YEAR, y=N, color=type, linetype=SSP))+
-  scale_linetype_manual(values=linetype_ssp)+
-  scale_color_manual(values=colors_types)+
-  theme_bw()+
-  facet_wrap(~group, scale="free", ncol=1)
-
-ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.png", threshold, threshold_N*100),
-                           width=8, height=8)  
-ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.pdf", threshold, threshold_N*100),
-       width=8, height=8)  
-group_i<-"Amphibians"
-p<-ggplot()+geom_tile(data=points, aes(x=x, y=y), fill=colors_black[3])+
-  geom_tile(data=df_threshold, aes(x=x, y=y, fill=type))+
-  scale_fill_manual(values=colors_types)
-legend_g<-g_legend(p)
-
-
-for (year_i in c(2021:2100)){
-  print(year_i)
-  p_list<-list()
-  for (group_i in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-    for (SSP_i in SSPs){
-      df_threshold_item<-df_threshold[(YEAR==year_i)&(M==1)&(SSP==SSP_i)&(group==group_i)]
-      p<-ggplot()+geom_tile(data=points, aes(x=x, y=y), fill=colors_black[3])+
-        geom_tile(data=df_threshold_item, aes(x=x, y=y, fill=type))+
-        scale_fill_manual(values=colors_types)+
-        ggtitle(paste(year_i, group_i, SSP_i))+
-        theme_bw()+
-        theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(), axis.line = element_blank(),
-              axis.text.x=element_blank(),
-              axis.text.y=element_blank(),axis.ticks=element_blank(),
-              axis.title.x=element_blank(),
-              axis.title.y=element_blank(),
-              legend.position = "none")
-      p_list[[paste(group_i, SSP_i)]]<-p
-    }
+for (threshold in c(1, 5)){
+  df_threshold<-readRDS(sprintf("../../Figures/Species_gain_loss_%d/threshold_all.%d.rda", threshold, threshold_N*100))
+  colors_types<-c("HIGH HIGH HIGH"=colors_red[9],
+                  "HIGH LOW HIGH"=colors_red[7],
+                  "LOW HIGH HIGH"=colors_red[5],
+                  "LOW LOW HIGH"=colors_red[3],
+                  "HIGH HIGH LOW"=colors_blue[3],
+                  "HIGH LOW LOW"=colors_blue[5],
+                  "LOW HIGH LOW"=colors_blue[7],
+                  "LOW LOW LOW"=colors_blue[9])
+  
+  
+  
+  #unique(df_sm[, c("type", "type_index_number")])
+  
+  for (dispersal in c(0:2)){
     
+    df_sm<-df_threshold%>%dplyr::group_by(YEAR, type, M, SSP, type_index, type_index_number, group)%>%
+      dplyr::summarise(N=n())
+    
+    p<-ggplot(df_sm%>%dplyr::filter(M==dispersal))+
+      geom_line(aes(x=YEAR, y=N, color=type, linetype=SSP))+
+      scale_linetype_manual(values=linetype_ssp)+
+      scale_color_manual(values=colors_types)+
+      theme_bw()+
+      scale_y_log10()+
+      facet_wrap(~group, scale="free", ncol=1)
+    
+    ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.dispersal.%d.png", 
+                               threshold, threshold_N*100, dispersal),
+           width=8, height=8)  
+    ggsave(p, filename=sprintf("../../Figures/Species_gain_loss_%d/threshold.%d.dispersal.%d.pdf", 
+                               threshold, threshold_N*100, dispersal),
+           width=8, height=8)  
+    group_i<-"Amphibians"
+    p<-ggplot()+geom_tile(data=points, aes(x=x, y=y), fill=colors_black[3])+
+      geom_tile(data=df_threshold%>%dplyr::filter(M==dispersal), aes(x=x, y=y, fill=type))+
+      scale_fill_manual(values=colors_types[names(colors_types) %in% 
+                                              unique(df_threshold[which(df_threshold$M==dispersal),]$type)])
+    legend_g<-g_legend(p)
+    
+    
+    for (year_i in c(2021:2100)){
+      print(paste(year_i, threshold, dispersal))
+      p_list<-list()
+      for (group_i in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+        for (SSP_i in SSPs){
+          df_threshold_item<-df_threshold[(YEAR==year_i)&(M==dispersal)&(SSP==SSP_i)&(group==group_i)]
+          #print(colors_types[names(colors_types) %in% unique(df_threshold_item$type)])
+          p<-ggplot()+geom_tile(data=points, aes(x=x, y=y), fill=colors_black[3])+
+            geom_tile(data=df_threshold_item, aes(x=x, y=y, fill=type))+
+            scale_fill_manual(values=colors_types[names(colors_types) %in% unique(df_threshold_item$type)])+
+            ggtitle(paste(year_i, group_i, SSP_i))+
+            theme_bw()+
+            theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                  panel.grid.minor = element_blank(), axis.line = element_blank(),
+                  axis.text.x=element_blank(),
+                  axis.text.y=element_blank(),axis.ticks=element_blank(),
+                  axis.title.x=element_blank(),
+                  axis.title.y=element_blank(),
+                  legend.position = "none")
+          p_list[[paste(group_i, SSP_i)]]<-p
+        }
+        
+      }
+      ppp<-ggarrange(plotlist=p_list, nrow=4, ncol=3, common.legend = T,
+                     legend = "right", legend.grob = legend_g)
+      folder<-sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d.dispersal.%d", 
+                      threshold, threshold_N*100, dispersal)
+      dir.create(folder, showWarnings = F)
+      ggsave(ppp, 
+             filename=sprintf("%s/%d.png", 
+                              folder, year_i),
+             width=12, height = 9)
+      #ggsave(ppp, 
+      #       filename=sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d/%d.pdf", threshold, threshold_N*100, year_i),
+      #       width=12, height = 9)
+    }
   }
-  ppp<-ggarrange(plotlist=p_list, nrow=4, ncol=3, common.legend = T, legend = "right", legend.grob = legend_g)
-  ggsave(ppp, 
-         filename=sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d/%d.png", threshold, threshold_N*100, year_i),
-         width=12, height = 9)
-  #ggsave(ppp, 
-  #       filename=sprintf("../../Figures/Species_gain_loss_%d/threshold_map_year.%d/%d.pdf", threshold, threshold_N*100, year_i),
-  #       width=12, height = 9)
 }
 
-  #ffmpeg -r 2 -start_number 2021 -i %04d.png -y ../threshold_map_year.10.mp4
+#ffmpeg -r 2 -start_number 2021 -i %04d.png -y ../threshold_map_year.10.mp4

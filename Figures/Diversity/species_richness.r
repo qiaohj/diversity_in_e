@@ -3,6 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(ggpubr)
 library(Rmisc)
+library(rgdal)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
@@ -57,7 +58,9 @@ if (F){
     }
   }
 }
-myPalette <- colorRampPalette(c(color_two_map[2], color_two_map[1]))
+
+continent<-readOGR("../../Shape/continents", "continents_eck4")
+AG <- fortify(continent)
 for (threshold in c(1, 5)){
   p_full_all<-NULL
   for (g in groups){
@@ -67,17 +70,25 @@ for (threshold in c(1, 5)){
     p_full_all<-bind_dplyr(p_full_all, p_full)
     p_full_se<-p_full%>%dplyr::group_by(x, y, mask_index, M, YEAR, SSP)%>%
       dplyr::summarise(MEAN_V=mean(V, na.rm=T))
-    colors<-myPalette(max(p_full_se$MEAN_V, na.rm=T))
-    d1<-p_full_se%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119"))
-    p1<-ggplot(p_full_sthresholde%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119")))+
+    
+    dd_df<-p_full_se%>%dplyr::filter((YEAR %in% c(2020, 2100))&(M %in% c(0, 1)))
+    max_v<-max(dd_df$MEAN_V, na.rm=T)
+    colors<-myPalette(max_v)
+    d1<-p_full_se%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119")&(!is.na(MEAN_V)))
+    d1$log_mean_v<-log2(d1$MEAN_V)
+    p1<-ggplot(d1)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=MEAN_V))+
-      scale_fill_gradientn(colors=colors[c(1:max(d1$MEAN_V, na.rm=T))])+
+      scale_fill_gradientn(colors=colors[c(1,max(d1$MEAN_V, na.rm=T))])+
       ggtitle(paste(g, "Exposure year:", threshold))+
       map_theme
+      
     p1
     
-    d2<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==0))
+    
+    d2<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==0)&(!is.na(MEAN_V)))
     p2<-ggplot(d2)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=MEAN_V))+
       scale_fill_gradientn(colors=colors[c(1,max(d2$MEAN_V, na.rm=T))])+
       ggtitle("Without dispersal")+
@@ -85,18 +96,20 @@ for (threshold in c(1, 5)){
       map_theme
     p2
     
-    d3<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==1))
+    d3<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==1)&(!is.na(MEAN_V)))
     p3<-ggplot(d3)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=MEAN_V))+
       scale_fill_gradientn(colors=colors[c(1,max(d3$MEAN_V, na.rm=T))])+
       labs(fill = "Richness")+
-      ggtitle("With 1 dispersal")+
+      ggtitle("With dispersal")+
       facet_wrap(~SSP)
     g_legend<-get_legend(p3)
     p3<-p3+map_theme
     
-    d4<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==2))
+    d4<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==2)&(!is.na(MEAN_V)))
     p4<-ggplot(d4)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=MEAN_V))+
       scale_fill_gradientn(colors=colors[c(1,max(d3$MEAN_V, na.rm=T))])+
       labs(fill = "Richness")+
@@ -106,8 +119,8 @@ for (threshold in c(1, 5)){
     p4<-p4+map_theme
     
     
-    p<-ggarrange(p1, ggarrange(p2, p3, p4, ncol=1, nrow=3), 
-                 common.legend = T, legend = "right", legend.grob = g_legend, widths = c(8, 7))  
+    p<-ggarrange(p1, ggarrange(p2, p3, ncol=1, nrow=2), 
+                 common.legend = T, legend = "right", legend.grob = g_legend, widths = c(6, 7))  
     p
     ggsave(p, filename=sprintf("../../Figures/Diversity_%d/MAP.%s.species.richness.png", threshold, g),
            width=14, height=5)
@@ -140,56 +153,52 @@ if (F){
 }
 
 p_full_all_se<-readRDS("../../Figures/Diversity_all/species.richness.rda")
-
-
-for (tttt in c(1, 5)){
-  print(tttt)
-  p_full_all_se_1<-p_full_all_se%>%dplyr::filter(threshold==tttt)
+p_full_all_se$exposure<-" no exposure"
+p_full_all_se[which(p_full_all_se$threshold==5), "exposure"]<-"5-year exposure"
+da=0
+myPalette <- colorRampPalette(c(mask_color, color_two_map[2]))
+for (da in c(0, 1)){
+  print(da)
+  p_full_all_se_1<-p_full_all_se%>%dplyr::filter(M==da)
   colors<-myPalette(max(p_full_all_se_1$SUM_V, na.rm=T))
-  d1<-p_full_all_se_1%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119"))
+  d1<-p_full_all_se_1%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119")&(!is.na(SUM_V)))
   p1<-ggplot(p_full_all_se_1%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119")))+
-    geom_tile(aes(x=x, y=y, fill=SUM_V))+
+    geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+    geom_tile(aes(x=x, y=y, fill=SUM_V), color=NA)+
     scale_fill_gradientn(colors=colors[c(1:max(d1$SUM_V, na.rm=T))])+
-    ggtitle(paste("Species richness, Exposure year:", tttt))+
+    scale_color_gradientn(colors=colors[c(1:max(d1$SUM_V, na.rm=T))])+
+    ggtitle(ifelse(da==0, "Species richness, no dispersal", "Species richness, with dispersal"))+
     map_theme
   p1
   
-  d2<-p_full_all_se_1%>%dplyr::filter((YEAR==2100)&(M==0))
+  d2<-p_full_all_se_1%>%dplyr::filter((YEAR==2100)&(!is.na(SUM_V)))
   p2<-ggplot(d2)+
-    geom_tile(aes(x=x, y=y, fill=SUM_V))+
+    geom_tile(aes(x=x, y=y, fill=SUM_V), color=NA)+
     scale_fill_gradientn(colors=colors[c(1,max(d2$SUM_V, na.rm=T))])+
-    ggtitle("Without dispersal")+
-    facet_wrap(~SSP)+
-    map_theme
+    labs(fill = "Richness")+
+    facet_grid(exposure~SSP)
+  g_legend<-get_legend(p2)
+  p2<-p2+  map_theme
   p2
   
-  d3<-p_full_all_se_1%>%dplyr::filter((YEAR==2100)&(M==1))
-  p3<-ggplot(d3)+
-    geom_tile(aes(x=x, y=y, fill=SUM_V))+
-    scale_fill_gradientn(colors=colors[c(1,max(d3$SUM_V, na.rm=T))])+
-    labs(fill = "Richness")+
-    ggtitle("With 1 dispersal")+
-    facet_wrap(~SSP)
-  g_legend<-get_legend(p3)
-  p3<-p3+map_theme
-  
-  d4<-p_full_all_se_1%>%dplyr::filter((YEAR==2100)&(M==2))
-  p4<-ggplot(d4)+
-    geom_tile(aes(x=x, y=y, fill=SUM_V))+
-    scale_fill_gradientn(colors=colors[c(1,max(d3$SUM_V, na.rm=T))])+
-    labs(fill = "Richness")+
-    ggtitle("With 2 dispersal")+
-    facet_wrap(~SSP)
-  g_legend<-get_legend(p4)
-  p4<-p4+map_theme
-  
-  
-  p<-ggarrange(p1, ggarrange(p2, p3, p4, ncol=1, nrow=3), 
-               common.legend = T, legend = "right", legend.grob = g_legend, widths = c(8, 7))  
+  # p<-ggarrange(p1, ggarrange(p2, p3, p4, ncol=1, nrow=3), 
+  #              common.legend = T, legend = "right", legend.grob = g_legend, widths = c(8, 7))  
+  p<-ggarrange(p1, p2, 
+               common.legend = T, legend = "right", legend.grob = g_legend, widths = c(6, 8))  
   p
-  ggsave(p, filename=sprintf("../../Figures/Diversity_all/MAP.species.richness.threshold.%d.png", tttt),
-         width=14, height=5)
+  ggsave(p, filename=sprintf("../../Figures/Diversity_all/MAP.species.richness.dispersal.%d.png", da),
+         width=14, height=4)
   
-  ggsave(p, filename=sprintf("../../Figures/Diversity_all/MAP.species.richness.threshold.%d.pdf", tttt),
-         width=14, height=5)
+  ggsave(p, filename=sprintf("../../Figures/Diversity_all/MAP.species.richness.dispersal.%d.pdf", da),
+         width=14, height=4)
+}
+
+if (F){
+  df1<-readRDS(sprintf("../../Figures/Diversity_%d/species.richness.%s.rda", 1, "Birds"))
+  df2<-readRDS(sprintf("../../Figures/Diversity_%d/species.richness.%s.rda", 5, "Birds"))
+  df1<-df1%>%dplyr::filter((YEAR==2100)&(!is.na(V)))
+  df2<-df2%>%dplyr::filter((YEAR==2100)&(!is.na(V)))
+  df_xx<-inner_join(df1, df2, by=c("x", "y", "mask_index", "GCM", "M", "YEAR", "SSP"))
+  df_xx$differ<-df_xx$V.x-df_xx$V.y
+  range(df_xx$differ)
 }

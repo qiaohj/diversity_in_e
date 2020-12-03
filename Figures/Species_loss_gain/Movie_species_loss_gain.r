@@ -12,7 +12,7 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 SSP_i<-SSPs[1]
 year_i<-2025
 predict_range<-c(2021:2100)
-for (year_i in c(2081:2100)){
+for (year_i in c(2021:2100)){
   print(year_i)
   images<-list()
   for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){

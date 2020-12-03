@@ -59,6 +59,7 @@ for (SSP_i in SSPs){
       df_end_full_list<-list()
       max_2020<-0
       max_year<-0
+      year_i<-2100
       for (year_i in c(2021:2100)){
         df_end_full<-NULL
         for (GCM_i in GCMs){
@@ -158,7 +159,7 @@ for (SSP_i in SSPs){
       ggsave(gg, filename=sprintf("%s/%s.png", t_dir, year_str))
       
       plot_gg(gg, multicore = F, raytrace = F, width = 5, height = 5,
-              scale = 100, windowsize = c(1400,866), zoom = 0.6, phi = 30)
+              scale = 50, windowsize = c(1400,866), zoom = 0.6, phi = 30)
       t_dir<-sprintf("../../Figures/Species_gain_loss_%d/Movies/RawValue/3D/rough/%s/%s/%d", threshold, group, SSP_i, dispersals[k])
       dir.create(t_dir, recursive = T, showWarnings = F)
       render_snapshot(filename=sprintf("%s/%s.png", t_dir, year_str), clear = TRUE)

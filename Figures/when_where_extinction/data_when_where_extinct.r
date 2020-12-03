@@ -2,13 +2,14 @@ library(dplyr)
 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 threshold<-5
+dispersal<-2
 if (F){
   sp_dis_all<-readRDS(sprintf("../../Figures/N_SPECIES/sp_dis_all_%d.rda", threshold))
   extinct_sp<-sp_dis_all%>%dplyr::filter(year==2100)
   extinct_sp<-extinct_sp%>%dplyr::filter(N_type=="EXTINCT")
-  extinct_sp<-extinct_sp%>%dplyr::filter(M==0)
+  extinct_sp<-extinct_sp%>%dplyr::filter(M==dispersal)
   extinct_sp<-extinct_sp%>%dplyr::filter(TYPE==sprintf("Diversity_%d", threshold))
-  saveRDS(extinct_sp, sprintf("../../Objects/when_where_extinction_%d/extinct_sp.rda", threshold))
+  saveRDS(extinct_sp, sprintf("../../Objects/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
 }
 i=1
 args = commandArgs(trailingOnly=TRUE)
@@ -20,29 +21,35 @@ threshold<-as.numeric(args[2])
 if (is.na(threshold)){
   threshold<-1
 }
-extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp.rda", threshold))
-extinct_sp<-extinct_sp%>%filter(group==g)
+
+
+
 source("commonFuns/functions.r")
 df<-NULL
-for (i in c(1:nrow(extinct_sp))){
-  print(paste(i, nrow(extinct_sp), g, threshold, sep=" - "))
-  item<-extinct_sp[i,]
-  #item$sp<-"Bunomys_fratrorum"
-  #item$group<-"Mammals"
-  st_dis<-readRDS(sprintf("../../Objects/IUCN_Distribution/%s/%s.rda", 
-                          item$group, item$sp))
-  if (threshold==5){
-    future_dis<-readRDS(sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d/%s_%s_0.rda", 
-                          item$group, item$sp, threshold, item$GCM, item$SSP))
-  }else{
-    future_dis<-readRDS(sprintf("../../Objects/Niche_Models/%s/%s/dispersal/%s_%s_0.rda", 
-                                item$group, item$sp, item$GCM, item$SSP))
+for (dispersal in (c(0:2))){
+  extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
+  extinct_sp<-extinct_sp%>%filter(group==g)
+  for (i in c(1:nrow(extinct_sp))){
+    print(paste(i, nrow(extinct_sp), g, threshold, dispersal, sep=" - "))
+    item<-extinct_sp[i,]
+    #item$sp<-"Bunomys_fratrorum"
+    #item$group<-"Mammals"
+    st_dis<-readRDS(sprintf("../../Objects/IUCN_Distribution/%s/%s.rda", 
+                            item$group, item$sp))
+    if (threshold==5){
+      future_dis<-readRDS(sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d/%s_%s_%d.rda", 
+                                  item$group, item$sp, threshold, item$GCM, item$SSP, dispersal))
+    }else{
+      future_dis<-readRDS(sprintf("../../Objects/Niche_Models/%s/%s/dispersal/%s_%s_%d.rda", 
+                                  item$group, item$sp, item$GCM, item$SSP, dispersal))
+    }
+    st_dis$group<-item$group
+    st_dis$sp<-item$sp
+    st_dis$GCM<-item$GCM
+    st_dis$SSP<-item$SSP
+    st_dis$extinct_year<-max(future_dis$YEAR)+1
+    st_dis$dispersal<-dispersal
+    df<-bind_dplyr(df, st_dis)
   }
-  st_dis$group<-item$group
-  st_dis$sp<-item$sp
-  st_dis$GCM<-item$GCM
-  st_dis$SSP<-item$SSP
-  st_dis$extinct_year<-max(future_dis$YEAR)+1
-  df<-bind_dplyr(df, st_dis)
 }
 saveRDS(df, sprintf("../../Objects/when_where_extinction_%d/%s.rda", threshold, g))

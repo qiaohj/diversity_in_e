@@ -93,12 +93,19 @@ for (threshold in c(1, 5)){
   sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, GCM, SSP, M, N_type, N_SP, TYPE)%>%
     dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
   sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
+  if (threshold==1){
+    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no exposure)", sep="")
+    sp_dis_all_sub_N$exposure<-" (no exposure)"
+  }else{
+    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (5-year exposure)", sep="")
+    sp_dis_all_sub_N$exposure<-"(5-year exposure)"
+  }
   
-  sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (Exposure year: ", threshold, ")", sep="")
   sp_dis_all_sub_N_all<-bind_dplyr(sp_dis_all_sub_N_all, sp_dis_all_sub_N)
 }
 
-sp_mean<-sp_dis_all_sub_N_all%>%dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label)%>%
+sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+  dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label, exposure)%>%
   dplyr::summarise(persentile_MEAN=mean(persentile),
                    persentile_SD=sd(persentile))
 p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
@@ -107,11 +114,13 @@ p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
                 aes(ymin=persentile_MEAN-persentile_SD, 
                     ymax=persentile_MEAN+persentile_SD,
                     group=factor(M))) +
+  xlab("SSP scenario")+
+  ylim(c(0, 1))+
   theme_bw()+
   #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
-  facet_wrap( ~ Label, nrow=2)+
-  scale_fill_manual(values=color_dispersal, breaks = c(0:2))+
-  labs(fill = "Dispersal ability")+
+  facet_grid(exposure~group)+
+  scale_fill_manual(values=color_dispersal, breaks=c(0:1), labels = c("no dispersal", "with dispersal"))+
+  labs(fill = "Dispersal")+
   ylab("Mean extinction proportion")
 p
 
