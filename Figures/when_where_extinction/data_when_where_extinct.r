@@ -4,7 +4,7 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 threshold<-5
 dispersal<-2
 if (F){
-  sp_dis_all<-readRDS(sprintf("../../Figures/N_SPECIES/sp_dis_all_%d.rda", threshold))
+  sp_dis_all<-readRDS(sprintf("../../Figures/N_Extinction/sp_dis_all_%d.rda", threshold))
   extinct_sp<-sp_dis_all%>%dplyr::filter(year==2100)
   extinct_sp<-extinct_sp%>%dplyr::filter(N_type=="EXTINCT")
   extinct_sp<-extinct_sp%>%dplyr::filter(M==dispersal)

@@ -39,15 +39,17 @@ ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/start_end.png")
 df_all_se<-df_all%>%dplyr::group_by(SSP, group, year)%>%
   dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
                    sd_dist_mean=sd(dist_min_mean))
-
+write.csv(df_all_se, "../../Figures/Min_distance_to_Dispersal/mean_by_year.csv")
 p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
   geom_line()+theme_bw()+
   xlab("Year")+
-  ylab("Average distance need to dispersal")+
+  ylab("Average distance need to dispersal (KM)")+
+  labs(color="Group")+
   scale_color_manual(values=color_groups)+
   facet_wrap(~SSP, ncol=1)
 p
 ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year.png")
+ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year.pdf")
 
 #p<-ggplot(df_all, aes(x=year, y = dist_min_mean, color=factor(group)))+
 #  geom_point()+theme_bw()+

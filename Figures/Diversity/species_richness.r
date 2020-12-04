@@ -155,6 +155,13 @@ if (F){
 p_full_all_se<-readRDS("../../Figures/Diversity_all/species.richness.rda")
 p_full_all_se$exposure<-" no exposure"
 p_full_all_se[which(p_full_all_se$threshold==5), "exposure"]<-"5-year exposure"
+
+p_full_all_summary<-p_full_all_se%>%dplyr::filter(YEAR %in% c(2020, 2100))%>%
+  dplyr::group_by(YEAR, M, SSP, threshold, exposure)%>%
+  dplyr::summarise(max_V=round(max(SUM_V)),
+                   min_V=round(min(SUM_V)))
+p_full_all_summary<-p_full_all_summary%>%dplyr::filter(M!=2)
+write.csv(p_full_all_summary, "../../Figures/Diversity_all/richness.csv")
 da=0
 myPalette <- colorRampPalette(c(mask_color, color_two_map[2]))
 for (da in c(0, 1)){

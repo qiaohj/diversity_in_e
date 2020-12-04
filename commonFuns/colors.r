@@ -19,8 +19,8 @@ color_ssp<-c("SSP119"=colors_blue[7],
              "SSP245"=colors_green[7],
              "SSP585"=colors_red[7])
 
-color_dispersal<-c(colors_blue[7],
-             colors_red[7],
+color_dispersal<-c("#FE5F55",
+             "#7A9E9F",
              colors_green[7])
 
 linetype_gcm<-c("EC-Earth3-Veg"=1,
