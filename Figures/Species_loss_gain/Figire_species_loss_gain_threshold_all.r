@@ -33,7 +33,7 @@ j=1
 k=1
 #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
 #dispersals<-data.frame(M=c(0:5), N=1)
-dispersals<-c(0:2)
+dispersals<-c(0:1)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-data.frame(rasterToPoints(mask))
@@ -69,7 +69,7 @@ if (F){
   saveRDS(df_threshold_se, "../../Figures/Species_gain_loss_all/Curves/data.rda")
 }
 
-df_threshold_se[(low_high_2020=="HIGH")&(low_high_year=="HIGH")]
+
 df_threshold_se<-readRDS("../../Figures/Species_gain_loss_all/Curves/data.rda")
 df_threshold_se<-df_threshold_se%>%dplyr::filter(M!=2)
 df_sm<-df_threshold_se%>%dplyr::group_by(YEAR, type, M, SSP, type_index, type_index_number, threshold)%>%

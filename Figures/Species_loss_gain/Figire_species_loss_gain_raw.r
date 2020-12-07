@@ -55,7 +55,7 @@ output_figures<-T
 
 for (SSP_i in SSPs){
   for (k in c(1:length(dispersals))){
-    if (F){
+    if (T){
       df_end_full_list<-list()
       max_2020<-0
       max_year<-0

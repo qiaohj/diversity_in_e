@@ -13,7 +13,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 index<-as.numeric(args[1])
 
-#index<-19
+#index<-3
 netcdf_f<-sprintf("%s/%s/%s/%s", base, files[index, "GCM"], files[index, "SSP"], files[index, "VAR"])
 woa13<-nc_open(netcdf_f)
 lat<-woa13$dim$lat$vals
@@ -42,7 +42,8 @@ points<-SpatialPointsDataFrame(coords=data.frame(lon=d_all$lon, lat=d_all$lat),
 y=0
 m=11
 for (y in c(0:(year_length-1))){
-  target_folder<-sprintf("%s/%s/%s/%s/%d", target, files[index, "GCM"], files[index, "SSP"], varname, y+1850)
+  target_folder<-sprintf("%s/%s/%s/%s/%d", target, files[index, "GCM"], files[index, "SSP"], 
+                         varname, y+1850)
   dir.create(target_folder, showWarnings = F, recursive = T)
   for (m in c(0:11)){
     if (is.na(days_in_month)){

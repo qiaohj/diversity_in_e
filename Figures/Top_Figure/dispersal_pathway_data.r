@@ -30,7 +30,8 @@ if (T){
   }
   
   smooth_path<-NULL
-  plot.new()
+  final_df<-NULL
+  #plot.new()
   #for (j in c(nrow(layer_df):1)){
   for (j in c(j_index)){
     layer_item<-layer_df[j,]
@@ -38,14 +39,14 @@ if (T){
       df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
       i=1
       #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-      dispersals<-c(1:2)
+      dispersals<-c(1)
       df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
-      final_df<-NULL
+      
       colors<-rainbow(length(2021:2100))
       #p<-ggplot()
       
       for (i in c(1:nrow(df_list))){
-        print(paste(i, nrow(df_list), group, layer_item$LABEL))
+        print(paste(i, nrow(df_list), group, layer_item$LABEL, threshold))
         item<-df_list[i,]
         item$sp<-gsub(" ", "_", item$sp)
         if (item$area<=0){
@@ -53,11 +54,7 @@ if (T){
         }
         target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
         
-        if (threshold==5){
-          target<-sprintf("%s/dispersal_%d", target_folder, threshold)
-        }else{
-          target<-sprintf("%s/dispersal", target_folder)
-        }
+        target<-sprintf("%s/dispersal_%d", target_folder, threshold)
         
         k=1
         
@@ -74,8 +71,16 @@ if (T){
         if (nrow(all_c)<=1){
           next()
         }
+        all_c$group<-group
+        all_c$sp<-item$sp
+        if (max(all_c$YEAR)==2100){
+          all_c$survive<-"SURVIVE"
+        }else{
+          all_c$survive<-"EXTINCT"
+        }
         
-        
+        final_df<-bind_dplyr(final_df, all_c)
+        next()
         #sm_path<-data.frame(xspline(all_c$gravity_x, all_c$gravity_y, shape=1, draw=F))
         for (ii in unique(all_c$continent_i)){
           #keyyears<-c(2020, 2040, 2060, 2080, 2100)
@@ -105,7 +110,9 @@ if (T){
         }
       }
     }
-    saveRDS(smooth_path, sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
+    #saveRDS(smooth_path, sprintf("../../Figures/Top_Figure_%d/smooth_path_%s.rda", threshold, layer_item$LABEL))
+    saveRDS(final_df, sprintf("../../Figures/Top_Figure_%d/raw_path_%s.rda", threshold, layer_item$LABEL))
+    
   }
 }
 

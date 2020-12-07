@@ -6,7 +6,7 @@ library(MASS)
 library(cluster)
 library(dplyr)
 library(ggpubr)
-setwd("Y:/Script/diversity_in_e")
+
 
 source("colors.R")
 source("functions.r")
@@ -19,26 +19,26 @@ group<-"Amphibians"
 
 
 example_sp<-"Dendropsophus_walfordi"
-target_folder<-sprintf("../../Objects/Niche_Models_Mean_GCM/%s/%s", group, example_sp)
+target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, example_sp)
 fit<-readRDS(sprintf("%s/fit.rda", target_folder))
 all_v<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
 
 mask<-raster("../../Raster/mask_index.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 #plot(mask)
-target<-sprintf("%s/dispersal", target_folder)
-dispersal_df<-readRDS(sprintf("%s/%s.rda", target, "UKESM1_SSP585_1_1"))
+target<-sprintf("%s/dispersal_1", target_folder)
+dispersal_df<-readRDS(sprintf("%s/%s.rda", target, "UKESM1_SSP585_1"))
 
-year=2015
+year=2021
 g2<-ggplot()+geom_raster(data=mask_p, aes(x=x, y=y), fill=colors_black[3])
 centers<-NULL
-for (year in c(2015:2099)){
+for (year in c(2021:2100)){
   print(year)
-  dis1<-dispersal_df%>%dplyr::filter(YEAR==year)
+  dis1<-data.frame(dispersal_df%>%dplyr::filter(YEAR==year))
   center<-c(x=mean(dis1$x), y=mean(dis1$y), year=year)
   p1<-left_join(mask_p, dis1, by=c("x", "y", "mask_index"))
-  g2<-g2+geom_raster(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8], alpha=(year-2015)/85)
-  centers<-bind(centers, center)
+  g2<-g2+geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8], alpha=(year-2015)/85)
+  centers<-bind_dplyr(centers, center)
 }
 g2<-g2+geom_point(data=centers, aes(x=x, y=y, color=year))
 

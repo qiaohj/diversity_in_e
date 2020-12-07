@@ -27,7 +27,7 @@ i=1
 j=1
 k=2
 
-dispersals<-c(0:2)
+dispersals<-c(0:1)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 
 mask<-readRDS("../../Objects/mask.rda")
@@ -53,11 +53,7 @@ for (j in c(1:nrow(layer_df))){
         next()
       }
       #print(paste(Sys.time(), 1))
-      if (threshold==1){
-        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal", group, item$sp)
-      }else{
-        enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold) 
-      }
+      enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold)
       
       #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-readRDS(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))

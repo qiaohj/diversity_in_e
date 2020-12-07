@@ -30,7 +30,7 @@ if (F){
     j=4
     k=1
     #dispersals<-data.frame(M=c(1:5, rep(1, 4), 2, 0, -1), N=c(rep(1,5), c(2:5), 2, 1, 1))
-    dispersals<-c(0:2)
+    dispersals<-c(0:1)
     sp_dis_all<-NULL
     folder<-folders[1]
     group<-"Amphibians"
@@ -149,11 +149,11 @@ sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
   dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label, exposure, continent, continent_label)%>%
   dplyr::summarise(persentile_MEAN=mean(persentile),
                    persentile_SD=sd(persentile))
+sp_mean$exposure<-gsub("\\(", "", sp_mean$exposure)
+sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
 
 write.csv(sp_mean, "../../Figures/N_Extinction/Extinction_continent.csv")
 
-sp_mean$exposure<-gsub("\\(", "", sp_mean$exposure)
-sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
 g<-"Amphibians"
 for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
   sp_mean_item<-sp_mean%>%dplyr::filter(group==g)
@@ -220,3 +220,4 @@ for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
          width=12, height=6)
   
 }
+

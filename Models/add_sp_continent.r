@@ -22,6 +22,7 @@ i=3369
 final_df<-NULL
 #beginCluster()
 continent<-raster("../../Raster/Continent_ect4.tif")
+df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 for (i in c(1:nrow(df_list))){
   
   item<-df_list[i,]

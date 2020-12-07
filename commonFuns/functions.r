@@ -27,3 +27,11 @@ min_dist<-function(x, y, points){
   min(sqrt((x-points$x)^2+(y-points$y)^2), na.rm = T)
 }
 
+
+NDquntil <- function(nD, level) {
+  n <- floor(nD * level)
+  if (n > nD) 
+    n <- nD
+  return(n)
+}
+in_Ellipsoid <- stats::qchisq(0.95, 2)

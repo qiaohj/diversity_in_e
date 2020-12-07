@@ -10,7 +10,7 @@ source("commonFuns/functions.r")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 GCMs<-c("EC-Earth3-Veg", "UKESM1", "MRI-ESM2-0")
 Groups<-c("Amphbians", "Birds", "Mammals", "Reptiles")
-dispersals<-c(0:2)
+dispersals<-c(0:1)
 dis_i<-1
 args = commandArgs(trailingOnly=TRUE)
 g<-args[1]

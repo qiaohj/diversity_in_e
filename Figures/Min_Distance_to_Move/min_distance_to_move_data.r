@@ -54,7 +54,8 @@ for (year in predict_range){
       env_item<-env_layers[[paste(layer_item$LABEL, year, sep="_")]]
       
       env_item$in_out<-(between(env_item$PR, model$range_PR_sd_min, model$range_PR_sd_max)&
-                          (between(env_item$TEMP, model$range_TEMP_sd_min, model$range_TEMP_sd_max)))
+                          (between(env_item$TEMP_MAX, model$range_TEMP_sd_min, model$range_TEMP_sd_max))&
+                          (between(env_item$TEMP_MIN, model$range_TEMP_sd_min, model$range_TEMP_sd_max)))
       
       
       #env_item<-env_item%>%dplyr::filter(in_out_1&in_out_2)

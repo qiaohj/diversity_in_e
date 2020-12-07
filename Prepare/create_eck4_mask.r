@@ -5,3 +5,14 @@ crs(mask)<-eck4_prj
 new_mask<-projectRaster(mask, res=c(100000, 100000), crs=eck4_prj, method="ngb")
 writeRaster(new_mask, "../../Raster/mask.tif", overwrite=T)
 plot(new_mask)
+
+bio1<-raster("../../Raster/bioclim/wc2.0_bio_30s_01.tif")
+new_bio1<-projectRaster(bio1, res=c(100000, 100000), crs=eck4_prj)
+writeRaster(new_bio1, "../../Raster/bioclim/bio1_eck4.tif", overwrite=T)
+
+new_bio1<-projectRaster(bio1, res=c(10000, 10000), crs=eck4_prj)
+writeRaster(new_bio1, "../../Raster/bioclim/bio1_eck4_10km.tif", overwrite=T)
+
+bio12<-raster("../../Raster/bioclim/wc2.0_bio_30s_12.tif")
+new_bio12<-projectRaster(bio12, res=c(10000, 10000), crs=eck4_prj)
+writeRaster(new_bio12, "../../Raster/bioclim/bio12_eck4_10km.tif", overwrite=T)

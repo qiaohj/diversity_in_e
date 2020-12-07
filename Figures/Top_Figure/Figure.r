@@ -34,14 +34,6 @@ p_bak<-ggplot() +
   scale_fill_gradientn(colours = rev(terrain.colors(10))) + 
   map_theme
 
-args = commandArgs(trailingOnly=TRUE)
-j_index<-as.numeric(args[1])
-
-
-if (is.na(j_index)){
-  j_index<-1
-}
-
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
@@ -50,34 +42,40 @@ predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
-#for (j in c(1:nrow(layer_df))){
-for (j in c(j_index)){
-  layer_item<-layer_df[j,]
-  smooth_path<-readRDS(sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
-  print(sprintf("../../Figures/Top_Figure_5/smooth_path_%s.rda", layer_item$LABEL))
-
-  smooth_path$line_group<-paste(smooth_path$sp, smooth_path$continent_i)
-  smooth_path$alpha<-((smooth_path$YEAR-2021)/80)^5
-  p<-p_bak+geom_path(data=smooth_path, aes(x=x, y=y, alpha=alpha, color=group,
-                                           group=line_group))+
-    scale_alpha_continuous()+
-    scale_color_manual(values = color_groups)
-  
-  width<-10
-  height<-6
-  ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_ALL_%s.png", layer_item$LABEL), width=width, height = height)
-  ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_ALL_%s.pdf", layer_item$LABEL), width=width, height = height)
-  
-  for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-    print(g)
-    p<-p_bak+geom_path(data=smooth_path%>%dplyr::filter(group==g), 
-                       aes(x=x, y=y, alpha=alpha, color=group, group=line_group))+
+for (j in c(1:nrow(layer_df))){
+  for (threshold in c(1, 5)){
+    layer_item<-layer_df[j,]
+    smooth_path<-readRDS(sprintf("../../Figures/Top_Figure_%d/smooth_path_%s.rda", 
+                                 threshold, layer_item$LABEL))
+    print(sprintf("../../Figures/Top_Figure_%d/smooth_path_%s.rda", threshold, layer_item$LABEL))
+    
+    smooth_path$line_group<-paste(smooth_path$sp, smooth_path$continent_i)
+    smooth_path$alpha<-((smooth_path$YEAR-2021)/80)^5
+    p<-p_bak+geom_path(data=smooth_path, aes(x=x, y=y, alpha=alpha, color=group,
+                                             group=line_group))+
       scale_alpha_continuous()+
       scale_color_manual(values = color_groups)
     
+    width<-10
+    height<-6
+    ggsave(p, filename=sprintf("../../Figures/Top_Figure_%d/Top_Figure_ALL_%s.png", 
+                               threshold, layer_item$LABEL), width=width, height = height)
+    ggsave(p, filename=sprintf("../../Figures/Top_Figure_%d/Top_Figure_ALL_%s.pdf", 
+                               threshold, layer_item$LABEL), width=width, height = height)
     
-    ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_%s_%s.png", g, layer_item$LABEL), width=width, height = height)
-    ggsave(p, filename=sprintf("../../Figures/Top_Figure_5/Top_Figure_%s_%s.pdf", g, layer_item$LABEL), width=width, height = height)
+    for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+      print(g)
+      p<-p_bak+geom_path(data=smooth_path%>%dplyr::filter(group==g), 
+                         aes(x=x, y=y, alpha=alpha, color=group, group=line_group))+
+        scale_alpha_continuous()+
+        scale_color_manual(values = color_groups)
+      
+      
+      ggsave(p, filename=sprintf("../../Figures/Top_Figure_%d/Top_Figure_%s_%s.png",
+                                 threshold, g, layer_item$LABEL), width=width, height = height)
+      ggsave(p, filename=sprintf("../../Figures/Top_Figure_%d/Top_Figure_%s_%s.pdf", 
+                                 threshold, g, layer_item$LABEL), width=width, height = height)
+    }
   }
   
 }

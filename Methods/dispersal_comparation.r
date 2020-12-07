@@ -8,18 +8,20 @@ library(dplyr)
 library(ggpubr)
 library(data.table)
 library(batchtools)
+group<-"Amphibians"
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 example_sp<-"Dendropsophus_walfordi"
 target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, example_sp)
 fit<-readRDS(sprintf("%s/fit.rda", target_folder))
-target<-sprintf("%s/dispersal", target_folder)
+target<-sprintf("%s/dispersal_1", target_folder)
 dispersal_1<-readRDS(sprintf("%s/%s.rda", target, "UKESM1_SSP585_1"))
 target<-sprintf("%s/dispersal_5", target_folder)
 dispersal_5<-readRDS(sprintf("%s/%s.rda", target, "UKESM1_SSP585_1"))
 start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
 xrange<-c(-8000000, -3000000)
-yrange<-c(-3300000, 1500000)
+yrange<-c(-4500000, 1500000)
 predict_range<-c(2021:2100)
-year<-2021
+year<-2100
 p<-ggplot()+
   xlim(xrange)+
   ylim(yrange)+
@@ -42,7 +44,7 @@ for (year in predict_range){
     geom_text(data=dis5, aes(x=x, y=y, label=exposure), size=2)+
     ggtitle(paste(year, ", Exposure year: 5"))
   gg<-ggarrange(p1, p5, nrow = 1, ncol=2)
-  ggsave(gg, filename=sprintf("../../Figures/Methods/dispersal_comparison/%d.png", year), width=10, height=5)
+  ggsave(gg, filename=sprintf("../../Figures/Methods/dispersal_comparison/%d.png", year), width=8, height=5)
 }
 
 

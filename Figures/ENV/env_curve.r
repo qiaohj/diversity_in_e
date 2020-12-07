@@ -39,26 +39,28 @@ if (F){
 source("commonFuns/colors.r")
 source("commonFuns/functions.r")
 df<-readRDS("../../Objects/mean_env_year.rda")
+df[which(df$VAR!="pr"),]$V<-df[which(df$VAR!="pr"),]$V*10-273.16
 df_se_2020<-df%>%dplyr::filter(Y<=2020)%>%
   dplyr::group_by(Y, GCM, VAR)%>%
   dplyr::summarise(annul_prec=mean(V),
-                   annul_max_temp=max(V),
-                   annual_min_temp=min(V))
+                   annul_max_temp=mean(V),
+                   annual_min_temp=mean(V))
 df_se_2020$SSP<-"SSP_ALL"
 df_se_2100<-df%>%dplyr::filter(Y>2020)%>%
   dplyr::group_by(Y, GCM, SSP, VAR)%>%
   dplyr::summarise(annul_prec=sum(V),
-                   annul_max_temp=max(V),
-                   annual_min_temp=min(V))
+                   annul_max_temp=mean(V),
+                   annual_min_temp=mean(V))
 df_se<-bind_rows(df_se_2020, df_se_2100)
-p1<-ggplot(df_se%>%filter((VAR=="pr")&(between(Y, 2021, 2100))), aes(x=Y, y=annul_prec, color=SSP, linetype=GCM))+geom_line()+
+p1<-ggplot(df_se%>%filter((VAR=="pr")&(between(Y, 2021, 2100))), aes(x=Y, y=annul_prec, color=SSP, linetype=GCM))+
+  geom_line()+
   geom_line(data=df_se%>%filter((VAR=="pr")&(between(Y, 1850, 2020))), aes(x=Y, y=annul_prec, linetype=GCM),  color=colors_black[5])+
   geom_vline(xintercept = 2020, color=colors_black[6], linetype=3)+
   scale_color_manual(values=color_ssp)+
   scale_linetype_manual(values=linetype_gcm)+
   scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
   xlab("Year")+
-  ylab("Annual Precipitation")+
+  ylab("Annual precipitation")+
   theme_bw()
 legend_g<-get_legend(p1)
 p1<-p1+theme(legend.position="none")
@@ -70,10 +72,24 @@ p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2021, 2100))), aes(x=Y, y=
   scale_linetype_manual(values=linetype_gcm)+
   scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
   xlab("Year")+
-  ylab("Annual Maximum Temperature")+
+  ylab("Annual maximum temperature")+
   theme_bw()+theme(legend.position="none")
 
 p2
-p<-ggarrange(p1, p2, nrow=2, common.legend = T, legend.grob=legend_g, legend="right")
+
+p3<-ggplot(df_se%>%filter((VAR=="tasmin")&(between(Y, 2021, 2100))), aes(x=Y, y=annul_max_temp, color=SSP, linetype=GCM))+
+  geom_line()+
+  geom_line(data=df_se%>%filter((VAR=="tasmin")&(between(Y, 1850, 2020))), aes(x=Y, y=annul_max_temp, linetype=GCM),  color=colors_black[5])+
+  geom_vline(xintercept = 2020, color=colors_black[6], linetype=3)+
+  scale_color_manual(values=color_ssp)+
+  scale_linetype_manual(values=linetype_gcm)+
+  scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
+  xlab("Year")+
+  ylab("Annual minimum temperature")+
+  theme_bw()+theme(legend.position="none")
+
+p3
+
+p<-ggarrange(p1, p2, p3, nrow=3, common.legend = T, legend.grob=legend_g, legend="right")
 p
 ggsave(p, file="../../Figures/Env/GCM_Curves.png", width=15, height=8)
