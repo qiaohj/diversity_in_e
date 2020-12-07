@@ -18,7 +18,7 @@ source("commonFuns/functions.r")
 predict_range<-c(2021:2100)
 threshold<-as.numeric(args[2])
 if (is.na(threshold)){
-  threshold<-1
+  threshold<-5
 }
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
@@ -26,7 +26,7 @@ layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=3369
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-dispersals<-c(1:2)
+dispersals<-c(1)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 #beginCluster()
@@ -47,7 +47,6 @@ for (i in c(1:nrow(df_list))){
   print(paste(i, nrow(df_list), item$sp, target_folder))
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
   model<-readRDS(sprintf("%s/fit.rda", target_folder))
-  model[, c("range_PR_sd_min", "range_PR_sd_max", "range_TEMP_sd_min", "range_TEMP_sd_max")]
   #start_dis<-start_dis%>%dplyr::filter(in_out==1)
   start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y, mask_index)
   if (is.null(start_dis)){
@@ -58,11 +57,8 @@ for (i in c(1:nrow(df_list))){
   }
   #colnames(start_dis)<-c("x", "y")
   
-  if (threshold==5){
-    target<-sprintf("%s/dispersal_%d", target_folder, threshold)
-  }else{
-    target<-sprintf("%s/dispersal", target_folder)
-  }
+  target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+  
   j=7
   for (j in c(1:nrow(layer_df))){
     layer_item<-layer_df[j,]

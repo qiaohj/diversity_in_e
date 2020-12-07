@@ -21,7 +21,7 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 VARs<-c("pr", "tasmax", "tasmin")
 Ys<-c(1850:2100)
 Ms<-c(1:12)
-i=10
+i=1
 COMs<-expand.grid(GCM=GCMs, SSP=SSPs, VAR=VARs, Y=Ys, stringsAsFactors = F)
 template<-"../../Raster/ENV/Monthly/%s/%s/%s/%d/%s_%d.tif"
 template_year<-"../../Raster/ENV/Annually/%s_%s_%s_%d_%s.tif"
@@ -46,6 +46,7 @@ for (i in c(1:nrow(COMs))){
   for (label in labels){
     stacked<-c()
     mask<-NULL
+    m=1
     for (m in Ms){
       r_file<-sprintf(template, com$GCM, com$SSP, com$VAR, com$Y, label, m)
       print(paste(i, nrow(COMs), r_file))

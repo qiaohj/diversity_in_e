@@ -38,7 +38,7 @@ if (T){
       df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
       i=1
       #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-      dispersals<-c(1:2)
+      dispersals<-c(1)
       df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
       final_df<-NULL
       colors<-rainbow(length(2021:2100))

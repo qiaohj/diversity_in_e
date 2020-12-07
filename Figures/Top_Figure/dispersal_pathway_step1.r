@@ -46,7 +46,7 @@ layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=1
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
-dispersals<-c(1:2)
+dispersals<-c(1)
 df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 colors<-rainbow(length(2021:2100))
@@ -59,11 +59,7 @@ for (i in c(1:nrow(df_list))){
   }
   target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
   
-  if (threshold==5){
-    target<-sprintf("%s/dispersal_%d", target_folder, threshold)
-  }else{
-    target<-sprintf("%s/dispersal", target_folder)
-  }
+  target<-sprintf("%s/dispersal_%d", target_folder, threshold)
   
   j=1
   no_na<-!is.na(values(mask))
@@ -75,10 +71,10 @@ for (i in c(1:nrow(df_list))){
       ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
                    threshold, group, item$sp, layer_item$LABEL, dispersal)
       if (file.exists(ttt)){
-        ddddd<-readRDS(ttt)
-        if (!is.null(ddddd)){
+        #ddddd<-readRDS(ttt)
+        #if (!is.null(ddddd)){
           next()
-        }
+        #}
         
       }
       dir.create(sprintf("../../Objects/dispersal_path_%d/%s", 

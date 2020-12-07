@@ -31,7 +31,7 @@ df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
 i=1
 j=1
 k=2
-dispersals<-c(0:2)
+dispersals<-c(0:1)
 
 mask<-raster("../../Raster/mask_index.tif")
 points<-as_tibble(rasterToPoints(mask))
