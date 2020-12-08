@@ -49,6 +49,8 @@ p$fit.temp <- predict(lm.temp)
 library("plot3D")
 info<-lm_eqn(p)
 p_sample<-p[sample(nrow(p), 1000),]
+
+
 scatter3D(p_sample$alt, p_sample$abs_y, p_sample$temp, pch = 18, cex = 0.5, 
           theta = 30, phi = 20, ticktype = "detailed",
           xlab = "Elevation (m)", ylab = "Latitude (km)", zlab = "Temperature",
