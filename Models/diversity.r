@@ -22,7 +22,7 @@ predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
-df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+df_list<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", group))
 i=1
 j=1
 k=2
@@ -30,7 +30,7 @@ k=2
 dispersals<-c(0:1)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 
-mask<-readRDS("../../Objects/mask.rda")
+mask<-readRDS("../../Objects_Full_species/mask.rda")
 
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
@@ -53,14 +53,23 @@ for (j in c(1:nrow(layer_df))){
         next()
       }
       #print(paste(Sys.time(), 1))
-      enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold)
+      #enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold)
+      
+      
+      source_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", group, item$sp)
+      start_dis<-readRDS(sprintf("%s/occ_with_env.rda", source_folder))
+      start_dis_item<-start_dis[year==1850]
+      if (nrow(start_dis_item)==1){
+        print("ONE PIXEL, SKIP")
+        next()
+      }
+      
+      enm_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold)
       
       #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-readRDS(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
       env_item_all<-env_item_all[, c("x", "y", "mask_index", "YEAR")]
       
-      source_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
-      start_dis<-readRDS(sprintf("%s/occ_with_env.rda", source_folder))
       selected_cols<-c("x", "y", "mask_index")
       start_dis<-unique(start_dis[, ..selected_cols])
       start_dis$YEAR<-2020

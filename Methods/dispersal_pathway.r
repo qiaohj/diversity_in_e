@@ -7,10 +7,9 @@ library(cluster)
 library(dplyr)
 library(ggpubr)
 
-
-source("colors.R")
-source("functions.r")
-source("genCircle.R")
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
+source("commonFuns/colors.r")
+source("commonFuns/functions.r")
 min_dist<-function(x, y, points){
   min(sqrt((x-points$x)^2+(y-points$y)^2), na.rm = T)
 }
@@ -19,7 +18,7 @@ group<-"Amphibians"
 
 
 example_sp<-"Dendropsophus_walfordi"
-target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, example_sp)
+target_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", group, example_sp)
 fit<-readRDS(sprintf("%s/fit.rda", target_folder))
 all_v<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
 
@@ -37,7 +36,8 @@ for (year in c(2021:2100)){
   dis1<-data.frame(dispersal_df%>%dplyr::filter(YEAR==year))
   center<-c(x=mean(dis1$x), y=mean(dis1$y), year=year)
   p1<-left_join(mask_p, dis1, by=c("x", "y", "mask_index"))
-  g2<-g2+geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), fill=colors_black[8], alpha=(year-2015)/85)
+  g2<-g2+geom_tile(data=p1 %>% dplyr::filter(!is.na(YEAR)), aes(x=x, y=y), 
+                   fill=colors_black[8], alpha=(year-2020)/80)
   centers<-bind_dplyr(centers, center)
 }
 g2<-g2+geom_point(data=centers, aes(x=x, y=y, color=year))
@@ -91,7 +91,7 @@ g4
 
 library(png)
 library(grid)
-img <- readPNG("../../Figures/Top_Figure/Top_Figure_ALL_UKESM1_SSP585.png")
+img <- readPNG("../../Figures_Full_species/Top_Figure_5/Top_Figure_ALL_UKESM1_SSP585.png")
 g <- rasterGrob(img, interpolate=TRUE)
 
 g1<-qplot(1:1000, 1:1000, geom="blank") +
@@ -108,7 +108,8 @@ g1
 g<-ggarrange(ggarrange(g2, g3, g4, nrow=1),
           g1, nrow=2, heights=c(2, 6))
 
-ggsave(g, filename="../../Figures/Methods/dispersal_pathway.png", height=10, width=10)
+ggsave(g, filename="../../Figures_Full_species/Methods/dispersal_pathway.png", height=10, width=10)
+ggsave(g, filename="../../Figures_Full_species/Methods/dispersal_pathway.pdf", height=10, width=10)
 
 #ffmpeg -r 1 -start_number 2015 -i %04d.png -y ../dispersal_diagram.gif
 #ffmpeg -r 2 -start_number 2015 -i %04d.png -y ../dispersal_diagram.mp4

@@ -35,7 +35,7 @@ if (F){
     folder<-folders[1]
     group<-"Amphibians"
     for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-      sp_continent<-readRDS(sprintf("../../Objects/SP_Continent/%s.rda", group))
+      sp_continent<-readRDS(sprintf("../../Objects_Full_species/SP_Continent/%s.rda", group))
       sp_continent<-sp_continent%>%dplyr::filter(!is.na(continent))
       for (j in c(1:nrow(layer_df))){
         layer<-layer_df[j,]
@@ -181,43 +181,4 @@ for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
          width=14, height=6)
 }
 
-sp_dis_extinct<-sp_dis_extinct%>%dplyr::filter(M!=2)
-sp_dis_extinct<-data.frame(sp_dis_extinct)
-sp_dis_extinct[which(sp_dis_extinct$M==0), "Label"]<-
-  paste(sp_dis_extinct[which(sp_dis_extinct$M==0), "SSP"], "(no dispersal)")
-sp_dis_extinct[which(sp_dis_extinct$M==1), "Label"]<-
-  paste(sp_dis_extinct[which(sp_dis_extinct$M==0), "SSP"], "(with dispersal)")
-
-p<-ggplot(sp_dis_extinct)+
-  geom_histogram(aes(x=st_N_CELL), fill=colors_black[4], bins=20)+
-  geom_histogram(data=sp_dis_extinct%>%dplyr::filter(N_type=="EXTINCT"), 
-                 aes(x=st_N_CELL), fill=colors_red[9], bins=20)+
-  scale_x_log10()+
-  theme_bw()+
-  xlab("Range size")+
-  ylab("Number of species")+
-  facet_grid(exposure~Label)
-ggsave(p, filename="../../Figures/N_Extinction/Extinction_hist.pdf", width=12, height=6)
-ggsave(p, filename="../../Figures/N_Extinction/Extinction_hist.png", width=12, height=6)
-
-
-for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-  print(g)
-  sp_dis_extinct_item<-sp_dis_extinct%>%dplyr::filter(group==g)
-  p<-ggplot(sp_dis_extinct_item)+
-    geom_histogram(aes(x=st_N_CELL), fill=colors_black[4], bins=20)+
-    geom_histogram(data=sp_dis_extinct_item%>%dplyr::filter(N_type=="EXTINCT"), 
-                   aes(x=st_N_CELL), fill=colors_red[9], bins=20)+
-    ggtitle(g)+
-    scale_x_log10()+
-    theme_bw()+
-    xlab("Range size")+
-    ylab("Number of species")+
-    facet_grid(exposure~Label)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.pdf", g), 
-         width=12, height=6)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.png", g),
-         width=12, height=6)
-  
-}
 

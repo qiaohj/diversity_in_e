@@ -36,13 +36,13 @@ for (dispersal in (c(0:1))){
   extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
   extinct_sp<-extinct_sp%>%filter(group==g)
   for (i in c(1:nrow(extinct_sp))){
-    print(paste(i, nrow(extinct_sp), g, threshold, dispersal, sep=" - "))
+    print(paste(i, nrow(extinct_sp), g, "threshold=", threshold, "dispersal=", dispersal, sep=" - "))
     item<-extinct_sp[i,]
     #item$sp<-"Bunomys_fratrorum"
     #item$group<-"Mammals"
-    st_dis<-readRDS(sprintf("../../Objects/IUCN_Distribution/%s/%s.rda", 
+    st_dis<-readRDS(sprintf("../../Objects_Full_species/IUCN_Distribution/%s/%s.rda", 
                             item$group, item$sp))
-    future_dis<-readRDS(sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d/%s_%s_%d.rda", 
+    future_dis<-readRDS(sprintf("../../Objects_Full_species/Niche_Models/%s/%s/dispersal_%d/%s_%s_%d.rda", 
                                 item$group, item$sp, threshold, item$GCM, item$SSP, dispersal))
     st_dis$group<-item$group
     st_dis$sp<-item$sp

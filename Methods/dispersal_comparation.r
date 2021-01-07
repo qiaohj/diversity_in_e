@@ -11,7 +11,7 @@ library(batchtools)
 group<-"Amphibians"
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 example_sp<-"Dendropsophus_walfordi"
-target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, example_sp)
+target_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", group, example_sp)
 fit<-readRDS(sprintf("%s/fit.rda", target_folder))
 target<-sprintf("%s/dispersal_1", target_folder)
 dispersal_1<-readRDS(sprintf("%s/%s.rda", target, "UKESM1_SSP585_1"))
@@ -44,7 +44,8 @@ for (year in predict_range){
     geom_text(data=dis5, aes(x=x, y=y, label=exposure), size=2)+
     ggtitle(paste(year, ", Exposure year: 5"))
   gg<-ggarrange(p1, p5, nrow = 1, ncol=2)
-  ggsave(gg, filename=sprintf("../../Figures/Methods/dispersal_comparison/%d.png", year), width=8, height=5)
+  #ggsave(gg, filename=sprintf("../../Figures/Methods/dispersal_comparison/%d.png", year), width=8, height=5)
+  ggsave(gg, filename=sprintf("../../Figures_Full_species/Methods/dispersal_comparison_pdf/%d.pdf", year), width=8, height=5)
 }
 
 

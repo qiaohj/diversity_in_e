@@ -91,7 +91,8 @@ if (F){
     for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
       print(group)
       df_end_full_all<-readRDS(file = sprintf("../../Figures/Species_gain_loss_%d/%s_threshold.%d.rda", threshold, group, threshold_N*100))
-      df_end_full_all_sub<-df_end_full_all[type %in% types_list$type]
+      #df_end_full_all_sub<-df_end_full_all[type %in% types_list$type]
+      df_end_full_all_sub<-df_end_full_all
       df_end_full_all_sub$group<-group
       df_threshold<-bind(df_threshold, df_end_full_all_sub)
       

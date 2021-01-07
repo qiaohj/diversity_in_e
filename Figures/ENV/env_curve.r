@@ -38,7 +38,7 @@ if (F){
 }
 source("commonFuns/colors.r")
 source("commonFuns/functions.r")
-df<-readRDS("../../Objects/mean_env_year.rda")
+df<-readRDS("../../Objects_Full_species/mean_env_year.rda")
 df[which(df$VAR!="pr"),]$V<-df[which(df$VAR!="pr"),]$V*10-273.16
 df_se_2020<-df%>%dplyr::filter(Y<=2020)%>%
   dplyr::group_by(Y, GCM, VAR)%>%
@@ -93,3 +93,4 @@ p3
 p<-ggarrange(p1, p2, p3, nrow=3, common.legend = T, legend.grob=legend_g, legend="right")
 p
 ggsave(p, file="../../Figures/Env/GCM_Curves.png", width=15, height=8)
+ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.pdf", width=15, height=8)
