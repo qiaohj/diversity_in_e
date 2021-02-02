@@ -126,7 +126,7 @@ for (threshold in c(1, 5)){
   }else{
     sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (5-year exposure)", sep="")
     sp_dis_all_sub_N$exposure<-"5-year exposure"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (5-year exposure)", sep="")
+    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, " (5-year exposure)", sep="")
     sp_dis_all_sub_1$exposure<-"5-year exposure"
   }
   sp_dis_extinct<-bind_dplyr(sp_dis_extinct, sp_dis_all_sub_1)
@@ -141,7 +141,26 @@ sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
 
 sp_mean$exposure<-gsub("\\(", "", sp_mean$exposure)
 sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
+sp_mean$N_Extinct_SP<-sp_mean$N_SP*sp_mean$persentile_MEAN
 write.csv(sp_mean, "../../Figures_Full_species/N_Extinction/Extinction.csv")
+
+sp_mean_best<-sp_mean%>%dplyr::filter((M==1)&(exposure=="5-year exposure"))%>%ungroup()%>%
+  select(group, SSP, M, N_SP, exposure, persentile_MEAN, persentile_SD)
+colnames(sp_mean_best)[c(3, 5, 6, 7)]<-paste("best", colnames(sp_mean_best)[c(3, 5, 6, 7)], sep="_")
+sp_mean_worst<-sp_mean%>%dplyr::filter((M==0)&(exposure==" no exposure"))%>%ungroup()%>%
+  select(group, SSP, M, N_SP, exposure, persentile_MEAN, persentile_SD)
+colnames(sp_mean_worst)[c(3, 5, 6, 7)]<-paste("worst", colnames(sp_mean_worst)[c(3, 5, 6, 7)], sep="_")
+sp_mean_best_worst<-inner_join(sp_mean_best, sp_mean_worst, by=c("group", "SSP", "N_SP"))
+sp_mean_best_worst$Extinct_differ<-sp_mean_best_worst$worst_persentile_MEAN-sp_mean_best_worst$best_persentile_MEAN
+write.csv(sp_mean_best_worst, "../../Figures_Full_species/N_Extinction/Extinction_differ.csv")
+
+sp_mean_best_worst_mean<-sp_mean_best_worst%>%dplyr::group_by(SSP)%>%
+  dplyr::summarise(mean_best_exposure=mean(best_persentile_MEAN),
+                   mean_worst_exposure=mean(worst_persentile_MEAN))
+write.csv(sp_mean_best_worst_mean, "../../Figures_Full_species/N_Extinction/Extinction_all.csv")
+
+sp_mean_best_worst_se<-sp_mean_best_worst%>%dplyr::group_by(SSP)%>%
+  dplyr::summarise(mean_Extinct_differ=mean(Extinct_differ))
 
 p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
   geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(M)))+

@@ -146,7 +146,7 @@ p1<-ggplot()+
   ylab("Average number of extinctions")+
   labs(linetype = "SSP scenario")+
   theme_bw()+
-  xlim(2020, 2110)+
+  #xlim(2020, 2110)+
   facet_grid(exposure~da, scale="free")
 
 p1
@@ -174,7 +174,7 @@ p2<-ggplot(when_extinct%>%dplyr::filter(dispersal!=2),
   ylab("Extinction proportion")+
   labs(linetype = "SSP scenario")+
   theme_bw()+
-  xlim(2020, 2110)+
+  #xlim(2020, 2110)+
   facet_grid(exposure~da)
 p2
 ggsave(p2, filename="../../Figures_Full_species/when_where_extinction_all/when_proportion.png", 

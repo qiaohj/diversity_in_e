@@ -21,10 +21,10 @@ if (F){
       df_all<-bind(df_all, df_se)
     }
   }
-  saveRDS(df_all, "../../Figures/Min_distance_to_Dispersal/full.rda")
+  saveRDS(df_all, "../../Figures_Full_species/Min_distance_to_Dispersal/full.rda")
 }
 source("commonFuns/colors.r")
-df_all<-readRDS("../../Figures/Min_distance_to_Dispersal/full.rda")
+df_all<-readRDS("../../Figures_Full_species/Min_distance_to_Dispersal/full.rda")
 p<-ggplot(df_all%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)), 
        aes(x=dist_min_mean, fill=group)) +
   geom_histogram(bins=20, position="dodge")+theme_bw()+
@@ -34,22 +34,57 @@ p<-ggplot(df_all%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)),
   facet_wrap(~SSP, ncol=1)
   
 p
-ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/start_end.png")
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/start_end.png")
 
 df_all_se<-df_all%>%dplyr::group_by(SSP, group, year)%>%
   dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
-                   sd_dist_mean=sd(dist_min_mean))
-write.csv(df_all_se, "../../Figures/Min_distance_to_Dispersal/mean_by_year.csv")
-p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
-  geom_line()+theme_bw()+
+                   sd_dist_mean=sd(dist_min_mean),
+                   ci_dist_mean=CI(dist_min_mean)[1]-CI(dist_min_mean)[2])
+df_all_se%>%filter(year==2100)
+write.csv(df_all_se, "../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year.csv")
+
+df_all_se_grouped<-df_all%>%group_by(group, year)%>%
+  dplyr::summarise(dist_mean=mean(dist_min_mean),
+                   sd_dist=sd(dist_min_mean),
+                   CI_dist=CI(dist_min_mean)[1]-CI(dist_min_mean)[2])
+write.csv(df_all_se_grouped, "../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_all_SSP.csv")
+
+p<-ggplot(df_all_se)+
+  geom_ribbon(data=df_all_se, 
+              aes(x=year,
+                  ymin=mean_dist_mean-ci_dist_mean, 
+                  ymax=mean_dist_mean+ci_dist_mean, 
+                  fill=group), alpha=0.2)+
+  geom_line(data=df_all_se, aes(x=year, y = mean_dist_mean, color=group))+theme_bw()+
   xlab("Year")+
   ylab("Average distance need to dispersal (KM)")+
-  labs(color="Group")+
+  labs(color="Group", fill="Group")+
   scale_color_manual(values=color_groups)+
+  scale_fill_manual(values=color_groups)+
   facet_wrap(~SSP, ncol=1)
 p
-ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year.png")
-ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year.pdf")
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year.png")
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year.pdf")
+
+p<-ggplot(df_all_se)+
+  geom_ribbon(data=df_all_se, 
+              aes(x=year,
+                  ymin=mean_dist_mean-ci_dist_mean, 
+                  ymax=mean_dist_mean+ci_dist_mean, 
+                  fill=group), alpha=0.2)+
+  geom_line(data=df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
+  theme_bw()+
+  xlab("Year")+
+  ylab("Average distance need to dispersal (KM)")+
+  labs(color="Group", fill="Group")+
+  scale_color_manual(values=color_groups)+
+  scale_fill_manual(values=color_groups)+
+  xlim(2020, 2100)+
+  facet_wrap(~SSP, ncol=1, scale="free")
+p
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_scale_free.png")
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_scale_free.pdf")
+
 
 #p<-ggplot(df_all, aes(x=year, y = dist_min_mean, color=factor(group)))+
 #  geom_point()+theme_bw()+
@@ -65,5 +100,13 @@ p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
   ylab("Average distance need to dispersal")+
   scale_color_manual(values=color_groups)+
   facet_wrap(~SSP, ncol=1)
-ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year_without_zero.png")
+ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_without_zero.png")
+
+df_all_se_all<-df_all%>%dplyr::filter(dist_min_mean>=1)%>%dplyr::group_by(group, year)%>%
+  dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
+                   sd_dist_mean=sd(dist_min_mean))
+
+
+df_all_se%>%filter(year==2100)
+
 

@@ -81,14 +81,14 @@ if (F){
     N_SP<-sp_dis_all%>%dplyr::group_by(group)%>%dplyr::summarise(N_SP=n_distinct(sp))
     sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
     sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
-    saveRDS(sp_dis_all, sprintf("../../Figures/N_Extinction/sp_dis_all_%d.rda", threshold))
+    saveRDS(sp_dis_all, sprintf("../../Figures_Full_species/N_Extinction/sp_dis_all_%d.rda", threshold))
   }
 }
 
 sp_dis_all_sub_N_all<-NULL
 sp_dis_extinct<-NULL
 for (threshold in c(1, 5)){
-  rda<-sprintf("../../Figures/N_Extinction/sp_dis_all_%d.rda", threshold)
+  rda<-sprintf("../../Figures_Full_species/N_Extinction/sp_dis_all_%d.rda", threshold)
   print(paste("Reading", rda))
   sp_dis_all<-readRDS(rda)
   sp_dis_all_sub_1<-sp_dis_all%>%dplyr::filter(year==2100)
@@ -119,7 +119,14 @@ sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
 
 sp_mean$exposure<-gsub("\\(", "", sp_mean$exposure)
 sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
-write.csv(sp_mean, "../../Figures/N_Extinction/Extinction.csv")
+write.csv(sp_mean, "../../Figures_Full_species/N_Extinction/Extinction.csv")
+
+sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+  dplyr::group_by(SSP, M, N_type, TYPE, exposure)%>%
+  dplyr::summarise(persentile_MEAN=mean(persentile),
+                   persentile_SD=sd(persentile))
+write.csv(sp_mean, "../../Figures_Full_species/N_Extinction/Extinction_across_all_groups.csv")
+
 
 p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
   geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(M)))+
@@ -139,8 +146,8 @@ p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
 p
 
 
-ggsave(p, filename="../../Figures/N_Extinction/Extinction.pdf", width=10, height=6)
-ggsave(p, filename="../../Figures/N_Extinction/Extinction.png", width=10, height=6)
+ggsave(p, filename="../../Figures_Full_species/N_Extinction/Extinction.pdf", width=10, height=6)
+ggsave(p, filename="../../Figures_Full_species/N_Extinction/Extinction.png", width=10, height=6)
 
 sp_dis_extinct<-sp_dis_extinct%>%dplyr::filter(M!=2)
 sp_dis_extinct<-data.frame(sp_dis_extinct)
@@ -158,8 +165,8 @@ p<-ggplot(sp_dis_extinct)+
   xlab("Range size")+
   ylab("Number of species")+
   facet_grid(exposure~Label)
-ggsave(p, filename="../../Figures/N_Extinction/Extinction_hist.pdf", width=12, height=6)
-ggsave(p, filename="../../Figures/N_Extinction/Extinction_hist.png", width=12, height=6)
+ggsave(p, filename="../../Figures_Full_species/N_Extinction/Extinction_hist.pdf", width=12, height=6)
+ggsave(p, filename="../../Figures_Full_species/N_Extinction/Extinction_hist.png", width=12, height=6)
 
 
 for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
@@ -175,9 +182,9 @@ for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
     xlab("Range size")+
     ylab("Number of species")+
     facet_grid(exposure~Label)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.pdf", g), 
+  ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%s.pdf", g), 
          width=12, height=6)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.png", g),
+  ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%s.png", g),
          width=12, height=6)
   
 }

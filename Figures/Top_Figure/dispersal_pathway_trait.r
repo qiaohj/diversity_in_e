@@ -3,6 +3,9 @@ library(dplyr)
 library(concaveman)
 library(sf)
 library(data.table)
+library(Rmisc)
+library(ggplot2)
+library(ggpubr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 mask<-raster("../../Raster/mask_index.tif")
 alt<-raster("../../Raster/ALT/alt_eck4")
@@ -71,7 +74,7 @@ if (F){
   saveRDS(raw_path_final_all, "../../Figures/Top_Figure_all/Data/raw_path_final_all.rda")
 }
 
-raw_path_final_all<-readRDS("../../Figures/Top_Figure_all/Data/raw_path_final_all.rda")
+raw_path_final_all<-readRDS("../../Figures_Full_species/Top_Figure_all/Data/raw_path_final_all.rda")
 
 
 raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, survive, SSP, threshold)%>%
@@ -151,8 +154,10 @@ pp<-ggarrange(p1, p2, nrow=2, ncol=1, common.legend=T, legend.grob=legend, legen
 pp2<-annotate_figure(pp,
                      bottom = text_grob("Time spots", size = 10)
 )
-ggsave(pp2, filename=sprintf("../../Figures/Top_Figure_all/gradient_%s.png", "ALL"), width=10, height=8)
-ggsave(pp2, filename=sprintf("../../Figures/Top_Figure_all/gradient_%s.pdf", "ALL"), width=10, height=8)
+
+write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.csv", "ALL"), row.names=F)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.png", "ALL"), width=10, height=8)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.pdf", "ALL"), width=10, height=8)
 
 p3<-ggplot(raw_path_final_se_g)+
   geom_point(aes(x=year, y=mean_agent, color=group))+
@@ -217,6 +222,9 @@ raw_path_continent_se_g<-rbind(raw_path_continent_se_1, raw_path_continent_se_2)
 raw_path_continent_se_g$year<-factor(raw_path_continent_se_g$year, levels = c("Start", "End"))
 raw_path_continent_se_g$exposure<-" no exposure"
 raw_path_continent_se_g[which(raw_path_continent_se_g$threshold==5),]$exposure<-"5-year exposure"
+write.csv(raw_path_continent_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.csv", "continent"), row.names=F)
+
+
 co<-"Africa"
 for (co in unique(raw_path_continent_se_g$continent_label)){
   print(co)
