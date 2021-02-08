@@ -36,7 +36,8 @@ color_groups<-c("Amphibians"=colors_green[7],
              "Birds"=colors_blue[7],
              "Reptiles"=colors_purple[7],
              "Mammals"=colors_red[7])
-
+color_da<-c("with dispersal"=colors_blue[7],
+             "no dispersal"=colors_red[7])
 
 map_theme<-theme(
   axis.line = element_blank(),

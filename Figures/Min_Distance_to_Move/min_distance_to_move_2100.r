@@ -14,7 +14,7 @@ if (F){
       #df_filter<-df%>%dplyr::filter((dist_min!=0)&!is.infinite(dist_min))
       df_filter<-df%>%dplyr::filter(!is.infinite(dist_min))
       df_se<-df_filter%>%dplyr::group_by(SSP, sp, group)%>%
-        dplyr::summarise(dist_min_mean=mean(dist_min,),
+        dplyr::summarise(dist_min_mean=mean(dist_min),
                          dist_min_sd=sd(dist_min),
                          dist_min_CI=CI(dist_min)[2]-CI(dist_min)[3])
       df_se$year<-y
@@ -47,6 +47,9 @@ df_all_se_grouped<-df_all%>%group_by(group, year)%>%
   dplyr::summarise(dist_mean=mean(dist_min_mean),
                    sd_dist=sd(dist_min_mean),
                    CI_dist=CI(dist_min_mean)[1]-CI(dist_min_mean)[2])
+df_all_se%>%filter(year==2100)
+
+
 write.csv(df_all_se_grouped, "../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_all_SSP.csv")
 
 p<-ggplot(df_all_se)+
