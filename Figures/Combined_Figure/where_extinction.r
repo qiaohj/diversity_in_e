@@ -107,7 +107,7 @@ p2<-ggplot()+
   scale_y_sqrt(breaks=seq(0, 100, by=20)^2)+
   #scale_y_continuous()+
   theme_bw()+
-  labs(x="Number of extinctions", y="")+
+  labs(x="Number of extinctions", y="N Cells")+
   facet_wrap(~label, scale="free")+
   theme(
     strip.background = element_blank(),
@@ -116,7 +116,7 @@ p2<-ggplot()+
     panel.grid.minor = element_blank(),
     #plot.background = element_rect(fill = map_background, color = NA), 
     panel.background = element_blank(),
-    axis.title.y=element_blank()
+    #axis.title.y=element_blank()
   )
 
 p2

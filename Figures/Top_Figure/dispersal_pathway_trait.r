@@ -33,10 +33,10 @@ if (F){
     for (threshold in c(1, 5)){
       for (GCM_i in GCMs){
         print(paste(SSP_i, GCM_i, threshold))
-        raw_path<-readRDS(sprintf("../../Figures/Top_Figure_%d/raw_path_%s_%s.rda", threshold, GCM_i, SSP_i))
+        raw_path<-readRDS(sprintf("../../Figures_Full_species/Top_Figure_%d/raw_path_%s_%s.rda", threshold, GCM_i, SSP_i))
         raw_path<-data.frame(raw_path)
         raw_path$alt<-raster::extract(alt, raw_path[, c("gravity_x", "gravity_y")])
-        saveRDS(raw_path, sprintf("../../Figures/Top_Figure_%d/raw_path_%s_%s_with_alt.rda", threshold, GCM_i, SSP_i))
+        saveRDS(raw_path, sprintf("../../Figures_Full_species/Top_Figure_%d/raw_path_%s_%s_with_alt.rda", threshold, GCM_i, SSP_i))
         
         raw_path_min_max_year<-raw_path%>%
           dplyr::group_by(group, sp, survive, continent_i)%>%
@@ -71,11 +71,21 @@ if (F){
       }
     }
   }
-  saveRDS(raw_path_final_all, "../../Figures/Top_Figure_all/Data/raw_path_final_all.rda")
+  saveRDS(raw_path_final_all, "../../Figures_Full_species/Top_Figure_all/Data/raw_path_final_all.rda")
 }
 
 raw_path_final_all<-readRDS("../../Figures_Full_species/Top_Figure_all/Data/raw_path_final_all.rda")
+df_sp_list<-list()
+for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+  df_list<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", group))
+  df_sp_list[[group]]<-df_list
+}
+df_sp_list<-rbindlist(df_sp_list)
 
+ttt<-2
+df_sp_list<-df_sp_list[area>ttt]
+df_sp_list$sp<-gsub(" ", "_", df_sp_list$sp)
+raw_path_final_all<-raw_path_final_all%>%dplyr::filter(sp %in% df_sp_list$sp)
 
 raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, survive, SSP, threshold)%>%
   dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
@@ -155,9 +165,9 @@ pp2<-annotate_figure(pp,
                      bottom = text_grob("Time spots", size = 10)
 )
 
-write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.csv", "ALL"), row.names=F)
-ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.png", "ALL"), width=10, height=8)
-ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.pdf", "ALL"), width=10, height=8)
+write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "ALL", ttt), row.names=F)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.png", "ALL", ttt), width=10, height=8)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.pdf", "ALL", ttt), width=10, height=8)
 
 p3<-ggplot(raw_path_final_se_g)+
   geom_point(aes(x=year, y=mean_agent, color=group))+
@@ -222,7 +232,7 @@ raw_path_continent_se_g<-rbind(raw_path_continent_se_1, raw_path_continent_se_2)
 raw_path_continent_se_g$year<-factor(raw_path_continent_se_g$year, levels = c("Start", "End"))
 raw_path_continent_se_g$exposure<-" no exposure"
 raw_path_continent_se_g[which(raw_path_continent_se_g$threshold==5),]$exposure<-"5-year exposure"
-write.csv(raw_path_continent_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s.csv", "continent"), row.names=F)
+write.csv(raw_path_continent_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "continent", ttt), row.names=F)
 
 
 co<-"Africa"
@@ -261,8 +271,8 @@ for (co in unique(raw_path_continent_se_g$continent_label)){
                   top = text_grob(co, face = "bold", size = 14),
                   bottom = text_grob("Time spots", size = 10)
   )
-  ggsave(pp2, filename=sprintf("../../Figures/Top_Figure_all/gradient_%s.png", co), width=10, height=8)
-  ggsave(pp2, filename=sprintf("../../Figures/Top_Figure_all/gradient_%s.pdf", co), width=10, height=8)
+  ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.png", co, ttt), width=10, height=8)
+  ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.pdf", co, ttt), width=10, height=8)
 }
 
 if (F){

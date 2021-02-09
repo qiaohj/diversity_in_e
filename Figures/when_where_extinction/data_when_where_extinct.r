@@ -12,7 +12,7 @@ if (F){
       extinct_sp<-extinct_sp%>%dplyr::filter(N_type=="EXTINCT")
       extinct_sp<-extinct_sp%>%dplyr::filter(M==dispersal)
       extinct_sp<-extinct_sp%>%dplyr::filter(TYPE==sprintf("Diversity_%d", threshold))
-      saveRDS(extinct_sp, sprintf("../../Objects/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
+      saveRDS(extinct_sp, sprintf("../../Objects_Full_species/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
     }
   }
   
@@ -33,7 +33,7 @@ if (is.na(threshold)){
 source("commonFuns/functions.r")
 df<-NULL
 for (dispersal in (c(0:1))){
-  extinct_sp<-readRDS(sprintf("../../Objects/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
+  extinct_sp<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/extinct_sp_%d.rda", threshold, dispersal))
   extinct_sp<-extinct_sp%>%filter(group==g)
   for (i in c(1:nrow(extinct_sp))){
     print(paste(i, nrow(extinct_sp), g, "threshold=", threshold, "dispersal=", dispersal, sep=" - "))
@@ -53,4 +53,4 @@ for (dispersal in (c(0:1))){
     df<-bind_dplyr(df, st_dis)
   }
 }
-saveRDS(df, sprintf("../../Objects/when_where_extinction_%d/%s.rda", threshold, g))
+saveRDS(df, sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
