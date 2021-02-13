@@ -6,13 +6,13 @@ group<-"Birds"
 for (group in groups){
   print(group)
   
-  f<-list.files(sprintf("../../Objects/IUCN_Distribution/%s", group))
-  i<-f[1]
+  f<-list.files(sprintf("../../Objects_Full_species/IUCN_Distribution/%s", group))
+  i<-f[2]
   result<-NULL
   for (i in f){
     
     sp<-gsub("\\.rda", "", i)
-    df<-readRDS(sprintf("../../Objects/IUCN_Distribution/%s/%s", group, i))
+    df<-readRDS(sprintf("../../Objects_Full_species/IUCN_Distribution/%s/%s", group, i))
     area<-nrow(df)
     if (is.null(area)){
       area<--1
@@ -25,7 +25,7 @@ for (group in groups){
     }
   }
   if (F){
-    result_bak<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+    result_bak<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", group))
     table(result_bak[which(result_bak$area<=0), "area"])
     table(result[which(result_bak$area<=0), "area"])
     result[which(result$area<=0), ]

@@ -102,7 +102,7 @@ if (F){
 }
 ttt<-0
 threshold<-1
-for (ttt in c(0, 1, 2)){
+for (ttt in c(2)){
   sp_dis_all_sub_N_all<-NULL
   sp_dis_extinct<-NULL
   sp_dis_all_se_all<-NULL
@@ -141,21 +141,22 @@ for (ttt in c(0, 1, 2)){
     sp_dis_all_se_all<-bind_dplyr(sp_dis_all_se_all, sp_dis_all_se)
   }
   
-  sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+  sp_mean_gcm<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+    dplyr::group_by(GCM, SSP, M, N_type)%>%
+    dplyr::summarise(persentile_MEAN=sum(persentile*N_SP)/sum(N_SP))
+  
+  sp_mean<-sp_mean_gcm%>%
     dplyr::group_by(SSP, M, N_type)%>%
-    dplyr::summarise(persentile_MEAN=mean(persentile),
-                     persentile_SD=sd(persentile))
+    dplyr::summarise(persentile=mean(persentile_MEAN),
+                     persentile_SD=sd(persentile_MEAN))
   
-  write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
-  
-  #sp_mean<-sp_dis_all_se_all%>%dplyr::filter(M!=2)%>%
-  #  dplyr::group_by(SSP, M)%>%
+  #sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+  #  dplyr::group_by(SSP, M, N_type)%>%
   #  dplyr::summarise(persentile_MEAN=mean(persentile),
   #                   persentile_SD=sd(persentile))
   
-  #write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
+  write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
 
-  
   sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
     dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label, exposure)%>%
     dplyr::summarise(persentile_MEAN=mean(persentile),
@@ -166,17 +167,15 @@ for (ttt in c(0, 1, 2)){
   sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
   write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d.csv", ttt))
   
-  sp_mean_2<-sp_mean%>%
-    dplyr::group_by(SSP, M, N_type)%>%
-    dplyr::summarise(persentile=mean(persentile_MEAN),
-                     sd=mean(persentile_SD))
+  sp_mean_gcm<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
+    dplyr::group_by(GCM, SSP, M, N_type, exposure)%>%
+    dplyr::summarise(persentile_MEAN=sum(persentile*N_SP)/sum(N_SP))
   
-  write.csv(sp_mean_2, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
-  
-  sp_mean_3<-sp_mean%>%
+  sp_mean_3<-sp_mean_gcm%>%
     dplyr::group_by(SSP, M, N_type, exposure)%>%
     dplyr::summarise(persentile=mean(persentile_MEAN),
-                     sd=mean(persentile_SD))
+                     persentile_SD=sd(persentile_MEAN))
+  
   
   write.csv(sp_mean_3, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_by_exposure.csv", ttt))
    
@@ -198,11 +197,6 @@ for (ttt in c(0, 1, 2)){
     ylab("Mean extinction proportion")
   p
   
-  sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
-    dplyr::group_by(SSP, M, N_type, TYPE, exposure)%>%
-    dplyr::summarise(persentile_MEAN=mean(persentile),
-                     persentile_SD=sd(persentile))
-  write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_across_all_groups_%d.csv", ttt))
   
   
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d.pdf", ttt), width=10, height=6)

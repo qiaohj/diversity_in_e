@@ -88,11 +88,15 @@ df_sp_list$sp<-gsub(" ", "_", df_sp_list$sp)
 
 result<-readRDS("../../Objects_Full_species/Extinction_type/Extinction_type.rda")
 result<-result%>%dplyr::filter(sp %in% df_sp_list$sp)
-result_count<-result%>%dplyr::group_by(type, dispersal)%>%
+result_count<-result%>%dplyr::group_by(type, dispersal, threshold, SSP, GCM)%>%
   dplyr::summarise(N=n())
-
-result$min_distance<-result$min_distance*100
-
+result_count_se<-result_count%>%dplyr::group_by(type, dispersal, threshold, SSP)%>%
+  dplyr::summarise(mean_N=mean(N),
+                   sd_N=sd(N))
+result_count_se$dispersal<-ifelse(result_count_se$dispersal==0, "no dispersal", "with dispersal")
+result_count_se$exposure<-ifelse(result_count_se$threshold==1, " no exposure", "5-year exposure")
+result_count_se<-result_count_se%>%ungroup()%>%dplyr::select(-c(threshold))
+write.table(result_count_se, "../../Objects_Full_species/Extinction_type/Extinction_type.csv", row.names = F, sep=",")
 result_unreachable<-result%>%filter((type=="Unreachable")&(dispersal==1))%>%
   dplyr::group_by(SSP, dispersal)%>%
   dplyr::summarise(mean_distance=mean(min_distance),
