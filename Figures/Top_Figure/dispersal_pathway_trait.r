@@ -364,3 +364,199 @@ if (F){
     geom_smooth(method="lm")+
     facet_grid(continent_label~survive, scale="free")
 }
+
+
+#Figure XXX
+
+raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, SSP, threshold)%>%
+  dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
+                   sd_start_alt=sd(start_alt, na.rm=T),
+                   CI_start_alt=CI(start_alt)[1]-CI(start_alt)[2],
+                   mean_end_alt=mean(end_alt, na.rm=T),
+                   sd_end_alt=sd(end_alt, na.rm=T),
+                   CI_end_alt=CI(end_alt)[1]-CI(end_alt)[2],
+                   mean_start_y=mean(abs(start_y), na.rm=T),
+                   sd_start_y=sd(abs(start_y), na.rm=T),
+                   CI_start_y=CI(start_y)[1]-CI(start_y)[2],
+                   mean_end_y=mean(abs(end_y), na.rm=T),
+                   sd_end_y=sd(abs(end_y), na.rm=T),
+                   CI_end_y=CI(end_y)[1]-CI(end_y)[2],
+                   mean_start_agent=mean(start_agent, na.rm=T),
+                   sd_start_agent=sd(start_agent, na.rm=T),
+                   CI_start_agent=CI(start_agent)[1]-CI(start_agent)[2],
+                   mean_end_agent=mean(end_agent, na.rm=T),
+                   sd_end_agent=sd(end_agent, na.rm=T),
+                   CI_end_agent=CI(end_agent)[1]-CI(end_agent)[2])
+
+raw_path_final_se_1<-raw_path_final_se[, c("group", "SSP", "threshold",
+                                           "mean_start_alt", "sd_start_alt", "CI_start_alt",
+                                           "mean_start_y", "sd_start_y", "CI_start_y",
+                                           "mean_start_agent", "sd_start_agent", "CI_start_agent")]
+colnames(raw_path_final_se_1)<-c("group", "SSP", "threshold",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_1$year="Start"
+
+raw_path_final_se_2<-raw_path_final_se[, c("group", "SSP", "threshold",
+                                           "mean_end_alt", "sd_end_alt", "CI_end_alt",
+                                           "mean_end_y", "sd_end_y", "CI_end_y",
+                                           "mean_end_agent", "sd_end_agent", "CI_end_agent")]
+colnames(raw_path_final_se_2)<-c("group", "SSP", "threshold",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_2$year="End"
+
+raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
+raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
+raw_path_final_se_g$exposure<-" no exposure"
+raw_path_final_se_g[which(raw_path_final_se_g$threshold==5),]$exposure<-"5-year exposure"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "5-year exposure"))
+raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
+raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
+
+p1<-ggplot(raw_path_final_se_g%>%dplyr::filter(SSP!="SSP245"))+
+  geom_point(aes(x=year, y=mean_alt, color=group), size=2)+
+  geom_errorbar(aes(x=year, y=mean_alt, ymin=mean_alt-CI_alt, ymax=mean_alt+CI_alt, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_alt, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_wrap(~SSP, scale="free", strip.position="right", nrow=2)+
+  labs(x="Time spots", y="Elevation (m)", color="Group", linetype="Exposure")+
+  theme_bw()+
+  guides(color = guide_legend(nrow = 2, byrow = T)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.spacing = unit(0, "lines"),
+        legend.direction = "vertical", legend.box = "horizontal")
+legend<-g_legend(p1)
+
+
+p2<-ggplot(raw_path_final_se_g%>%dplyr::filter(SSP!="SSP245"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_wrap(~SSP, scale="free", strip.position="right", nrow=2)+
+  labs(x="Time spots", y="Latitude (km)", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.spacing = unit(0, "lines"))
+
+pp<-ggarrange(p1, p2, nrow=2, ncol=1, common.legend=T, legend.grob=legend, legend="top")
+pp2=pp
+#pp2<-annotate_figure(pp,
+#                     bottom = text_grob("Begin to end", size = 10)
+#)
+
+#write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "ALL", ttt), row.names=F)
+ggsave(pp2, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_combined.png", "ALL", ttt), 
+       width=4, height=8)
+ggsave(pp2, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_combined.pdf", "ALL", ttt), 
+       width=4, height=8)
+
+
+
+#Figure YYYYY
+
+raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(survive, SSP, threshold)%>%
+  dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
+                   sd_start_alt=sd(start_alt, na.rm=T),
+                   CI_start_alt=CI(start_alt)[1]-CI(start_alt)[2],
+                   mean_end_alt=mean(end_alt, na.rm=T),
+                   sd_end_alt=sd(end_alt, na.rm=T),
+                   CI_end_alt=CI(end_alt)[1]-CI(end_alt)[2],
+                   mean_start_y=mean(abs(start_y), na.rm=T),
+                   sd_start_y=sd(abs(start_y), na.rm=T),
+                   CI_start_y=CI(start_y)[1]-CI(start_y)[2],
+                   mean_end_y=mean(abs(end_y), na.rm=T),
+                   sd_end_y=sd(abs(end_y), na.rm=T),
+                   CI_end_y=CI(end_y)[1]-CI(end_y)[2],
+                   mean_start_agent=mean(start_agent, na.rm=T),
+                   sd_start_agent=sd(start_agent, na.rm=T),
+                   CI_start_agent=CI(start_agent)[1]-CI(start_agent)[2],
+                   mean_end_agent=mean(end_agent, na.rm=T),
+                   sd_end_agent=sd(end_agent, na.rm=T),
+                   CI_end_agent=CI(end_agent)[1]-CI(end_agent)[2])
+
+raw_path_final_se_1<-raw_path_final_se[, c("survive", "SSP", "threshold",
+                                           "mean_start_alt", "sd_start_alt", "CI_start_alt",
+                                           "mean_start_y", "sd_start_y", "CI_start_y",
+                                           "mean_start_agent", "sd_start_agent", "CI_start_agent")]
+colnames(raw_path_final_se_1)<-c("survive", "SSP", "threshold",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_1$year="Start"
+
+raw_path_final_se_2<-raw_path_final_se[, c("survive", "SSP", "threshold",
+                                           "mean_end_alt", "sd_end_alt", "CI_end_alt",
+                                           "mean_end_y", "sd_end_y", "CI_end_y",
+                                           "mean_end_agent", "sd_end_agent", "CI_end_agent")]
+colnames(raw_path_final_se_2)<-c("survive", "SSP", "threshold",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_2$year="End"
+
+raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
+raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
+raw_path_final_se_g$exposure<-" no exposure"
+raw_path_final_se_g[which(raw_path_final_se_g$threshold==5),]$exposure<-"5-year exposure"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "5-year exposure"))
+raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
+raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
+raw_path_final_se_g[which(raw_path_final_se_g$survive=="SURVIVE"), "survive"]<-"extant"
+raw_path_final_se_g[which(raw_path_final_se_g$survive=="EXTINCT"), "survive"]<-"extinct"
+p1<-ggplot(raw_path_final_se_g)+
+  geom_point(aes(x=year, y=mean_alt, color=survive), size=2)+
+  geom_errorbar(aes(x=year, y=mean_alt, ymin=mean_alt-CI_alt, ymax=mean_alt+CI_alt, color=survive), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_alt, color=survive, linetype=factor(SSP)))+
+  scale_color_manual(values=color_survive)+
+  facet_wrap(~exposure, scale="free", strip.position="right", nrow=2)+
+  labs(x="Time spots", y="Elevation (m)", color="Status", linetype="SSP")+
+  theme_bw()+
+  guides(color = guide_legend(nrow = 3, byrow = T)) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.spacing = unit(0, "lines"),
+        legend.direction = "vertical", legend.box = "horizontal")
+legend<-g_legend(p1)
+
+
+p2<-ggplot(raw_path_final_se_g)+
+  geom_point(aes(x=year, y=mean_y, color=survive))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=survive), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=survive, linetype=factor(SSP)))+
+  scale_color_manual(values=color_survive)+
+  facet_wrap(~exposure, scale="free", strip.position="right", nrow=2)+
+  labs(x="Time spots", y="Latitude (km)", color="Status", linetype="SSP")+
+  theme_bw()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.spacing = unit(0, "lines"))
+
+pp<-ggarrange(p1, p2, nrow=2, ncol=1, common.legend=T, legend.grob=legend, legend="top")
+pp2=pp
+#pp2<-annotate_figure(pp,
+#                     bottom = text_grob("Begin to end", size = 10)
+#)
+
+#write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "ALL", ttt), row.names=F)
+ggsave(pp2, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_combined_all_sp.png", "ALL", ttt), 
+       width=4, height=8)
+ggsave(pp2, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_combined_all_sp.pdf", "ALL", ttt), 
+       width=4, height=8)

@@ -18,7 +18,8 @@ color_two_map<-c(mask_color, colors_red[8])
 color_ssp<-c("SSP119"=colors_blue[7],
              "SSP245"=colors_green[7],
              "SSP585"=colors_red[7])
-
+color_survive<-c("extant"=colors_blue[7],
+             "extinct"=colors_red[7])
 color_dispersal<-c("#FE5F55",
              "#7A9E9F",
              colors_green[7])
@@ -26,7 +27,8 @@ color_dispersal<-c("#FE5F55",
 linetype_gcm<-c("EC-Earth3-Veg"=1,
                 "MRI-ESM2-0"=2,
                 "UKESM1"=5)
-
+color_causation<-c("Temperature"=colors_red[7],
+                   "Precipitation"=colors_blue[7])
 
 linetype_ssp<-c("SSP119"=1,
              "SSP245"=2,
