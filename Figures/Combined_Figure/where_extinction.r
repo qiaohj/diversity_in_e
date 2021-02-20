@@ -48,7 +48,8 @@ pc100km <- gBuffer( cord.eck4, width=100*10e3, byid=TRUE )
 plot(pc100km, add=T, col="red")
 pc100km <- SpatialPolygonsDataFrame(pc100km, data=keyspots)
 
-mask_p_sp<-SpatialPointsDataFrame(mask_p[, c("x", "y")], data=mask_p, proj4string=crs(mask))
+mask_p_sp<-SpatialPointsDataFrame(mask_p[, c("x", "y")], 
+                                  data=mask_p, proj4string=crs(mask))
 
 mask_p_sp$keysport<-NA
 for (i in c(1:nrow(pc100km))){
@@ -64,13 +65,15 @@ pc100km.df = join(pc100km.points[], pc100km@data[, c("name", "id")], by="id")
 p<-ggplot()+
   geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
   geom_tile(data=n_ext_final, aes(x=x, y=y, fill=sum_V))+
-  geom_polygon(data=pc100km.df, aes(x=long, y=lat, color=factor(name)), fill=NA)+
+  geom_polygon(data=pc100km.df, aes(x=long, y=lat, color=name), fill=NA)+
   facet_wrap(~label)+
+  
   scale_fill_gradient(low=color_two_map[1], high=color_two_map[2],
                       limits=c(0, 100), oob=squish,
                       breaks=c(0, 20, 40, 60, 80, 100),
                       labels=c("0", "20", "40", "60", "80", 
                                sprintf(">100, up to %d", round(max(n_ext_final$sum_V)))))+
+  scale_color_manual(values=color_keyspots)+
   labs(fill = "Number of extinctions", color="Key spots")+
   theme(
     axis.line = element_blank(),
@@ -100,13 +103,15 @@ n_ext_final_with_keyspots<-left_join(n_ext_final, mask_p_sp_df[, c("mask_index",
 p2<-ggplot()+
   stat_density(data=n_ext_final_with_keyspots, aes(x=sum_V, y=..count..), fill="grey50", alpha=0.2)+
   stat_density(data=n_ext_final_with_keyspots%>%filter(!is.na(keysport)), 
-               aes(x=sum_V, y=..count.., fill=factor(keysport)), position = "identity", alpha=0.3)+
+               aes(x=sum_V, y=..count.., fill=keysport), position = "identity", alpha=0.3)+
   stat_density(data=n_ext_final_with_keyspots%>%filter(!is.na(keysport)), 
-               aes(x=sum_V, y=..count.., color=factor(keysport)), position = "identity", fill=NA)+
+               aes(x=sum_V, y=..count.., color=keysport), position = "identity", fill=NA)+
   scale_x_log10()+
   scale_y_sqrt(breaks=seq(0, 100, by=20)^2)+
   #scale_y_continuous()+
   theme_bw()+
+  scale_color_manual(values=color_keyspots)+
+  scale_fill_manual(values=color_keyspots)+
   labs(x="Number of extinctions", y="N Cells")+
   facet_wrap(~label, scale="free")+
   theme(
@@ -123,4 +128,5 @@ p2
 }
 g_legend<-get_legend(p)
 p3<-ggarrange(p, p2, nrow=2, ncol=1, common.legend=T, legend = "right", legend.grob = g_legend)
-ggsave(p3, filename="../../Figures_Full_species/Combined_Figure/keyspots_extinction.pdf", width=12, height=8)
+ggsave(p3, filename="../../Figures_Full_species/Combined_Figure/keyspots_extinction.pdf", width=8, height=4)
+ggsave(p3, filename="../../Figures_Full_species/Combined_Figure/keyspots_extinction.png", width=8, height=4)

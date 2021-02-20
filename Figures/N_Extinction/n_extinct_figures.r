@@ -145,7 +145,7 @@ for (ttt in c(2)){
     dplyr::group_by(GCM, SSP, M, N_type)%>%
     dplyr::summarise(persentile_MEAN=sum(persentile*N_SP)/sum(N_SP))
   
-  sp_mean<-sp_mean_gcm%>%
+  sp_mean4<-sp_mean_gcm%>%
     dplyr::group_by(SSP, M, N_type)%>%
     dplyr::summarise(persentile=mean(persentile_MEAN),
                      persentile_SD=sd(persentile_MEAN))
@@ -155,7 +155,7 @@ for (ttt in c(2)){
   #  dplyr::summarise(persentile_MEAN=mean(persentile),
   #                   persentile_SD=sd(persentile))
   
-  write.csv(sp_mean, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
+  write.csv(sp_mean4, sprintf("../../Figures_Full_species/N_Extinction/Extinction_%d_all_exposure.csv", ttt))
 
   sp_mean<-sp_dis_all_sub_N_all%>%dplyr::filter(M!=2)%>%
     dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label, exposure)%>%
@@ -186,8 +186,8 @@ for (ttt in c(2)){
                       ymax=persentile_MEAN+persentile_SD,
                       group=factor(M))) +
     xlab("SSP scenario")+
-    ggtitle(sprintf("Distribution>%d", ttt))+
-    ylim(c(0, 1))+
+    #ggtitle(sprintf("Distribution>%d", ttt))+
+    #ylim(c(0, 1))+
     theme_bw()+
     #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
     facet_grid(exposure~group)+
@@ -217,7 +217,7 @@ for (ttt in c(2)){
     theme_bw()+
     xlab("Range size")+
     ylab("Number of species")+
-    ggtitle(sprintf("Distribution>%d", ttt))+
+    #ggtitle(sprintf("Distribution>%d", ttt))+
     facet_grid(exposure~Label)
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.pdf", ttt), width=12, height=6)
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.png", ttt), width=12, height=6)
@@ -230,7 +230,7 @@ for (ttt in c(2)){
       geom_histogram(aes(x=st_N_CELL), fill=colors_black[4], bins=20)+
       geom_histogram(data=sp_dis_extinct_item%>%dplyr::filter(N_type=="EXTINCT"), 
                      aes(x=st_N_CELL), fill=colors_red[9], bins=20)+
-      ggtitle(sprintf("Distribution>%d (%s)", ttt, g))+
+      #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))+
       scale_x_log10()+
       theme_bw()+
       xlab("Range size")+

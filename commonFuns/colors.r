@@ -29,7 +29,10 @@ linetype_gcm<-c("EC-Earth3-Veg"=1,
                 "UKESM1"=5)
 color_causation<-c("Temperature"=colors_red[7],
                    "Precipitation"=colors_blue[7])
+color_dipsersal_type<-c("neither higher elevation nor higher latitude"=colors_red[7],
+                        "higher elevation and/or higher latitude"=colors_blue[7])
 
+library(RColorBrewer)
 linetype_ssp<-c("SSP119"=1,
              "SSP245"=2,
              "SSP585"=5)
@@ -38,6 +41,14 @@ color_groups<-c("Amphibians"=colors_green[7],
              "Birds"=colors_blue[7],
              "Reptiles"=colors_purple[7],
              "Mammals"=colors_red[7])
+#display.brewer.all(n=NULL, type="all", select=NULL, exact.n=TRUE, colorblindFriendly=T)
+color_keyspots<-brewer.pal(n = 6, name = 'Dark2')
+
+names(color_keyspots)<-c("Amazon Basin", "central North America", "Congo Basin",
+                         "Qinghai-Tibet Plateau", "", "Southeast Asia")
+
+
+
 color_da<-c("with dispersal"=colors_blue[7],
              "no dispersal"=colors_red[7])
 

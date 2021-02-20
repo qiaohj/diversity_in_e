@@ -113,4 +113,5 @@ p2<-ggplot()+
   theme_bw()
 p2
 ggsave(p2, filename="../../Figures_Full_species/Combined_Figure/Figure_env_year.pdf")
+ggsave(p2, filename="../../Figures_Full_species/Combined_Figure/Figure_env_year.png", width=8, height=4)
 

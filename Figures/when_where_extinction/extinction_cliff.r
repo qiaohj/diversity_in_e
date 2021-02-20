@@ -56,9 +56,9 @@ cliff<-readRDS("../../Figures_Full_species/Extinction_cliff/Extinction_cliff.rda
 range(cliff$N_extinct_Cell)
 hist(cliff$N_extinct_Cell)
 
+ttt=2
 
-
-for (ttt in c(0, 1, 2)){
+for (ttt in c(2)){
   
   cliff_item<-cliff%>%dplyr::filter(N_st_Cell>ttt)
   cliff_se<-cliff_item%>%dplyr::group_by(SSP, dispersal, exposure, group)%>%
@@ -99,15 +99,15 @@ for (ttt in c(0, 1, 2)){
   cliff_se_all$da=ifelse(cliff_se_all$dispersal==0, "no dispersal", "with dispersal")
   
   p<-ggplot(cliff_se_all)+
-    #geom_ribbon(aes(x=extinct_year,
-    #                ymin=mean_extinct_Cell-CI_extinct_Cell, 
-    #                ymax=mean_extinct_Cell+CI_extinct_Cell, 
-    #                fill=da), alpha=0.2)+
+    geom_ribbon(aes(x=extinct_year,
+                    ymin=mean_extinct_Cell-CI_extinct_Cell, 
+                    ymax=mean_extinct_Cell+CI_extinct_Cell, 
+                    fill=da), alpha=0.2)+
     geom_line(aes(x=extinct_year, y=mean_extinct_Cell, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
     ylab("N Cells")+
-    ggtitle(sprintf("Distribution>%d", ttt))+
+    #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+
     scale_fill_manual(values=color_da)+
@@ -132,15 +132,15 @@ for (ttt in c(0, 1, 2)){
   cliff_se_all$da=ifelse(cliff_se_all$dispersal==0, "no dispersal", "with dispersal")
   
   p<-ggplot(cliff_se_all)+
-    #geom_ribbon(aes(x=extinct_year,
-    #                ymin=mean_extinct_Cell-CI_extinct_Cell, 
-    #                ymax=mean_extinct_Cell+CI_extinct_Cell, 
-    #                fill=da), alpha=0.2)+
+    geom_ribbon(aes(x=extinct_year,
+                    ymin=mean_extinct_st-sd_extinct_st, 
+                    ymax=mean_extinct_st+sd_extinct_st, 
+                    fill=da), alpha=0.2)+
     geom_line(aes(x=extinct_year, y=mean_extinct_st, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
     ylab("N Cells/Initial N Cells")+
-    ggtitle(sprintf("Distribution>%d", ttt))+
+    #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+
     scale_fill_manual(values=color_da)+
@@ -151,15 +151,15 @@ for (ttt in c(0, 1, 2)){
          width=12, height=6)
   
   p<-ggplot(cliff_se_all)+
-    #geom_ribbon(aes(x=extinct_year,
-    #                ymin=mean_extinct_Cell-CI_extinct_Cell, 
-    #                ymax=mean_extinct_Cell+CI_extinct_Cell, 
-    #                fill=da), alpha=0.2)+
+    geom_ribbon(aes(x=extinct_year,
+                    ymin=mean_extinct_max-sd_extinct_max, 
+                    ymax=mean_extinct_max+sd_extinct_max, 
+                    fill=da), alpha=0.2)+
     geom_line(aes(x=extinct_year, y=mean_extinct_max, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
     ylab("N Cells/Max N Cells")+
-    ggtitle(sprintf("Distribution>%d", ttt))+
+    #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+
     scale_fill_manual(values=color_da)+

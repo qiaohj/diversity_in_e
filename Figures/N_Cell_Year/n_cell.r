@@ -1,6 +1,6 @@
 library(raster)
 #library(rgdal)
-#library(rgeos)
+library(Rmisc)
 library(vegan)
 library(data.table)
 library(dplyr)
@@ -98,7 +98,7 @@ if (F){
     sp_dis_all$Label<-paste(sp_dis_all$sp, sp_dis_all$group, 
                             sp_dis_all$GCM, sp_dis_all$SSP, 
                             sp_dis_all$M, sp_dis_all$TYPE)
-    for (ttt in c(0, 1, 2)){
+    for (ttt in c(2)){
       sp_dis_all_filtered<-sp_dis_all%>%dplyr::filter(st_N_CELL>ttt)
       sp_dis_all_sub_1<-sp_dis_all_filtered%>%dplyr::filter(year==2100)
       extincted_species<-sp_dis_all_sub_1%>%dplyr::filter(N_type=="EXTINCT")
@@ -110,19 +110,25 @@ if (F){
         dplyr::group_by(year, group, SSP, M, TYPE)%>%
         dplyr::summarise(mean_N_CELL=mean(N_CELL),
                          sd_N_CELL=sd(N_CELL),
+                         CI_N_CELL=CI(N_CELL)[1]-CI(N_CELL)[2],
                          mean_N_CELL_Change=mean(N_CELL_Change),
                          sd_N_CELL_Change=sd(N_CELL_Change),
+                         CI_N_CELL_Change=CI(N_CELL_Change)[1]-CI(N_CELL_Change)[2],
                          mean_N_CELL_Change_Max=mean(N_CELL_Change_Max),
-                         sd_N_CELL_Change_Max=sd(N_CELL_Change_Max))
+                         sd_N_CELL_Change_Max=sd(N_CELL_Change_Max),
+                         CI_N_CELL_Change_Max=CI(N_CELL_Change_Max)[1]- CI(N_CELL_Change_Max)[2])
       
       sp_dis_all_extincted_se_all<-sp_dis_all_extincted%>%
         dplyr::group_by(year, SSP, M, TYPE)%>%
         dplyr::summarise(mean_N_CELL=mean(N_CELL),
-                         sd_N_CELL=sd(N_CELL),
-                         mean_N_CELL_Change=mean(N_CELL_Change),
-                         sd_N_CELL_Change=sd(N_CELL_Change),
-                         mean_N_CELL_Change_Max=mean(N_CELL_Change_Max),
-                         sd_N_CELL_Change_Max=sd(N_CELL_Change_Max),
+                          sd_N_CELL=sd(N_CELL),
+                          CI_N_CELL=CI(N_CELL)[1]-CI(N_CELL)[2],
+                          mean_N_CELL_Change=mean(N_CELL_Change),
+                          sd_N_CELL_Change=sd(N_CELL_Change),
+                          CI_N_CELL_Change=CI(N_CELL_Change)[1]-CI(N_CELL_Change)[2],
+                          mean_N_CELL_Change_Max=mean(N_CELL_Change_Max),
+                          sd_N_CELL_Change_Max=sd(N_CELL_Change_Max),
+                          CI_N_CELL_Change_Max=CI(N_CELL_Change_Max)[1]- CI(N_CELL_Change_Max)[2],
                          group="ALL")
       sp_dis_all_extincted_se_all<-sp_dis_all_extincted_se_all%>%dplyr::select(names(sp_dis_all_extincted_se))
       sp_dis_all_extincted_se<-bind_rows(sp_dis_all_extincted_se, sp_dis_all_extincted_se_all)
@@ -143,10 +149,10 @@ if (F){
 }
 all_df<-readRDS("../../Objects_Full_species/N_Cell_year/N_Cell_year.rda")
 all_df$dispersal<-ifelse(all_df$M==0, "no dispersal", "with dispersal")
-ttt<-0
+ttt<-2
 g<-"ALL"
 for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
-  for (ttt in c(0, 1, 2)){
+  for (ttt in c(2)){
     p<-ggplot(all_df%>%dplyr::filter((group==g)&(threshold==ttt)))+
       geom_ribbon(aes(x=year, ymin=mean_N_CELL_Change_Max-sd_N_CELL_Change_Max,
                       ymax=mean_N_CELL_Change_Max+sd_N_CELL_Change_Max, fill=SSP), alpha=0.2)+
@@ -157,12 +163,13 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell/Max Cell")+
-      ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
-    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_MAX_CELL_%s_%d.pdf", g, ttt))
+      xlab("Year")+ylab("N Cell/Max Cell")
+      #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
+    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_MAX_CELL_%s_%d.pdf", g, ttt), width=8, height=4)
+    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_MAX_CELL_%s_%d.png", g, ttt), width=8, height=4)
     p<-ggplot(all_df%>%dplyr::filter((group==g)&(threshold==ttt)))+
-      #geom_ribbon(aes(x=year, ymin=mean_N_CELL-N_CELL,
-      #                ymax=mean_N_CELL+sd_N_CELL, fill=SSP), alpha=0.2)+
+      geom_ribbon(aes(x=year, ymin=mean_N_CELL-sd_N_CELL,
+                      ymax=mean_N_CELL+sd_N_CELL, fill=SSP), alpha=0.2)+
       geom_line(aes(x=year, y=mean_N_CELL, color=SSP))+
       theme_bw()+
       #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
@@ -170,10 +177,10 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell")+
-      ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
-    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_%s_%d.pdf", g, ttt))
-    
+      xlab("Year")+ylab("N Cell")
+      #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
+    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_%s_%d.pdf", g, ttt), width=8, height=4)
+    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_%s_%d.png", g, ttt), width=8, height=4)
     p<-ggplot(all_df%>%dplyr::filter((group==g)&(threshold==ttt)))+
       #geom_ribbon(aes(x=year, ymin=mean_N_CELL_Change-N_CELL_Change,
       #                ymax=mean_N_CELL_Change+sd_N_CELL_Change, fill=SSP), alpha=0.2)+
@@ -184,8 +191,9 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell/Initial N Cell")+
-      ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
+      xlab("Year")+ylab("N Cell/Initial N Cell")
+      #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_INIT_CELL_%s_%d.pdf", g, ttt))
+    ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_INIT_CELL_%s_%d.png", g, ttt))
   }
 }

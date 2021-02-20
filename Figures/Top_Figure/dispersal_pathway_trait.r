@@ -86,7 +86,12 @@ ttt<-2
 df_sp_list<-df_sp_list[area>ttt]
 df_sp_list$sp<-gsub(" ", "_", df_sp_list$sp)
 raw_path_final_all<-raw_path_final_all%>%dplyr::filter(sp %in% df_sp_list$sp)
-
+tropic_ll<-data.table(lon=0, lat=c(23.43654, -23.43654))
+mask_ll<-raster("../../Raster/Continent.tif")
+mask_eck4<-raster("../../Raster/Continent_ect4.tif")
+p_tropic_all<-SpatialPointsDataFrame(tropic_ll, tropic_ll, proj4string=crs(mask_ll))
+p_tropic_all_eck4<-spTransform(p_tropic_all, crs(mask_eck4))
+lat_threshold<-p_tropic_all_eck4@coords[,2]
 raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, survive, SSP, threshold)%>%
   dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
                    sd_start_alt=sd(start_alt, na.rm=T),
@@ -145,6 +150,13 @@ p1<-ggplot(raw_path_final_se_g)+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
+ggsave(p1, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_elevation.png", "ALL", ttt), 
+       width=10, height=4)
+ggsave(p1, filename=
+         sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_elevation.pdf", "ALL", ttt), 
+       width=10, height=4)
+
 legend<-g_legend(p1)
 
 raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
@@ -560,3 +572,208 @@ ggsave(pp2, filename=
 ggsave(pp2, filename=
          sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_combined_all_sp.pdf", "ALL", ttt), 
        width=4, height=8)
+
+
+
+#Separated by tropic and n/s temperate
+
+raw_path_final_all$is_tropic<-"tropics"
+raw_path_final_all[(raw_path_final_all$start_y>lat_threshold[1]), "is_tropic"]<-"north temperate"
+raw_path_final_all[(raw_path_final_all$start_y<lat_threshold[2]), "is_tropic"]<-"south temperate"
+
+
+ggplot(raw_path_final_all[sample(nrow(raw_path_final_all), 1000),])+
+  geom_point(aes(x=start_x, y=start_y, color=factor(is_tropic)))
+
+raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, survive, SSP, threshold, is_tropic)%>%
+  dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
+                   sd_start_alt=sd(start_alt, na.rm=T),
+                   CI_start_alt=CI(start_alt)[1]-CI(start_alt)[2],
+                   mean_end_alt=mean(end_alt, na.rm=T),
+                   sd_end_alt=sd(end_alt, na.rm=T),
+                   CI_end_alt=CI(end_alt)[1]-CI(end_alt)[2],
+                   mean_start_y=mean(start_y, na.rm=T),
+                   sd_start_y=sd(start_y, na.rm=T),
+                   CI_start_y=CI(start_y)[1]-CI(start_y)[2],
+                   mean_end_y=mean(end_y, na.rm=T),
+                   sd_end_y=sd(end_y, na.rm=T),
+                   CI_end_y=CI(end_y)[1]-CI(end_y)[2],
+                   mean_start_agent=mean(start_agent, na.rm=T),
+                   sd_start_agent=sd(start_agent, na.rm=T),
+                   CI_start_agent=CI(start_agent)[1]-CI(start_agent)[2],
+                   mean_end_agent=mean(end_agent, na.rm=T),
+                   sd_end_agent=sd(end_agent, na.rm=T),
+                   CI_end_agent=CI(end_agent)[1]-CI(end_agent)[2])
+
+raw_path_final_se_1<-raw_path_final_se[, c("group", "survive", "SSP", "threshold", "is_tropic",
+                                           "mean_start_alt", "sd_start_alt", "CI_start_alt",
+                                           "mean_start_y", "sd_start_y", "CI_start_y",
+                                           "mean_start_agent", "sd_start_agent", "CI_start_agent")]
+colnames(raw_path_final_se_1)<-c("group", "survive","SSP", "threshold", "is_tropic",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_1$year="Start"
+
+raw_path_final_se_2<-raw_path_final_se[, c("group", "survive","SSP", "threshold", "is_tropic",
+                                           "mean_end_alt", "sd_end_alt", "CI_end_alt",
+                                           "mean_end_y", "sd_end_y", "CI_end_y",
+                                           "mean_end_agent", "sd_end_agent", "CI_end_agent")]
+colnames(raw_path_final_se_2)<-c("group", "survive","SSP", "threshold", "is_tropic",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_2$year="End"
+
+raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
+raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
+raw_path_final_se_g$exposure<-" no exposure"
+raw_path_final_se_g[which(raw_path_final_se_g$threshold==5),]$exposure<-"5-year exposure"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "5-year exposure"))
+
+
+raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
+raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
+p1<-ggplot(raw_path_final_se_g%>%filter(is_tropic=="tropics"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_grid(survive~SSP, scale="free")+
+  labs(x="Time spots", y="Latitude (km) in tropics", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+legend<-g_legend(p1)
+
+p2<-ggplot(raw_path_final_se_g%>%filter(is_tropic=="north temperate"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_grid(survive~SSP, scale="free")+
+  labs(x="Time spots", y="Latitude (km) in north temperate", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank())
+p3<-ggplot(raw_path_final_se_g%>%filter(is_tropic=="south temperate"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_grid(survive~SSP, scale="free")+
+  labs(x="Time spots", y="Latitude (km) in south temperate", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank())
+
+
+pp<-ggarrange(p1, p2, p3, nrow=3, ncol=1, common.legend=T, legend.grob=legend, legend="right")
+pp2<-annotate_figure(pp,
+                     bottom = text_grob("Time spots", size = 10)
+)
+
+#write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "ALL", ttt), row.names=F)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_by_tropics_ns.png", 
+                             "ALL", ttt), width=10, height=10)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_by_tropics_ns.pdf", 
+                             "ALL", ttt), width=12, height=8)
+
+
+#Separated by tropic and temperate
+
+raw_path_final_all$is_tropic<-"tropics"
+raw_path_final_all[(raw_path_final_all$start_y>lat_threshold[1]), "is_tropic"]<-"temperate"
+raw_path_final_all[(raw_path_final_all$start_y<lat_threshold[2]), "is_tropic"]<-"temperate"
+
+
+ggplot(raw_path_final_all[sample(nrow(raw_path_final_all), 1000),])+
+  geom_point(aes(x=start_x, y=start_y, color=factor(is_tropic)))
+
+raw_path_final_se<-raw_path_final_all%>%dplyr::group_by(group, survive, SSP, threshold, is_tropic)%>%
+  dplyr::summarise(mean_start_alt=mean(start_alt, na.rm=T),
+                   sd_start_alt=sd(start_alt, na.rm=T),
+                   CI_start_alt=CI(start_alt)[1]-CI(start_alt)[2],
+                   mean_end_alt=mean(end_alt, na.rm=T),
+                   sd_end_alt=sd(end_alt, na.rm=T),
+                   CI_end_alt=CI(end_alt)[1]-CI(end_alt)[2],
+                   mean_start_y=mean(abs(start_y), na.rm=T),
+                   sd_start_y=sd(abs(start_y), na.rm=T),
+                   CI_start_y=CI(abs(start_y))[1]-CI(abs(start_y))[2],
+                   mean_end_y=mean(abs(end_y), na.rm=T),
+                   sd_end_y=sd(abs(end_y), na.rm=T),
+                   CI_end_y=CI(abs(end_y))[1]-CI(abs(end_y))[2],
+                   mean_start_agent=mean(start_agent, na.rm=T),
+                   sd_start_agent=sd(start_agent, na.rm=T),
+                   CI_start_agent=CI(start_agent)[1]-CI(start_agent)[2],
+                   mean_end_agent=mean(end_agent, na.rm=T),
+                   sd_end_agent=sd(end_agent, na.rm=T),
+                   CI_end_agent=CI(end_agent)[1]-CI(end_agent)[2])
+
+raw_path_final_se_1<-raw_path_final_se[, c("group", "survive", "SSP", "threshold", "is_tropic",
+                                           "mean_start_alt", "sd_start_alt", "CI_start_alt",
+                                           "mean_start_y", "sd_start_y", "CI_start_y",
+                                           "mean_start_agent", "sd_start_agent", "CI_start_agent")]
+colnames(raw_path_final_se_1)<-c("group", "survive","SSP", "threshold", "is_tropic",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_1$year="Start"
+
+raw_path_final_se_2<-raw_path_final_se[, c("group", "survive","SSP", "threshold", "is_tropic",
+                                           "mean_end_alt", "sd_end_alt", "CI_end_alt",
+                                           "mean_end_y", "sd_end_y", "CI_end_y",
+                                           "mean_end_agent", "sd_end_agent", "CI_end_agent")]
+colnames(raw_path_final_se_2)<-c("group", "survive","SSP", "threshold", "is_tropic",
+                                 "mean_alt", "sd_alt", "CI_alt",
+                                 "mean_y", "sd_y", "CI_y",
+                                 "mean_agent", "sd_agent", "CI_agent")
+raw_path_final_se_2$year="End"
+
+raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
+raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
+raw_path_final_se_g$exposure<-" no exposure"
+raw_path_final_se_g[which(raw_path_final_se_g$threshold==5),]$exposure<-"5-year exposure"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "5-year exposure"))
+
+
+raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
+raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
+p1<-ggplot(raw_path_final_se_g%>%filter(is_tropic=="tropics"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_grid(survive~SSP, scale="free")+
+  labs(x="Time spots", y="Latitude (km) in tropics", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+legend<-g_legend(p1)
+
+p2<-ggplot(raw_path_final_se_g%>%filter(is_tropic=="temperate"))+
+  geom_point(aes(x=year, y=mean_y, color=group))+
+  geom_errorbar(aes(x=year, y=mean_y, ymin=mean_y-CI_y, ymax=mean_y+CI_y, color=group), 
+                width = 0.1, position = "dodge2")+
+  geom_line(aes(x=as.numeric(year), y=mean_y, color=group, linetype=factor(exposure)))+
+  scale_color_manual(values=color_groups)+
+  facet_grid(survive~SSP, scale="free")+
+  labs(x="Time spots", y="Latitude (km) in temperate", color="Group", linetype="Exposure")+
+  theme_bw()+
+  theme(axis.title.x=element_blank())
+
+
+pp<-ggarrange(p1, p2, nrow=2, ncol=1, common.legend=T, legend.grob=legend, legend="right")
+pp2<-annotate_figure(pp,
+                     bottom = text_grob("Time spots", size = 10)
+)
+
+#write.csv(raw_path_final_se_g, sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d.csv", "ALL", ttt), row.names=F)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_by_tropics.png", 
+                             "ALL", ttt), width=10, height=8)
+ggsave(pp2, filename=sprintf("../../Figures_Full_species/Top_Figure_all/gradient_%s_ttt_%d_by_tropics.pdf", 
+                             "ALL", ttt), width=12, height=8)
