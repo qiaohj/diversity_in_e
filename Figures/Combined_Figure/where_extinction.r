@@ -74,7 +74,7 @@ p<-ggplot()+
                       labels=c("0", "20", "40", "60", "80", 
                                sprintf(">100, up to %d", round(max(n_ext_final$sum_V)))))+
   scale_color_manual(values=color_keyspots)+
-  labs(fill = "Number of extinctions", color="Key spots")+
+  labs(fill = "Number of extinctions", color="Key locations")+
   theme(
     axis.line = element_blank(),
     axis.text.x = element_blank(),
@@ -112,7 +112,7 @@ p2<-ggplot()+
   theme_bw()+
   scale_color_manual(values=color_keyspots)+
   scale_fill_manual(values=color_keyspots)+
-  labs(x="Number of extinctions", y="N Cells")+
+  labs(x="Number of extinctions", y="Number of cells")+
   facet_wrap(~label, scale="free")+
   theme(
     strip.background = element_blank(),

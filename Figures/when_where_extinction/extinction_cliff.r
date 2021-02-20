@@ -78,7 +78,7 @@ for (ttt in c(2)){
   
   p<-ggplot(cliff_item)+geom_density(aes(x=N_extinct_Cell, color=da))+
     facet_grid(exposure~SSP)+
-    xlab("N Cells")+
+    xlab("Number of cells")+
     ylab("Density")+
     ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="")+
@@ -106,7 +106,7 @@ for (ttt in c(2)){
     geom_line(aes(x=extinct_year, y=mean_extinct_Cell, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
-    ylab("N Cells")+
+    ylab("Number of cells")+
     #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+
@@ -139,7 +139,7 @@ for (ttt in c(2)){
     geom_line(aes(x=extinct_year, y=mean_extinct_st, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
-    ylab("N Cells/Initial N Cells")+
+    ylab("Number of cells/Initial number of cells")+
     #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+
@@ -158,7 +158,7 @@ for (ttt in c(2)){
     geom_line(aes(x=extinct_year, y=mean_extinct_max, color=da))+
     facet_grid(exposure~SSP, scale="free")+
     xlab("Year")+
-    ylab("N Cells/Max N Cells")+
+    ylab("Number of cells/Max number of cells")+
     #ggtitle(sprintf("Distribution>%d", ttt))+
     labs(color="", fill="")+
     scale_color_manual(values=color_da)+

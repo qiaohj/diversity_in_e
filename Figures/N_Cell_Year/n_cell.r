@@ -163,7 +163,7 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell/Max Cell")
+      xlab("Year")+ylab("Number of cells/Max number of cells")
       #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_MAX_CELL_%s_%d.pdf", g, ttt), width=8, height=4)
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_MAX_CELL_%s_%d.png", g, ttt), width=8, height=4)
@@ -177,7 +177,7 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell")
+      xlab("Year")+ylab("Number of cells")
       #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_%s_%d.pdf", g, ttt), width=8, height=4)
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_%s_%d.png", g, ttt), width=8, height=4)
@@ -191,7 +191,7 @@ for (g in c("ALL", "Amphibians", "Birds", "Mammals", "Reptiles")){
       scale_color_manual(values=color_ssp)+
       scale_fill_manual(values=color_ssp)+
       labs(color = "SSP")+
-      xlab("Year")+ylab("N Cell/Initial N Cell")
+      xlab("Year")+ylab("Number of cells/Initial number of cells")
       #ggtitle(sprintf("Distribution>%d (%s)", ttt, g))
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_INIT_CELL_%s_%d.pdf", g, ttt))
     ggsave(p, filename=sprintf("../../Figures_Full_species/N_Cell_year/N_CELL_INIT_CELL_%s_%d.png", g, ttt))

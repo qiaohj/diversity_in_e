@@ -123,5 +123,61 @@ for (i in c(1:3)){
          width=15, height=4)
 }
 
+GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
+SSPs<-c("SSP119", "SSP245", "SSP585")
+dispersals<-c(0, 1)
+
+df<-NULL
+for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+  print(g)
+  nb<-readRDS(sprintf("../../Objects_Full_species/Species_property/%s_property.rda", g))
+  
+  nb<-nb%>%dplyr::select(nb_TEMP_sd, nb_PR_sd, N_CELL, sp)
+  nb<-as.data.frame(nb)
+  full_sp<-expand.grid(GCM=GCMs, SSP=SSPs, sp=unique(nb$sp), dispersal=dispersals, stringsAsFactors = F)
+  full_sp_with_nb<-full_join(full_sp, nb, by="sp")
+  ttt<-2
+  for (threshold in c(1, 5)){
+    extinct<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
+    extinct<-extinct%>%dplyr::distinct(sp, GCM, SSP, extinct_year, dispersal)
+    extinct[is.infinite(extinct$extinct_year), "extinct_year"]<-2020
+    df1<-full_join(full_sp_with_nb, extinct, by=c("sp", "GCM", "SSP", "dispersal"))
+    df1<-df1%>%dplyr::filter(N_CELL>ttt)
+    df1$threshold<-threshold
+    df1$group<-g
+    df<-bind(df, df1)
+  }
+}
 
 
+
+
+
+df$is_extinct<-ifelse(is.na(df$extinct_year), "NO", "YES")
+df$exposure<-ifelse(df$threshold==1, " no exposure", "5-year exposure")
+df$da<-ifelse(df$dispersal==1, "with dispersal", "no dispersal")
+df$Label<-paste(df$SSP, df$da)
+p<-ggplot(df)+
+  geom_histogram(aes(x=nb_TEMP_sd), fill=colors_black[4], bins=50)+
+  geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
+                 aes(x=nb_TEMP_sd), fill=colors_red[9], bins=50)+
+  theme_bw()+
+  xlab("Niche breadth in temperature)")+
+  ylab("Number of species")+
+  facet_grid(exposure~Label, scale="free")
+p
+ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.pdf", ttt), width=12, height=6)
+ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.png", ttt), width=12, height=6)
+
+
+p<-ggplot(df)+
+  geom_histogram(aes(x=nb_PR_sd), fill=colors_black[4], bins=50)+
+  geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
+                 aes(x=nb_PR_sd), fill=colors_red[9], bins=50)+
+  theme_bw()+
+  xlab("Niche breadth in precipitation)")+
+  ylab("Number of species")+
+  facet_grid(exposure~Label)
+p
+ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.pdf", ttt), width=12, height=6)
+ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.png", ttt), width=12, height=6)

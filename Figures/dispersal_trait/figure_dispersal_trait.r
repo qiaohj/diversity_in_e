@@ -89,7 +89,7 @@ df_se$type<-factor(df_se$type, levels=c("start", "end"))
 df_se$y<-df_se$y/1000
 df_se$CI_y<-df_se$CI_y/1000
 
-p1<-ggplot(df_se%>%dplyr::filter((SSP=="SSP245")&(da=="with dispersal")))+
+p1<-ggplot(df_se%>%dplyr::filter((SSP=="SSP119")&(da=="with dispersal")))+
   geom_point(aes(x=type, y=alt, color=group), size=2)+
   geom_errorbar(aes(x=type, y=alt, ymin=alt-CI_alt, ymax=alt+CI_alt, color=group), 
                 width = 0.1, position = "dodge2")+
@@ -108,7 +108,7 @@ p1<-ggplot(df_se%>%dplyr::filter((SSP=="SSP245")&(da=="with dispersal")))+
 legend<-g_legend(p1)
 
 
-p2<-ggplot(df_se%>%dplyr::filter((SSP=="SSP245")&(da=="with dispersal")))+
+p2<-ggplot(df_se%>%dplyr::filter((SSP=="SSP119")&(da=="with dispersal")))+
   geom_point(aes(x=type, y=y, color=group))+
   geom_errorbar(aes(x=type, y=y, ymin=y-CI_y, ymax=y+CI_y, color=group), 
                 width = 0.1, position = "dodge2")+

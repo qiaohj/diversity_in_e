@@ -222,6 +222,7 @@ for (ttt in c(2)){
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.pdf", ttt), width=12, height=6)
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.png", ttt), width=12, height=6)
   
+ 
   
   for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
     print(g)

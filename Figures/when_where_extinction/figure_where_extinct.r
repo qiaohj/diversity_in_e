@@ -64,9 +64,12 @@ g<-"Amphibians"
 mask<-raster("../../Raster/mask_index.tif")
 threshold<-1
 SSP_i<-"SSP585"
+ttt=2
+da=1
+
 for (threshold in c(1, 5)){
   for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-    for (ttt in c(0, 1, 2)){
+    for (ttt in c(2)){
       where_extinct<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/where_extinct_%s_ttt_%d.rda", threshold, g, ttt))
       for (da in c(0:1)){
         print(paste(g, threshold, da))

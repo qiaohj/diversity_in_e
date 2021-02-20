@@ -101,7 +101,7 @@ p2<-ggplot()+
     name = "Annual maximum temperature",
     # Add a second axis and specify its features
     sec.axis = sec_axis(trans=~(.-intercept)*scale, 
-                        name="Average number of extinctions across GCM",
+                        name="Average number of extinctions across ESMs",
                         breaks=waiver(),
                         labels=waiver())
   )+
@@ -112,6 +112,6 @@ p2<-ggplot()+
   labs(linetype="")+
   theme_bw()
 p2
-ggsave(p2, filename="../../Figures_Full_species/Combined_Figure/Figure_env_year.pdf")
+ggsave(p2, filename="../../Figures_Full_species/Combined_Figure/Figure_env_year.pdf", width=8, height=4)
 ggsave(p2, filename="../../Figures_Full_species/Combined_Figure/Figure_env_year.png", width=8, height=4)
 

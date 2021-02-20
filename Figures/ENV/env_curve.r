@@ -61,6 +61,7 @@ p1<-ggplot(df_se%>%filter((VAR=="pr")&(between(Y, 2021, 2100))), aes(x=Y, y=annu
   scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
   xlab("Year")+
   ylab("Annual precipitation")+
+  labs(linetype="ESM")+
   theme_bw()
 legend_g<-get_legend(p1)
 p1<-p1+theme(legend.position="none")
@@ -92,5 +93,5 @@ p3
 
 p<-ggarrange(p1, p2, p3, nrow=3, common.legend = T, legend.grob=legend_g, legend="right")
 p
-ggsave(p, file="../../Figures/Env/GCM_Curves.png", width=15, height=8)
+ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.png", width=15, height=8)
 ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.pdf", width=15, height=8)
