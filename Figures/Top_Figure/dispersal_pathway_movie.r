@@ -121,9 +121,44 @@ for (j in c(6:6)){
   }
   
 }
-
+library(magick)
+threshold<-5
+label<-"UKESM1_SSP119"
+ttt<-2
+g<-"Birds"
+year<-2021
+for (year in c(2021:2100)){
+  print(year)
+  png(sprintf("../../Figures_Full_species/Top_Figure_%d/Movies/Top_Figure_ALL_%s_ttt_%d/Combined/%d.png", 
+              threshold, label, ttt, year), width=1920, height=1080, units = "px")
+  par(mfrow=c(2,2),
+      oma = c(0,0,0,0),
+      mar = c(0,0,0,0),
+      mgp = c(0, 0, 0),    # axis label at 2 rows distance, tick labels at 1 row
+      xpd = NA,
+      tcl=-1
+      )
+  for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+    folder<-sprintf("../../Figures_Full_species/Top_Figure_%d/Movies/Top_Figure_ALL_%s_ttt_%d/%s", 
+                    threshold, label, ttt, g)
+    
+    path<-image_read(sprintf("%s/%d.png", folder, year))
+    path<-image_crop(path, "2400x1450+300+100")
+    
+    path<-image_annotate(path, g, gravity = "south", 
+                   size = 120,  color = "#000000",
+                   strokecolor = NULL, boxcolor = NULL)
+    #path<-image_resize(path, "960x580")
+    
+    plot(path)
+    
+  }
+  text(0,100,year,cex=6,font=2)
+  
+  dev.off()
+}
 cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP585_ttt_2
-ffmpeg -r 2 -start_number 2021 -i %04d.png -y ../UKESM1_SSP585_ttt_2.mp4
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../UKESM1_SSP585_ttt_2.mp4
 
 cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP585_ttt_2/Amphibians
 ffmpeg -r 1 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP585_ttt_2_Amphibians.mp4
@@ -136,3 +171,12 @@ ffmpeg -r 1 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP585_ttt_2_Mammals.
 
 cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP585_ttt_2/Reptiles
 ffmpeg -r 1 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP585_ttt_2_Reptiles.mp4
+
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP585_ttt_2/Combined
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP585_ttt_2_Combined.mp4
+
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP245_ttt_2/Combined
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP245_ttt_2_Combined.mp4
+
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures_Full_species/Top_Figure_5/Movies/Top_Figure_ALL_UKESM1_SSP119_ttt_2/Combined
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../UKESM1_SSP119_ttt_2_Combined.mp4

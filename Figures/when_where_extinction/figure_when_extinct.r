@@ -60,6 +60,8 @@ if (F){
         
         when_extinct_df<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/when_extinct_%s_%d.rda", threshold, g, ttt))
         when_extinct_df$extinct_ratio<-when_extinct_df$n_sp/nrow(sp_list)
+        when_extinct_df%>%dplyr::filter((SSP=="SSP119")&(extinct_year==2021))
+             + )
         when_extinct_df_se<-when_extinct_df%>%dplyr::group_by(group, SSP, extinct_year, dispersal)%>%
           dplyr::summarise(mean_n_sp=mean(n_sp),
                            sd_n_sp=sd(n_sp),

@@ -14,14 +14,15 @@ source("commonFuns/colors.r")
 
 tttt=2
 
+SSPi<-"SSP245"
 n_ext_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/n_ext_final_with_ttt.rda")
 n_ext_final_1<-n_ext_final%>%dplyr::filter((dispersal==0)&
                                              (ttt==tttt)&
-                                             (SSP=="SSP585")&
+                                             (SSP==SSPi)&
                                              (threshold==1))
 n_ext_final_2<-n_ext_final%>%dplyr::filter((dispersal==1)&
                                              (ttt==tttt)&
-                                             (SSP=="SSP585")&
+                                             (SSP==SSPi)&
                                              (threshold==5))
 n_ext_final<-bind_rows(n_ext_final_1, n_ext_final_2)
 n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
@@ -32,8 +33,8 @@ mask<-raster("../../Raster/mask_index.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 n_ext_final$label<-paste(n_ext_final$SSP, n_ext_final$exposure, n_ext_final$da, sep=", ")
 n_ext_final$label<-factor(n_ext_final$label, 
-                             levels = c("SSP585,  no exposure, no dispersal",
-                                        "SSP585, 5-year exposure, with dispersal"))
+                             levels = c(sprintf("%s,  no exposure, no dispersal", SSPi),
+                                        sprintf("%s, 5-year exposure, with dispersal", SSPi)))
 
 if (T){
 keyspots<-read.csv("../../Objects_Full_species/keyspots/keyspots.csv", stringsAsFactors = F)
@@ -88,8 +89,8 @@ p<-ggplot()+
     panel.background = element_blank(), 
     #legend.background = element_rect(fill = map_background, color = NA),
     #panel.border = element_blank(),
-    panel.border = element_rect(colour = "black", fill=NA),
-    strip.background = element_blank()
+    #panel.border = element_rect(colour = "black", fill=NA),
+    #strip.background = element_blank()
   )
 p
 
@@ -107,6 +108,8 @@ p2<-ggplot()+
   stat_density(data=n_ext_final_with_keyspots%>%filter(!is.na(keysport)), 
                aes(x=sum_V, y=..count.., color=keysport), position = "identity", fill=NA)+
   scale_x_log10()+
+  #scale_x_sqrt(breaks=seq(0, 14, by=2)^2)+
+  #scale_y_log10()+
   scale_y_sqrt(breaks=seq(0, 100, by=20)^2)+
   #scale_y_continuous()+
   theme_bw()+
@@ -128,5 +131,5 @@ p2
 }
 g_legend<-get_legend(p)
 p3<-ggarrange(p, p2, nrow=2, ncol=1, common.legend=T, legend = "right", legend.grob = g_legend)
-ggsave(p3, filename="../../Figures_Full_species/Combined_Figure/keyspots_extinction.pdf", width=8, height=4)
-ggsave(p3, filename="../../Figures_Full_species/Combined_Figure/keyspots_extinction.png", width=8, height=4)
+ggsave(p3, filename=sprintf("../../Figures_Full_species/Combined_Figure/keyspots_extinction_%s.pdf", SSPi), width=8, height=4)
+ggsave(p3, filename=sprintf("../../Figures_Full_species/Combined_Figure/keyspots_extinction_%s.png", SSPi), width=8, height=4)

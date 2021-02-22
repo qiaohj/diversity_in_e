@@ -66,7 +66,7 @@ p<-ggplot(df_all_SSP%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)),
   
 p
 ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/start_end_ttt_%d.png", ttt))
-
+yyy=2040
 for (yyy in c(2040, 2100)){
   df_all_se<-df_all%>%dplyr::filter(extinct_year>yyy)%>%dplyr::group_by(SSP, group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min),
@@ -94,7 +94,7 @@ for (yyy in c(2040, 2100)){
     geom_line(data=df_all_se, aes(x=year, y = mean_dist_mean, color=group))+theme_bw()+
     xlab("Year")+
     ylab("Average distance need to dispersal (KM)")+
-    ggtitle(yyy)+
+    #ggtitle(yyy)+
     labs(color="Group", fill="Group")+
     scale_color_manual(values=color_groups)+
     scale_fill_manual(values=color_groups)+
@@ -112,7 +112,7 @@ for (yyy in c(2040, 2100)){
     geom_line(data=df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
     theme_bw()+
     xlab("Year")+
-    ggtitle(yyy)+
+    #ggtitle(yyy)+
     ylab("Average distance need to dispersal (KM)")+
     labs(color="Group", fill="Group")+
     scale_color_manual(values=color_groups)+
@@ -131,7 +131,7 @@ for (yyy in c(2040, 2100)){
 if (F){
   df_all_se<-df_all%>%dplyr::filter(dist_min_mean>=1)%>%dplyr::group_by(SSP, group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
-                     sd_dist_mean=sd(dist_min_mean))
+                     CI_dist_mean=sd(dist_min_mean))
   
   p<-ggplot(df_all_se, aes(x=year, y = mean_dist_mean, color=group))+
     geom_line()+theme_bw()+
@@ -143,7 +143,7 @@ if (F){
   
   df_all_se_all<-df_all%>%dplyr::filter(dist_min_mean>=1)%>%dplyr::group_by(group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min_mean),
-                     sd_dist_mean=sd(dist_min_mean))
+                     CI_dist_mean=sd(dist_min_mean))
   
   
   df_all_se%>%filter(year==2100)

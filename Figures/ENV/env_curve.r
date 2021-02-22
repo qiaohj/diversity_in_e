@@ -91,7 +91,11 @@ p3<-ggplot(df_se%>%filter((VAR=="tasmin")&(between(Y, 2021, 2100))), aes(x=Y, y=
 
 p3
 
-p<-ggarrange(p1, p2, p3, nrow=3, common.legend = T, legend.grob=legend_g, legend="right")
+p<-ggarrange(p1, p2, p3, nrow=3, 
+             common.legend = T, 
+             legend.grob=legend_g, 
+             legend="right", labels = c("(a)", "(b)", "(c)"),
+             label.x=0.065)
 p
-ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.png", width=15, height=8)
-ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.pdf", width=15, height=8)
+ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.png", width=10, height=8)
+ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.pdf", width=10, height=8)

@@ -11,7 +11,7 @@ rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
-
+threshold=1
 
 if (F){
   for (threshold in c(1, 5)){
@@ -84,6 +84,7 @@ if (F){
       }
     }
     N_SP<-sp_dis_all%>%dplyr::group_by(group)%>%dplyr::summarise(N_SP=n_distinct(sp))
+    
     sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
     sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
     saveRDS(sp_dis_all, sprintf("../../Figures_Full_species/N_Extinction/sp_dis_all_%d.rda", threshold))
@@ -100,7 +101,7 @@ if (F){
     
   }
 }
-ttt<-0
+ttt<-2
 threshold<-1
 for (ttt in c(2)){
   sp_dis_all_sub_N_all<-NULL

@@ -15,8 +15,9 @@ SSP_i<-"SSP585"
 da=1
 tttt=2
 mask_p<-data.frame(rasterToPoints(mask))
-if (F)
-  for (da in c(0:1)){
+if (T){
+  #for (da in c(0:1)){
+    da=0
     print(paste(da, tttt))
     if (da==0){
       title1<-"Extinct proportion (no dispersal)"
@@ -75,9 +76,11 @@ if (F)
         legend.background = element_rect(fill = map_background, color = NA),
         panel.border = element_blank(),
         legend.position="bottom",
-        legend.key.width=unit(1,"in"),
+        legend.key.width=unit(0.8, "in"),
         strip.background.x = element_blank(),
-        strip.text.x = element_blank()
+        strip.text.x = element_blank(),
+        strip.background.y = element_blank(),
+        strip.text.y = element_blank()
       )
     p1
     
@@ -106,20 +109,116 @@ if (F)
         legend.background = element_rect(fill = map_background, color = NA),
         panel.border = element_blank(),
         legend.position="bottom",
-        legend.key.width=unit(1, "in")
+        legend.key.width=unit(0.8, "in"),
+        strip.background.y = element_blank(),
+        strip.text.y = element_blank()
       )
     p2
 
-    pp<-ggarrange(p2, p1, ncol=1, nrow=2, labels=c("(a)", "(b)"))
+    da=1
+    print(paste(da, tttt))
+    if (da==0){
+      title1<-"Extinct proportion (no dispersal)"
+      title2<-"Number of extinct species (no dispersal)"
+    }else{
+      title1<-"Extinct proportion (with dispersal)"
+      title2<-"Number of extinct species (with dispersal)"
+    }
+    
+    myPalette <- colorRampPalette(c(color_two_map[2], color_two_map[1]))
+    ratio_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/ratio_final_with_ttt.rda")
+    
+    ratio_final<-ratio_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
+    ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$threshold)
+    ratio_final<-ratio_final%>%dplyr::filter(mean_V>0)
+    ratio_final<-data.frame(ratio_final)
+    ratio_final$exposure<-ifelse(ratio_final$threshold==1, " no exposure", "5-year exposure")
+    ratio_final[which(ratio_final$threshold==1), "label"]<-
+      paste(as.vector(ratio_final[which(ratio_final$threshold==1), "SSP"]), " no exposure", sep=", ")
+    ratio_final[which(ratio_final$threshold==5), "label"]<-
+      paste(ratio_final[which(ratio_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
+    
+    n_ext_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/n_ext_final_with_ttt.rda")
+    n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
+    n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$threshold)
+    n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
+    n_ext_final$exposure<-ifelse(n_ext_final$threshold==1, " no exposure", "5-year exposure")
+    n_ext_final<-data.frame(n_ext_final)
+    n_ext_final[which(n_ext_final$threshold==1), "label"]<-
+      paste(as.vector(n_ext_final[which(n_ext_final$threshold==1), "SSP"]), " no exposure", sep=", ")
+    n_ext_final[which(n_ext_final$threshold==5), "label"]<-
+      paste(n_ext_final[which(n_ext_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
+    
+    p3<-ggplot(ratio_final)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+      geom_tile(aes(x=x, y=y, fill=mean_V))+
+      facet_grid(exposure~SSP, scale="free")+
+      scale_fill_gradient(low=color_two_map[1], high=color_two_map[2], 
+                          limits=c(0, 0.6), oob=squish,
+                          breaks=seq(0, 0.6, by=0.1),
+                          labels=c("0%", "10%", "20%", "30%", "40%", "50%",
+                                   sprintf(">60%%, up to %.0f%%", max(ratio_final$mean_V)*100)))+
+      #ggtitle(title1)+
+      labs(fill = "Extinct proportion")+
+      theme(
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = map_background, color = NA), 
+        panel.background = element_blank(), 
+        legend.background = element_rect(fill = map_background, color = NA),
+        panel.border = element_blank(),
+        legend.position="bottom",
+        legend.key.width=unit(0.8, "in"),
+        strip.background.x = element_blank(),
+        strip.text.x = element_blank()
+      )
+    p3
+    
+    p4<-ggplot(n_ext_final)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+      geom_tile(aes(x=x, y=y, fill=sum_V))+
+      facet_grid(exposure~SSP)+
+      scale_fill_gradient(low=color_two_map[1], high=color_two_map[2],
+                          limits=c(0, 100), oob=squish,
+                          breaks=c(0, 20, 40, 60, 80, 100),
+                          labels=c("0", "20", "40", "60", "80", 
+                                   sprintf(">100, up to %d", round(max(n_ext_final$sum_V)))))+
+      #ggtitle(title2)+
+      labs(fill = "Number of extinct species")+
+      theme(
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = map_background, color = NA), 
+        panel.background = element_blank(), 
+        legend.background = element_rect(fill = map_background, color = NA),
+        panel.border = element_blank(),
+        legend.position="bottom",
+        legend.key.width=unit(0.8, "in")
+      )
+    p4
+    
+    pp<-ggarrange(p2,  p4, p1, p3, ncol=2, nrow=2, labels=c("(a)", "(b)", "(c)", "(d)"))
     
     ggsave(pp, 
-           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d.png", da, tttt), 
-           width=9, height=8)
+           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d.png", tttt), 
+           width=14, height=9)
     
     ggsave(pp, 
-           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d.pdf", da, tttt), 
-           width=9, height=8)
-    
+           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d.pdf", tttt), 
+           width=14, height=9)
+}   
     ratio_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/ratio_final_group_with_ttt.rda")
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
     ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$threshold)
@@ -230,6 +329,6 @@ if (F)
              filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d_%s.pdf", 
                               da, tttt, g), 
              width=9, height=8)
-    }
+    #}
   }
 }

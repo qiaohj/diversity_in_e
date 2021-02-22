@@ -35,31 +35,33 @@ if (F){
         dis<-readRDS(sprintf("../../Objects_Full_species/Niche_Models/%s/%s/dispersal_%d/%s_%s_%d.rda",
                              item$group, item$sp, threshold, item$GCM, item$SSP, item$dispersal))
         if (is.null(dis)){
-          next()
-        }
-        dis_prev<-dis[YEAR==(item$extinct_year-1)]
-        model<-readRDS(sprintf("../../Objects_Full_species/Niche_Models/%s/%s/fit.rda", 
-                               item$group, item$sp, threshold, item$GCM, item$SSP))
-        
-        env_item<-data.table(env_layers[[sprintf("%s_%s_%d", item$GCM, item$SSP, item$extinct_year)]])
-        
-        env_item<-env_item[((PR %between% c(model$range_PR_sd_min, model$range_PR_sd_max))&
-                              (TEMP_MAX %between% c(model$range_TEMP_sd_min, model$range_TEMP_sd_max))&
-                              (TEMP_MIN %between% c(model$range_TEMP_sd_min, model$range_TEMP_sd_max)))]
-        if (nrow(env_item)>0){
-          min_distance<-env_item[, min_dist(x, y, dis_prev), by = 1:nrow(env_item)]
-          min_distance<-min(min_distance$V1)/1000
-          if (F){
-            ggplot()+
-              geom_tile(data=env_item, aes(x=x, y=y))+
-              #geom_tile(data=dis_prev, aes(x=x, y=y), fill="red")
-              geom_point(data=dis_prev, aes(x=x, y=y), color="red")
-            
-          }
-          TYPE<-"Unreachable"
-        }else{
           min_distance<-NA
           TYPE<-"Unsuitable"
+        }else{
+          dis_prev<-dis[YEAR==(item$extinct_year-1)]
+          model<-readRDS(sprintf("../../Objects_Full_species/Niche_Models/%s/%s/fit.rda", 
+                                 item$group, item$sp, threshold, item$GCM, item$SSP))
+          
+          env_item<-data.table(env_layers[[sprintf("%s_%s_%d", item$GCM, item$SSP, item$extinct_year)]])
+          
+          env_item<-env_item[((PR %between% c(model$range_PR_sd_min, model$range_PR_sd_max))&
+                                (TEMP_MAX %between% c(model$range_TEMP_sd_min, model$range_TEMP_sd_max))&
+                                (TEMP_MIN %between% c(model$range_TEMP_sd_min, model$range_TEMP_sd_max)))]
+          if (nrow(env_item)>0){
+            min_distance<-env_item[, min_dist(x, y, dis_prev), by = 1:nrow(env_item)]
+            min_distance<-min(min_distance$V1)/1000
+            if (F){
+              ggplot()+
+                geom_tile(data=env_item, aes(x=x, y=y))+
+                #geom_tile(data=dis_prev, aes(x=x, y=y), fill="red")
+                geom_point(data=dis_prev, aes(x=x, y=y), color="red")
+              
+            }
+            TYPE<-"Unreachable"
+          }else{
+            min_distance<-NA
+            TYPE<-"Unsuitable"
+          }
         }
         item$N_Prev=nrow(dis_prev)
         item$N_Extinct=nrow(env_item)

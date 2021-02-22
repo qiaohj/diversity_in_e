@@ -23,14 +23,16 @@ if (is.na(threshold)){
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
-df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+ttt<-2
+df_list<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", group))
+df_list<-df_list[which(df_list$area>ttt),]
 i=3369
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
 dispersals<-c(1)
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 #beginCluster()
-for (i in c(5102:nrow(df_list))){
+for (i in c(1:nrow(df_list))){
   
   item<-df_list[i,]
   item$sp<-gsub(" ", "_", item$sp)
@@ -43,7 +45,7 @@ for (i in c(5102:nrow(df_list))){
     next()
   }
   
-  target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
+  target_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", group, item$sp)
   print(paste(i, nrow(df_list), item$sp, target_folder))
   start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
   model<-readRDS(sprintf("%s/fit.rda", target_folder))
@@ -147,7 +149,8 @@ for (i in c(5102:nrow(df_list))){
     }
   }
 }
-saveRDS(final_df, sprintf("../../Figures/dispersal_usage_%d/%s.rda", threshold, group))
+saveRDS(final_df, sprintf("../../Figures_Full_species/dispersal_usage_%d/%s_ttt_%d.rda", 
+                          threshold, group, ttt))
 #endCluster()
 
 if (F){

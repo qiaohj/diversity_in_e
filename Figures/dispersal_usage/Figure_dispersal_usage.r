@@ -18,7 +18,7 @@ if (F){
   final_df_sum_all<-NULL
   for (g in groups){
     print(g)
-    final_df<-readRDS(sprintf("../../Figures/dispersal_usage_%d/%s.rda", threshold, g))
+    final_df<-readRDS(sprintf("../../Figures_Full_species/dispersal_usage_%d/%s.rda", threshold, g))
     
     final_df_sum<-final_df%>%dplyr::group_by(mask_index, GCM, SSP, dispersal)%>%
       dplyr::summarise(N_SP_SUM=sum(N_SP))
