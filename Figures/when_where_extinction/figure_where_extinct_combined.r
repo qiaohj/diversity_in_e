@@ -51,7 +51,7 @@ if (T){
     n_ext_final[which(n_ext_final$threshold==5), "label"]<-
       paste(n_ext_final[which(n_ext_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
     
-    p1<-ggplot(ratio_final)+
+    p_ratio_no_da<-ggplot(ratio_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=mean_V))+
       facet_grid(exposure~SSP, scale="free")+
@@ -76,15 +76,11 @@ if (T){
         legend.background = element_rect(fill = map_background, color = NA),
         panel.border = element_blank(),
         legend.position="bottom",
-        legend.key.width=unit(0.8, "in"),
-        strip.background.x = element_blank(),
-        strip.text.x = element_blank(),
-        strip.background.y = element_blank(),
-        strip.text.y = element_blank()
+        legend.key.width=unit(0.8, "in")
       )
-    p1
+    p_ratio_no_da
     
-    p2<-ggplot(n_ext_final)+
+    p_n_ext_no_da<-ggplot(n_ext_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=sum_V))+
       facet_grid(exposure~SSP)+
@@ -109,11 +105,9 @@ if (T){
         legend.background = element_rect(fill = map_background, color = NA),
         panel.border = element_blank(),
         legend.position="bottom",
-        legend.key.width=unit(0.8, "in"),
-        strip.background.y = element_blank(),
-        strip.text.y = element_blank()
+        legend.key.width=unit(0.8, "in")
       )
-    p2
+    p_n_ext_no_da
 
     da=1
     print(paste(da, tttt))
@@ -149,7 +143,7 @@ if (T){
     n_ext_final[which(n_ext_final$threshold==5), "label"]<-
       paste(n_ext_final[which(n_ext_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
     
-    p3<-ggplot(ratio_final)+
+    p_ratio_with_da<-ggplot(ratio_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=mean_V))+
       facet_grid(exposure~SSP, scale="free")+
@@ -174,13 +168,11 @@ if (T){
         legend.background = element_rect(fill = map_background, color = NA),
         panel.border = element_blank(),
         legend.position="bottom",
-        legend.key.width=unit(0.8, "in"),
-        strip.background.x = element_blank(),
-        strip.text.x = element_blank()
+        legend.key.width=unit(0.8, "in")
       )
-    p3
+    p_ratio_with_da
     
-    p4<-ggplot(n_ext_final)+
+    p_n_ext_with_da<-ggplot(n_ext_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=sum_V))+
       facet_grid(exposure~SSP)+
@@ -207,18 +199,31 @@ if (T){
         legend.position="bottom",
         legend.key.width=unit(0.8, "in")
       )
-    p4
+    p_n_ext_no_da_formatted<-p_n_ext_no_da
     
-    pp<-ggarrange(p2,  p4, p1, p3, ncol=2, nrow=2, labels=c("(a)", "(b)", "(c)", "(d)"))
+    p_ratio_no_da_formatted<-p_ratio_no_da+theme(strip.background.x = element_blank(),
+                                                 strip.text.x = element_blank())
+    p_ratio_with_da_formatted<-p_ratio_with_da+theme(strip.background.x = element_blank(),
+                                                 strip.text.x = element_blank())
+    p_n_ext_with_da_formatted<-p_n_ext_with_da+theme(strip.background.x = element_blank(),
+                                                 strip.text.x = element_blank())
+    
+    pp<-ggarrange(p_n_ext_no_da_formatted,
+                  p_ratio_no_da_formatted, 
+                  p_n_ext_with_da_formatted, 
+                  p_ratio_with_da_formatted, ncol=1, nrow=4, labels=c("(a)", "(b)", "(c)", "(d)"))
     
     ggsave(pp, 
            filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d.png", tttt), 
-           width=14, height=9)
+           width=7, height=13)
     
     ggsave(pp, 
            filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d.pdf", tttt), 
-           width=14, height=9)
+           width=7, height=13)
 }   
+
+all_p_list<-list()
+for (da in c(0, 1)){
     ratio_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/ratio_final_group_with_ttt.rda")
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
     ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$threshold)
@@ -244,6 +249,7 @@ if (T){
    
     
     for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+      print(paste(g, da))
       ratio_final_item<-ratio_final%>%dplyr::filter(group==g)
       #hist(ratio_final_item$mean_V)
       ggg<-scale_fill_gradient(low=color_two_map[1], high=color_two_map[2], 
@@ -263,7 +269,7 @@ if (T){
         geom_tile(aes(x=x, y=y, fill=mean_V))+
         facet_grid(exposure~SSP)+
         ggg+
-        ggtitle(paste(g, title1, sep=" - "))+
+        #ggtitle(paste(g, title1, sep=" - "))+
         labs(fill = "Extinct proportion")+
         theme(
           axis.line = element_blank(),
@@ -279,13 +285,13 @@ if (T){
           legend.background = element_rect(fill = map_background, color = NA),
           panel.border = element_blank(),
           legend.position="bottom",
-          legend.key.width=unit(1,"in"),
-          strip.background.x = element_blank(),
-          strip.text.x = element_blank(),
+          legend.key.width=unit(0.8,"in"),
+          #strip.background.x = element_blank(),
+          #strip.text.x = element_blank(),
           plot.title = element_text(hjust = 0.5)
         )
       p1
-      
+      all_p_list[[sprintf("%s_%d_ratio", g, da)]]<-p1
       n_ext_final_item<-n_ext_final%>%dplyr::filter(group==g)
       
       p2<-ggplot(n_ext_final_item)+
@@ -297,7 +303,7 @@ if (T){
                             breaks=c(0, 10, 20, 30, 40),
                             labels=c("0", "10", "20", "30",
                                      sprintf(">40, up to %d", round(max(n_ext_final_item$sum_V)))))+
-        ggtitle(paste(title2, g, sep=" - "))+
+        #ggtitle(paste(title2, g, sep=" - "))+
         labs(fill = "Number of extinct species")+
         theme(
           axis.line = element_blank(),
@@ -313,22 +319,49 @@ if (T){
           legend.background = element_rect(fill = map_background, color = NA),
           panel.border = element_blank(),
           legend.position="bottom",
-          legend.key.width=unit(1,"in"),
+          legend.key.width=unit(0.8,"in"),
           plot.title = element_text(hjust = 0.5)
         )
       p2
+      all_p_list[[sprintf("%s_%d_n_ext", g, da)]]<-p2
       
-      pp<-ggarrange(p2, p1, ncol=1, nrow=2, labels=c("(a)", "(b)"))
+      #pp<-ggarrange(p2, p1, ncol=1, nrow=2, labels=c("(a)", "(b)"))
       
-      ggsave(pp, 
-             filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d_%s.png", 
-                              da, tttt, g), 
-             width=9, height=8)
+      #ggsave(pp, 
+      #       filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d_%s.png", 
+      #                        da, tttt, g), 
+      #       width=9, height=8)
       
-      ggsave(pp, 
-             filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d_%s.pdf", 
-                              da, tttt, g), 
-             width=9, height=8)
+      #ggsave(pp, 
+      #       filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_%d_ttt_%d_%s.pdf", 
+      #                        da, tttt, g), 
+      #       width=9, height=8)
     #}
   }
+}
+
+for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+  print(g)
+  p_n_ext_no_da_formatted<-all_p_list[[sprintf("%s_%d_n_ext", g, 0)]]
+  
+  p_ratio_no_da_formatted<-all_p_list[[sprintf("%s_%d_ratio", g, 0)]]+theme(strip.background.x = element_blank(),
+                                               strip.text.x = element_blank())
+  p_ratio_with_da_formatted<-all_p_list[[sprintf("%s_%d_ratio", g, 1)]]+theme(strip.background.x = element_blank(),
+                                                   strip.text.x = element_blank())
+  p_n_ext_with_da_formatted<-all_p_list[[sprintf("%s_%d_n_ext", g, 0)]]+theme(strip.background.x = element_blank(),
+                                                   strip.text.x = element_blank())
+  
+  pp<-ggarrange(p_n_ext_no_da_formatted,
+                p_ratio_no_da_formatted, 
+                p_n_ext_with_da_formatted, 
+                p_ratio_with_da_formatted, ncol=1, nrow=4, labels=c("(a)", "(b)", "(c)", "(d)")
+                )
+  
+  ggsave(pp, 
+         filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d_%s.png", tttt, g), 
+         width=7, height=13)
+  
+  ggsave(pp, 
+         filename=sprintf("../../Figures_Full_species/when_where_extinction_all/combined_final_da_all_ttt_%d_%s.pdf", tttt, g), 
+         width=7, height=13)
 }

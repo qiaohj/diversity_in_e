@@ -92,9 +92,18 @@ result<-readRDS("../../Objects_Full_species/Extinction_type/Extinction_type.rda"
 result<-result%>%dplyr::filter(sp %in% df_sp_list$sp)
 result_count<-result%>%dplyr::group_by(type, dispersal, threshold, SSP, GCM)%>%
   dplyr::summarise(N=n())
+
+result_count_extinct<-result%>%dplyr::group_by(dispersal, threshold, SSP, GCM)%>%
+  dplyr::summarise(N_all_extinction=n())
+
+result_count<-inner_join(result_count, result_count_extinct, by=c("dispersal", "threshold", "SSP", "GCM"))
+result_count$proportion<-result_count$N/result_count$N_all_extinction
 result_count_se<-result_count%>%dplyr::group_by(type, dispersal, threshold, SSP)%>%
   dplyr::summarise(mean_N=mean(N),
-                   sd_N=sd(N))
+                   sd_N=sd(N),
+                   mean_proportion=mean(proportion),
+                   sd_proportion=sd(proportion))
+result_count_se[is.na(result_count_se)]<-0
 result_count_se$dispersal<-ifelse(result_count_se$dispersal==0, "no dispersal", "with dispersal")
 result_count_se$exposure<-ifelse(result_count_se$threshold==1, " no exposure", "5-year exposure")
 result_count_se<-result_count_se%>%ungroup()%>%dplyr::select(-c(threshold))

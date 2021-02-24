@@ -163,10 +163,11 @@ p1<-ggplot(df)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
                  aes(x=nb_TEMP_sd), fill=colors_red[9], bins=50)+
   theme_bw()+
-  xlab("Niche breadth in temperature)")+
+  xlab("Niche breadth in temperature")+
   ylab("Number of species")+
   facet_grid(exposure~Label, scale="free")
 p1
+saveRDS(p1, "../../Figures_Full_species/NB_hist_combined/nb_temp.rda")
 ggsave(p1, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.pdf", ttt), width=12, height=6)
 ggsave(p1, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.png", ttt), width=12, height=6)
 
@@ -176,12 +177,14 @@ p2<-ggplot(df)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
                  aes(x=nb_PR_sd), fill=colors_red[9], bins=50)+
   theme_bw()+
-  xlab("Niche breadth in precipitation)")+
+  xlab("Niche breadth in precipitation")+
   ylab("Number of species")+
-  facet_grid(exposure~Label)+
+  facet_grid(exposure~Label)
+saveRDS(p2, "../../Figures_Full_species/NB_hist_combined/nb_prec.rda")
+
+p2<-p2+
   theme(strip.background.x = element_blank(),
         strip.text.x = element_blank())
-p2
 ggsave(p2, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.pdf", ttt), width=12, height=6)
 ggsave(p2, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.png", ttt), width=12, height=6)
 

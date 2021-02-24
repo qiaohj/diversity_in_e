@@ -64,7 +64,8 @@ p1<-ggplot(df_se%>%filter((VAR=="pr")&(between(Y, 2021, 2100))), aes(x=Y, y=annu
   labs(linetype="ESM")+
   theme_bw()
 legend_g<-get_legend(p1)
-p1<-p1+theme(legend.position="none")
+p1<-p1+
+  theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_blank())
 
 p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2021, 2100))), aes(x=Y, y=annul_max_temp, color=SSP, linetype=GCM))+geom_line()+
   geom_line(data=df_se%>%filter((VAR=="tasmax")&(between(Y, 1850, 2020))), aes(x=Y, y=annul_max_temp, linetype=GCM),  color=colors_black[5])+
@@ -72,9 +73,11 @@ p2<-ggplot(df_se%>%filter((VAR=="tasmax")&(between(Y, 2021, 2100))), aes(x=Y, y=
   scale_color_manual(values=color_ssp)+
   scale_linetype_manual(values=linetype_gcm)+
   scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
+  scale_y_continuous(labels = paste("   ", seq(18, 24, by=2)), breaks=seq(18, 24, by=2))+
   xlab("Year")+
   ylab("Annual maximum temperature")+
-  theme_bw()+theme(legend.position="none")
+  theme_bw()+
+  theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_blank())
 
 p2
 
@@ -85,9 +88,11 @@ p3<-ggplot(df_se%>%filter((VAR=="tasmin")&(between(Y, 2021, 2100))), aes(x=Y, y=
   scale_color_manual(values=color_ssp)+
   scale_linetype_manual(values=linetype_gcm)+
   scale_x_continuous(breaks = c(seq(1850, 2000, by=50), 2020, seq(2050, 2100, by=50)))+
+  scale_y_continuous(labels=paste("  ", seq(-12, -4, by=4)), breaks=seq(-12, -4, by=4))+
   xlab("Year")+
   ylab("Annual minimum temperature")+
-  theme_bw()+theme(legend.position="none")
+  theme_bw()+
+  theme(legend.position="none")
 
 p3
 
@@ -95,7 +100,7 @@ p<-ggarrange(p1, p2, p3, nrow=3,
              common.legend = T, 
              legend.grob=legend_g, 
              legend="right", labels = c("(a)", "(b)", "(c)"),
-             label.x=0.065)
+             label.x=0.065, label.y=0.95)
 p
 ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.png", width=10, height=8)
 ggsave(p, file="../../Figures_Full_species/Env/GCM_Curves.pdf", width=10, height=8)

@@ -29,21 +29,55 @@ df_all$diff_pr_max<-df_all$range_PR_sd_max-df_all$pr_max
 df_all$diff_pr_min<-df_all$range_PR_sd_min-df_all$pr_min
 df_all$nb_TEMP_sd
 
-p<-ggplot(df_all)+
-  geom_density(aes(x = nb_TEMP_sd, color=group, fill = group), alpha=0.3)+
+df_all<-df_all%>%dplyr::filter(N_CELL>ttt)
+df_N_CELL<-df_all%>%select(sp, group, N_CELL)
+colnames(df_N_CELL)[3]<-"V"
+df_N_CELL$TYPE="Distribution range"
+
+df_nb_TEMP_sd<-df_all%>%select(sp, group, nb_TEMP_sd)
+colnames(df_nb_TEMP_sd)[3]<-"V"
+df_nb_TEMP_sd$TYPE="Range of temperature"
+
+df_nb_PR_sd<-df_all%>%select(sp, group, nb_PR_sd)
+colnames(df_nb_PR_sd)[3]<-"V"
+df_nb_PR_sd$TYPE="Range of precipitation"
+df_g<-bind_rows(bind_rows(df_N_CELL, df_nb_TEMP_sd), df_nb_PR_sd)
+
+
+p<-ggplot(df_nb_TEMP_sd)+
+  geom_density(aes(x = V, color=group, fill = group), alpha=0.3)+
   scale_fill_manual(values=color_groups)+
   scale_color_manual(values=color_groups)+
   theme_bw()+
-  labs(fill="Group", color="Group", x="Temperature", y="Density")
+  labs(fill="", color="", x="Niche breadth in temperature")
+
+p
+
+saveRDS(p, "../../Figures_Full_species/NB_hist_combined/nb_temp_hist.rda")
+
 ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_temp.png")
 ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_temp.pdf")
 
-p<-ggplot(df_all)+
-  geom_density(aes(x = nb_PR_sd, color=group, fill = group), alpha=0.3)+
+p<-ggplot(df_nb_PR_sd)+
+  geom_density(aes(x = V, color=group, fill = group), alpha=0.3)+
   scale_fill_manual(values=color_groups)+
   scale_color_manual(values=color_groups)+
   theme_bw()+
-  labs(fill="Group", color="Group", x="Precipitation", y="Density")
+  labs(fill="", color="", x="Niche breadth in precipitation", y="")
+p
+saveRDS(p, "../../Figures_Full_species/NB_hist_combined/nb_prec_hist.rda")
+ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_prec.png")
+ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_prec.pdf")
+
+p<-ggplot(df_N_CELL)+
+  geom_density(aes(x = V, color=group, fill = group), alpha=0.3)+
+  scale_fill_manual(values=color_groups)+
+  scale_color_manual(values=color_groups)+
+  scale_x_log10()+
+  theme_bw()+
+  labs(fill="", color="", x="Range size", y="")
+saveRDS(p, "../../Figures_Full_species/NB_hist_combined/nb_range_size_hist.rda")
+p
 ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_prec.png")
 ggsave(p, filename="../../Figures_Full_species/niche_property/nb_hist_prec.pdf")
 
@@ -69,7 +103,7 @@ p<-ggplot(df_g)+
   scale_fill_manual(values=color_groups)+
   scale_color_manual(values=color_groups)+
   theme_bw()+
-  labs(fill="Group", color="Group", y="Number of species")+
+  labs(fill="Clade", color="Clade", y="Number of species")+
   facet_wrap(~TYPE, nrow=3, scale="free")+
   theme(axis.title.x=element_blank())
 p

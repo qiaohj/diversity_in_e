@@ -21,14 +21,16 @@ df_se_prec$causation<-"Precipitation"
 df_se<-bind_rows(df_se_prec, df_se_temp)
 
 df_se_prec%>%ungroup()%>%dplyr::filter((N>1000))
-p<-ggplot(df_se)+geom_line(aes(x=extinct_year, y=N, color=causation, linetype=SSP))+
+p1<-ggplot(df_se)+geom_line(aes(x=extinct_year, y=N, color=causation, linetype=SSP))+
   scale_color_manual(values=color_causation)+
   facet_grid(exposure~da, scale="free")+
   xlab("Year")+
-  ylab("N extinct events")+
+  ylab("Number of extinction events")+
   labs(color="Causation")+
+  scale_y_sqrt(labels=seq(0, 45, by=5)^2, breaks=seq(0, 45, by=5)^2)+
   theme_bw()
-ggsave(p, filename="../../Figures_Full_species/why_extinct/by_year.pdf")
+p1
+ggsave(p1, filename="../../Figures_Full_species/why_extinct/by_year.pdf")
 
 #factor by lat
 range(df$y)
@@ -74,7 +76,7 @@ df_se_prec$causation<-"Precipitation"
 
 df_se<-bind_rows(df_se_prec, df_se_temp)
 
-p<-ggplot(df_se)+
+p2<-ggplot(df_se)+
   geom_errorbar(aes(x=lat, ymin=mean_N-sd_N, ymax=mean_N+sd_N, color=causation, linetype=SSP))+
   geom_line(aes(x=lat, y=mean_N, color=causation, linetype=SSP))+
   scale_color_manual(values=color_causation)+
@@ -84,10 +86,10 @@ p<-ggplot(df_se)+
   ylab("Mean number of extinction events")+
   labs(color="Causation")+
   theme_bw()
-p
-ggsave(p, filename="../../Figures_Full_species/why_extinct/by_lat.pdf")
+p2
+ggsave(p2, filename="../../Figures_Full_species/why_extinct/by_lat.pdf")
 
-p<-ggplot(df_se)+
+p3<-ggplot(df_se)+
   geom_errorbar(aes(x=lat, ymin=mean_N/lat_N-sd_N/lat_N, ymax=mean_N/lat_N+sd_N/lat_N), alpha=0.2)+
   geom_line(aes(x=lat, y=mean_N/lat_N, color=causation, linetype=SSP))+
   scale_color_manual(values=color_causation)+
@@ -97,6 +99,23 @@ p<-ggplot(df_se)+
   labs(color="Causation")+
   theme_bw()
 plot(df_se$lat, df_se$lat_N)
-p
-ggsave(p, filename="../../Figures_Full_species/why_extinct/by_lat_fixed_by_area.pdf", width=8, height=4)
-ggsave(p, filename="../../Figures_Full_species/why_extinct/by_lat_fixed_by_area.png", width=8, height=4)
+p3
+ggsave(p3, filename="../../Figures_Full_species/why_extinct/by_lat_fixed_by_area.pdf", width=8, height=4)
+ggsave(p3, filename="../../Figures_Full_species/why_extinct/by_lat_fixed_by_area.png", width=8, height=4)
+
+
+legends<-get_legend(p1)
+p1_formatted<-p1+theme(legend.position = "none", strip.background.x = element_blank(),
+                       strip.text.x = element_blank())
+p3_formatted<-p3+theme(legend.position = "none")
+
+pp<-ggarrange(p3_formatted, p1_formatted, common.legend = T, legend = "right", 
+          legend.grob = legends, labels=c("(a)", "(b)"), nrow=2, ncol=1,
+          label.x = 0.06, label.y=0.93)
+
+pp<-ggarrange(p3_formatted, p1_formatted, common.legend = T, legend = "right", 
+              legend.grob = legends, nrow=2, ncol=1)
+
+pp
+ggsave(pp, filename="../../Figures_Full_species/why_extinct/combined_why_extinct.png", width=10, height=8)
+ggsave(pp, filename="../../Figures_Full_species/why_extinct/combined_why_extinct.pdf", width=10, height=8)

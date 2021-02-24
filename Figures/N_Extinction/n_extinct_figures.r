@@ -216,10 +216,11 @@ for (ttt in c(2)){
                    aes(x=st_N_CELL), fill=colors_red[9], bins=20)+
     scale_x_log10()+
     theme_bw()+
-    xlab("Range size")+
+    xlab("Range size (log transformed)")+
     ylab("Number of species")+
     #ggtitle(sprintf("Distribution>%d", ttt))+
     facet_grid(exposure~Label)
+  saveRDS(p, "../../Figures_Full_species/NB_hist_combined/nb_range_size.rda")
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.pdf", ttt), width=12, height=6)
   ggsave(p, filename=sprintf("../../Figures_Full_species/N_Extinction/Extinction_hist_%d.png", ttt), width=12, height=6)
   
