@@ -55,25 +55,25 @@ df_sp_list<-df_sp_list[sample(nrow(df_sp_list), nrow(df_sp_list)),]
 j=1
 mask<-raster("../../Raster/mask_index.tif")
 r_continent<-raster("../../Raster/Continent_ect4.tif")
+#Miniopterus_schreibersii
+
 sp_i<-412
 threshold<-5
-l_i<-1
-for (l_i in c(6:nrow(layer_df))){
+l_i<-2
+#for (l_i in c(3:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
-  for (threshold in c(5, 1)){
-    for (sp_i in c(1:nrow(df_sp_list))){
+ #for (threshold in c(5, 1)){
+    #for (sp_i in c(1:nrow(df_sp_list))){
       
-      sp_test<-df_sp_list[sp_i,]
+      #sp_test<-df_sp_list[sp_i,]
+  sp_test<-df_sp_list[sp=="Miniopterus_schreibersii"]
       print(sprintf("combination:%d/%d %s, exposure:%d, sp:%d/%d, %s, %s", 
                     l_i, nrow(layer_df), layer_item$LABEL, threshold, sp_i, nrow(df_sp_list),
                     sp_test$sp, sp_test$group))
       target_folder<-sprintf("../../Objects_Full_species/cluster_based_pathway/%s/%s/%s/exposure_%d", 
-                      sp_test$group, sp_test$sp, layer_item$LABEL, threshold)
+                             sp_test$group, sp_test$sp, layer_item$LABEL, threshold)
       
-      if (dir.exists(target_folder)){
-        next()
-      }
-      dir.create(target_folder, showWarnings = F, recursive = T)
+      
       source_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", sp_test$group, sp_test$sp)
       dis_details<-readRDS(sprintf("%s/dispersal_%d/%s_1.rda", 
                                    source_folder, threshold, layer_item$LABEL))
@@ -97,13 +97,16 @@ for (l_i in c(6:nrow(layer_df))){
         next()
       }
       g_df<-list()
+      dis_details_with_cluster<-list()
+      year<-keyyears[1]
       for (year in keyyears){
         current_dis<-dis_details[between(YEAR, year-1, year+1)]
         current_dis<-unique(current_dis[, c("x", "y", "mask_index", "continent")])
-
+        
         c_i=1
         current_dis$cluster<-0
         for(c_i in unique(current_dis$continent)){
+          print(paste(year, length(keyyears), c_i))
           current_dis_item<-current_dis[continent==c_i]
           N_row<-nrow(current_dis_item)
           if (N_row>2){
@@ -121,10 +124,13 @@ for (l_i in c(6:nrow(layer_df))){
           
           g_df[[sprintf("%d_%d", year, c_i)]]<-centers_pam
         }
+        current_dis$YEAR<-year
+        dis_details_with_cluster[[sprintf("%d", year)]]<-current_dis
+        
       }
       g_df<-rbindlist(g_df)
+      dis_details_with_cluster<-rbindlist(dis_details_with_cluster)
       g_df$mask_index<-raster::extract(mask, g_df[, c("x", "y")])
-      saveRDS(g_df, sprintf("%s/key_centers.rda", target_folder))
       
       
       
@@ -183,7 +189,7 @@ for (l_i in c(6:nrow(layer_df))){
       path_df$TYPE<-"MIDDLE"
       path_df[YEAR==min(path_df$YEAR)]$TYPE<-"START"
       path_df[(TYPE!="START")&(!(to %in% path_df$from))]$TYPE<-"END"
-      saveRDS(path_df, sprintf("%s/pathways.rda", target_folder))
+      #saveRDS(path_df, sprintf("%s/pathways.rda", target_folder))
       
       from_v<-path_df[, c("from", "from_x", "from_y", "continent")]
       colnames(from_v)<-c("label", "x", "y", "continent")
@@ -199,7 +205,7 @@ for (l_i in c(6:nrow(layer_df))){
       keycenters<-keycenters[,..col_order]
       
       g<-graph_from_data_frame(path_df, directed = T, vertices=keycenters)
-      saveRDS(g, sprintf("%s/pathway_graph.rda", target_folder))
+      #saveRDS(g, sprintf("%s/pathway_graph.rda", target_folder))
       
       from_labels<-unique(path_df[TYPE=="START"]$from)
       to_labels<-unique(path_df[TYPE=="END"]$to)
@@ -207,6 +213,7 @@ for (l_i in c(6:nrow(layer_df))){
         next()
       }
       sm_path_full<-list()
+      raw_full_path<-list()
       path_group<-1
       path_df$path_group<-0
       for (f_i in c(1:length(from_labels))){
@@ -219,15 +226,19 @@ for (l_i in c(6:nrow(layer_df))){
             if (nrow(all_c_few)<=1){
               next()
             }
-            full_path<-rbind(data.frame(x=all_c_few$from_x, y=all_c_few$from_y), 
-                             data.frame(x=all_c_few[nrow(all_c_few), ]$to_x, y=all_c_few[nrow(all_c_few), ]$to_y))
+            full_path<-rbind(data.frame(x=all_c_few$from_x, y=all_c_few$from_y, label=all_c_few$from), 
+                             data.frame(x=all_c_few[nrow(all_c_few), ]$to_x, y=all_c_few[nrow(all_c_few), ]$to_y, label=all_c_few[nrow(all_c_few), ]$to))
             
             sm_path<-data.frame(xspline(full_path$x, full_path$y, shape=1, draw=F, repEnds=T))
             sm_path$YEAR<-seq(keyyears[1], keyyears[length(keyyears)], 
                               by=(keyyears[length(keyyears)]-keyyears[1])/(nrow(sm_path)-1))
             sm_path$path_group<-path_group
+            full_path$path_group<-path_group
+            #full_path$from<-from_label
+            #full_path$to<-to_label
             path_df[(from %in% names(x))&(to %in% names(x))]$path_group<-path_group
             sm_path_full[[sprintf("%s_%s_%d", from_label, to_label, path_group)]]<-sm_path
+            raw_full_path[[sprintf("%s_%s_%d", from_label, to_label, path_group)]]<-full_path
             path_group<-path_group+1
           }
           
@@ -235,30 +246,155 @@ for (l_i in c(6:nrow(layer_df))){
         
       }
       sm_path_full_df<-rbindlist(sm_path_full)
+      raw_full_path_df<-rbindlist(raw_full_path)
+      
       if (nrow(sm_path_full_df)==0){
         next()
       }
       sm_path_full_df$alpha<-((sm_path_full_df$YEAR-2020)/80)^5
-      saveRDS(sm_path_full_df, sprintf("%s/smoothed_pathway.rda", target_folder))
+      #saveRDS(sm_path_full_df, sprintf("%s/smoothed_pathway.rda", target_folder))
       if (F){
+        y_i=1
         mask_black<-raster("../../Raster/mask.tif")
         mask_p<-data.frame(rasterToPoints(mask_black))
-        start_dis<-readRDS(sprintf("%s/occ_with_env.rda", source_folder))
-        dispersal_based_end<-dis_details[YEAR==2100]
+        dis_details_with_cluster_sub<-dis_details_with_cluster[continent==2]
+        dis_sub<-dis_details_with_cluster_sub[YEAR==keyyears[y_i]]
+        g_df_sub<-g_df[(YEAR==keyyears[y_i])&(continent==2)]
+        #dispersal_based_end<-dis_details_with_cluster[YEAR==keyyears[2]]
+        #dispersal_based_end<-dispersal_based_end[continent==2]
         p_bak<-ggplot() + 
           geom_tile(data = mask_p, aes(x = x, y = y), fill="grey50", alpha=0.2)+
           map_theme
+        dis_sub<-dis_details_with_cluster_sub
+        g_df_sub<-g_df[(continent==2)]
+        
         p<-p_bak+
-          geom_tile(data=dispersal_based_end, aes(x=x, y=y), fill="black", alpha=0.4)+
-          geom_path(data=sm_path_full_df, aes(x=x, y=y, group=path_group, alpha=alpha), color="red")+
-          geom_tile(data=start_dis, aes(x=x, y=y), fill="blue", alpha=0.4)+
-          #geom_path(data=path_df, aes(x=from_x, y=from_y, color=YEAR,group=path_group))+
+          geom_path(data=raw_full_path_df, aes(x=from_x, y=from_y, color=factor(path_group)))+
+          geom_point(data=g_df_sub, aes(x=x, y=y))+
+          xlim(range(dis_details_with_cluster_sub$x))+
+          ylim(range(dis_details_with_cluster_sub$y))+
+          facet_wrap(~YEAR, nrow=2, ncol=3)
+        ggsave(p, filename=
+                 sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/cluster_all_year.png", sp_test$sp))
+        
+        
+        all_connections<-NULL
+        path_group<-1
+        for (e_i in c(1:nrow(path_df))){
+          #edge<-edges[e_i,]
+          nodes<-path_df[e_i,]
+          if (nodes$continent==1){
+            next()
+          }
+          nodes_1<-data.frame(x=nodes$from_x, y=nodes$from_y, YEAR=nodes$YEAR, min_dist=nodes$min_dist)
+          nodes_2<-data.frame(x=nodes$to_x, y=nodes$to_y, YEAR=nodes$YEAR, min_dist=nodes$min_dist)
+          nodes<-rbind(nodes_1, nodes_2)
+          nodes$path_group<-path_group
+          path_group<-path_group+1
+          all_connections<-bind(all_connections, nodes)
+        }
+        
+        map_theme2<-theme(
+          axis.line = element_blank(),
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          plot.background = element_rect(fill = map_background, color = NA), 
+          panel.background = element_blank(), 
+          legend.background = element_rect(fill = map_background, color = NA),
+          panel.border = element_blank()
+        )
+        p_bak2<-ggplot() + 
+          geom_tile(data = mask_p, aes(x = x, y = y), fill="grey50", alpha=0.2)+
+          map_theme2
+        p<-p_bak2+
+          geom_path(data=all_connections, aes(x=x, y=y))+
+          geom_point(data=g_df_sub, aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[1]], aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[length(keyyears)]], aes(x=x, y=y, color=factor(YEAR)))+
+          xlim(range(dis_details_with_cluster_sub$x))+
+          ylim(range(dis_details_with_cluster_sub$y))+
+          labs(color="Year")
+        ggsave(p, filename=
+                 sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/pathway_raw_all_year.png", sp_test$sp))
+        
+        
+        
+        raw_full_path_df<-raw_full_path_df %>%
+          separate(label, c("YEAR", "mask_index", "c_i"), "_")
+        
+        g_df_sub$YEAR_Factor<-factor(g_df_sub$YEAR, levels=rev(unique(g_df_sub$YEAR)))
+        raw_full_path_df_sub<-raw_full_path_df[c_i==2]
+        raw_full_path_df_sub$path_group_Factor<-factor(raw_full_path_df_sub$path_group)
+        raw_full_path_df_sub$path_group_label<-sprintf("Pathway %d", raw_full_path_df_sub$path_group_Factor)
+        p<-p_bak2+
+          geom_path(data=raw_full_path_df_sub, aes(x=x, y=y))+
+          geom_point(data=g_df_sub, aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[1]], aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[length(keyyears)]], aes(x=x, y=y, color=factor(YEAR)))+
+          xlim(range(dis_details_with_cluster_sub$x))+
+          ylim(range(dis_details_with_cluster_sub$y))+
+          facet_wrap(~path_group_label, nrow=3, ncol=3)+
+          labs(color="Year")
+        p
+        ggsave(p, filename=
+                 sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/pathway_shortest_year.png", sp_test$sp),
+               width=10, height=8)
+        
+        
+        sm_path_full_df_sub<-sm_path_full_df[path_group %in% raw_full_path_df_sub$path_group]
+        sm_path_full_df_sub$path_group_Factor<-factor(sm_path_full_df_sub$path_group)
+        sm_path_full_df_sub$path_group_label<-sprintf("Pathway %d", sm_path_full_df_sub$path_group_Factor)
+        
+        
+        p<-p_bak2+
+          geom_path(data=raw_full_path_df_sub, aes(x=x, y=y))+
+          geom_point(data=g_df_sub, aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[1]], aes(x=x, y=y, color=factor(YEAR)))+
+          geom_point(data=g_df_sub[YEAR==keyyears[length(keyyears)]], aes(x=x, y=y, color=factor(YEAR)))+
+          geom_path(data=sm_path_full_df_sub, aes(x=x, y=y, group=path_group), color="red")+
+          xlim(range(dis_details_with_cluster_sub$x))+
+          ylim(range(dis_details_with_cluster_sub$y))+
+          facet_wrap(~path_group_label, nrow=3, ncol=3)+
+          labs(color="Year")
+        p
+        ggsave(p, filename=
+                 sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/pathway_smooth_year.png", sp_test$sp),
+               width=10, height=8)
           
+        p<-p_bak+
+          geom_path(data=sm_path_full_df_sub, aes(x=x, y=y, group=path_group, alpha=alpha), color="red")+
+          xlim(range(dis_details_with_cluster_sub$x))+
+          ylim(range(dis_details_with_cluster_sub$y))+
           scale_alpha_continuous()
         p
-        ggsave(p, filename=sprintf("%s/fig.pdf", target_folder))
+        ggsave(p, filename=
+                 sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/pathway_final.png", sp_test$sp),
+               width=6, height=3)
+        
+        library(qgraph)
+        path_df$weight<-max(path_df$min_dist) - path_df$min_dist
+        g<-graph_from_data_frame(path_df[continent==2], directed = T, vertices=keycenters[continent==2])
+        pa <- get.shortest.paths(g, "2021_4906_2", "2100_1973_2")[[1]]
+        V(g)[names(pa[[1]])]$color <- 'purple'
+        E(g)$color <- 'grey'
+        E(g)$width <- 1
+        E(g, path=names(pa[[1]]))$color <- 'red'
+        E(g, path=names(pa[[1]]))$width <- 3
+        layout <- layout.reingold.tilford(g, circular=T)
+        plot(g,layout=layout.fruchterman.reingold(g, niter=33), vertex.size=4)
+        
+        png(sprintf("../../Figures_Full_species/cluster_based_pathway_methods/%s/igraph.png", sp_test$sp),
+            width=1000, height=1000)
+        plot(g,layout=layout_with_fr, vertex.size=4,
+             vertex.label=NA)
+        dev.off()
       }
-    }
-  }
-}
+    #}
+ # }
+#}
 
