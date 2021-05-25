@@ -58,7 +58,7 @@ r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-412
 threshold<-5
 l_i<-1
-for (l_i in c(6:nrow(layer_df))){
+for (l_i in c(1:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
   for (threshold in c(5, 1)){
     for (sp_i in c(1:nrow(df_sp_list))){

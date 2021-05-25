@@ -40,6 +40,14 @@ if (T){
     ratio_final[which(ratio_final$threshold==5), "label"]<-
       paste(ratio_final[which(ratio_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
     
+    ratio_final_persentile<-ratio_final%>%dplyr::group_by(SSP, threshold, dispersal, ttt, label, exposure)%>%
+      dplyr::summarise(highest_v=quantile(mean_V, 0.75))
+    
+    ratio_final_with_highest<-inner_join(ratio_final, ratio_final_persentile, 
+                                         by=c("SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    ratio_final_with_highest<-ratio_final_with_highest%>%dplyr::filter(mean_V>=highest_v)
+    
     n_ext_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/n_ext_final_with_ttt.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
     n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$threshold)
@@ -50,6 +58,21 @@ if (T){
       paste(as.vector(n_ext_final[which(n_ext_final$threshold==1), "SSP"]), " no exposure", sep=", ")
     n_ext_final[which(n_ext_final$threshold==5), "label"]<-
       paste(n_ext_final[which(n_ext_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
+    
+    n_ext_final_persentile<-n_ext_final%>%dplyr::group_by(SSP, threshold, dispersal, ttt, label, exposure)%>%
+      dplyr::summarise(highest_v=quantile(sum_V, 0.75))
+    
+    n_ext_final_with_highest<-inner_join(n_ext_final, n_ext_final_persentile, 
+      by=c("SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    n_ext_final_with_highest<-n_ext_final_with_highest%>%dplyr::filter(sum_V>=highest_v)
+    
+    df_highest<-full_join(ratio_final_with_highest, n_ext_final_with_highest, 
+                          by=c("x", "y", "mask_index",  "SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    df_highest$type<-"Both highest quartile"
+    df_highest[which(is.na(df_highest$mean_V)), "type"]<-"Highest quartile in raw extinction"
+    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinct proportion"
     
     p_ratio_no_da<-ggplot(ratio_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
@@ -109,6 +132,39 @@ if (T){
       )
     p_n_ext_no_da
 
+    p_df_highest<-ggplot(df_highest)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+      geom_tile(aes(x=x, y=y, fill=type))+
+      facet_grid(exposure~SSP)+
+      scale_fill_manual(breaks=c("Both highest quartile", 
+                                 "Highest quartile in raw extinction", 
+                                 "Highest quartile in extinct proportion"),
+                        labels=c("Both highest quartile", 
+                                 "Highest quartile in raw extinction", 
+                                 "Highest quartile in extinct proportion"),
+                        values=c(colors_red[7], colors_blue[7], colors_green[7]))+
+      #ggtitle(title2)+
+      labs(fill = "")+
+      theme(
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = map_background, color = NA), 
+        panel.background = element_blank(), 
+        legend.background = element_rect(fill = map_background, color = NA),
+        panel.border = element_blank(),
+        legend.position="bottom",
+        legend.key.width=unit(0.8, "in")
+      )
+    p_df_highest
+    ggsave(p_df_highest, 
+           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/highest_combined_final_without_da_ttt_%d.png", tttt), 
+           width=8, height=4)
     da=1
     print(paste(da, tttt))
     if (da==0){
@@ -132,6 +188,15 @@ if (T){
     ratio_final[which(ratio_final$threshold==5), "label"]<-
       paste(ratio_final[which(ratio_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
     
+    ratio_final_persentile<-ratio_final%>%dplyr::group_by(SSP, threshold, dispersal, ttt, label, exposure)%>%
+      dplyr::summarise(highest_v=quantile(mean_V, 0.75))
+    
+    ratio_final_with_highest<-inner_join(ratio_final, ratio_final_persentile, 
+                                         by=c("SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    ratio_final_with_highest<-ratio_final_with_highest%>%dplyr::filter(mean_V>=highest_v)
+    
+    
     n_ext_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/n_ext_final_with_ttt.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da)&(ttt==tttt))
     n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$threshold)
@@ -142,6 +207,55 @@ if (T){
       paste(as.vector(n_ext_final[which(n_ext_final$threshold==1), "SSP"]), " no exposure", sep=", ")
     n_ext_final[which(n_ext_final$threshold==5), "label"]<-
       paste(n_ext_final[which(n_ext_final$threshold==5), "SSP"], "5-year exposure", sep=", ")
+    
+    n_ext_final_persentile<-n_ext_final%>%dplyr::group_by(SSP, threshold, dispersal, ttt, label, exposure)%>%
+      dplyr::summarise(highest_v=quantile(sum_V, 0.75))
+    
+    n_ext_final_with_highest<-inner_join(n_ext_final, n_ext_final_persentile, 
+                                         by=c("SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    n_ext_final_with_highest<-n_ext_final_with_highest%>%dplyr::filter(sum_V>=highest_v)
+    
+    df_highest<-full_join(ratio_final_with_highest, n_ext_final_with_highest, 
+                          by=c("x", "y", "mask_index",  "SSP", "threshold", "dispersal", "ttt", "label", "exposure"))
+    
+    df_highest$type<-"Both highest quartile"
+    df_highest[which(is.na(df_highest$mean_V)), "type"]<-"Highest quartile in raw extinction"
+    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinct proportion"
+    
+    p_df_highest<-ggplot(df_highest)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+      geom_tile(aes(x=x, y=y, fill=type))+
+      facet_grid(exposure~SSP)+
+      scale_fill_manual(breaks=c("Both highest quartile", 
+                                 "Highest quartile in raw extinction", 
+                                 "Highest quartile in extinct proportion"),
+                        labels=c("Both highest quartile", 
+                                 "Highest quartile in raw extinction", 
+                                 "Highest quartile in extinct proportion"),
+                        values=c(colors_red[7], colors_blue[7], colors_green[7]))+
+      #ggtitle(title2)+
+      labs(fill = "")+
+      theme(
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = map_background, color = NA), 
+        panel.background = element_blank(), 
+        legend.background = element_rect(fill = map_background, color = NA),
+        panel.border = element_blank(),
+        legend.position="bottom",
+        legend.key.width=unit(0.8, "in")
+      )
+    p_df_highest
+    ggsave(p_df_highest, 
+           filename=sprintf("../../Figures_Full_species/when_where_extinction_all/highest_combined_final_with_da_ttt_%d.png", tttt), 
+           width=8, height=4)
     
     p_ratio_with_da<-ggplot(ratio_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
