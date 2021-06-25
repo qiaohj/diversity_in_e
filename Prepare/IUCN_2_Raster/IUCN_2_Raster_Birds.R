@@ -11,7 +11,9 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 #for BIRDS
 mask_bak<-raster("../../Raster/mask.tif")
 if (F){
-  vessel <- sf::st_read(dsn = "../../Data/Raw/IUCN/BIRDS/BOTW.gdb", layer = "All_Species")
+  mask_bak<-raster("/media/huijieqiao/QNAS/Sp_Richness_GCM/Raster/ENV/Bioclim/EC-Earth3-Veg/SSP119/1850/bio12_eck4_1km.tif")
+  mask_high<-raster("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Raster/mask_high_res.tif")
+  vessel <- sf::st_read(dsn = "/media/huijieqiao/QNAS/Sp_Richness_GCM/Data/Raw/IUCN/BIRDS/BOTW.gdb", layer = "All_Species")
   sp_df_eck4<-st_transform(vessel, crs = st_crs(mask_bak))
   #st_write(sp_df_eck4, "../../Data/Raw/IUCN/BIRDS/BIRDS_ECK4.gdb")
   bird_df<-data.frame(sp_df_eck4)

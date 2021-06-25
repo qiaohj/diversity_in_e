@@ -13,7 +13,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 index<-as.numeric(args[1])
 
-#index<-3
+#index<-1
 netcdf_f<-sprintf("%s/%s/%s/%s", base, files[index, "GCM"], files[index, "SSP"], files[index, "VAR"])
 woa13<-nc_open(netcdf_f)
 lat<-woa13$dim$lat$vals
