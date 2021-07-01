@@ -42,13 +42,13 @@ get_disp_dist<-function(n, max_disp){
 }
 
 predict_range<-c(2021:2100)
-exposure_threshold<-5
+exposure_threshold<-0
 i=2
 unique<-unique[sample(length(unique), length(unique))]
 x_size<-dim(mask_100km)[2]
 bi<-"Poicephalus rufiventris"
 mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), by="binomial"]
-mammal_full_sum_area<-mammal_full_sum_area[order(sum_are),]
+mammal_full_sum_area<-mammal_full_sum_area[order(-1 * sum_are),]
 if (F){
   mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), 
                                     by=list(binomial, ForStrat, log_body_mass, Diet, estimated_disp)]
@@ -82,7 +82,7 @@ if (F){
 }
 bi<-mammal_full_sum_area[mammal_full_sum_area$sum_are<=1.5*min(mammal_full_sum_area$sum_are)]$binomial[1]
 mammal_full_sum_area<-mammal_full_sum_area[sample(nrow(mammal_full_sum_area), nrow(mammal_full_sum_area))]
-
+dispersal<-0
 for (i in 1:length(mammal_full_sum_area$binomial)) {
   bi<-mammal_full_sum_area$binomial[i]
   print(paste(i, length(unique), bi))
@@ -91,8 +91,8 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   if (!file.exists(fit_str)){
     next()
   }
-  
-  check_point<- sprintf("%s/initial_disp_exposure_%d.rda", target_folder, exposure_threshold)
+  check_point<- sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", 
+                        target_folder, exposure_threshold, dispersal)
   if (file.exists(check_point)){
     next()
   }
@@ -117,16 +117,19 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
     next()
   }
   
-  
-  print("calculating buffer")
-  disp_dist<-mammal_disp[Scientific==bi]$estimated_disp
-  buffer<-disp_dist * 80
-  tmp_sf_buff<-st_buffer(tmp_sf, ceiling(buffer) * 1000)
-  print("cut by buffer")
-  mask_buffer<-crop(mask_100km, tmp_sf_buff)
-  mask_buffer<-mask(mask_buffer, tmp_sf_buff)
-  print("buffer to point")
-  p_buffer<-data.table(rasterToPoints(mask_buffer))
+  if (dispersal!=0){
+    print("calculating buffer")
+    disp_dist<-mammal_disp[iucn_name==bi]$estimated_disp
+    buffer<-disp_dist * 80
+    tmp_sf_buff<-st_buffer(tmp_sf, ceiling(buffer) * 1000)
+    print("cut by buffer")
+    mask_buffer<-crop(mask_100km, tmp_sf_buff)
+    mask_buffer<-mask(mask_buffer, tmp_sf_buff)
+    print("buffer to point")
+    p_buffer<-data.table(rasterToPoints(mask_buffer))
+  }else{
+    disp_dist<-0
+  }
   item_str<- names(future_env_layers)[9]
   tmp_sf_b<-as_Spatial(st_buffer(tmp_sf, 50000))
   mask_nb<-crop(mask_100km, tmp_sf_b)
@@ -144,7 +147,9 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   for (item_str in names(future_env_layers)){
     print(item_str)
     item<-future_env_layers[[item_str]]
-    item<-item[mask_100km %in% p_buffer$mask_100km]
+    if (dispersal!=0){
+      item<-item[mask_100km %in% p_buffer$mask_100km]
+    }
     item<-item[between(bio1, fit$range_bio1_sd_min, fit$range_bio1_sd_max)&
                  between(bio5, fit$range_bio5_sd_min, fit$range_bio5_sd_max)&
                  between(bio6, fit$range_bio6_sd_min, fit$range_bio6_sd_max)&
@@ -166,84 +171,106 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
       if (nrow(prev_dis)==0){
         next()
       }
+      if (dispersal==0){
+        prev_dis$accumulative_disp<-0
+      }else{
+        prev_dis$accumulative_disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000) + prev_dis$accumulative_disp
+      }
       
-      prev_dis$accumulative_disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000) + prev_dis$accumulative_disp
       prev_dis[suitable==0]$accumulative_disp<-0
-      moveable_dis<-prev_dis[suitable==1]
-      if (nrow(moveable_dis)>0){
-        edge_points_list<-moveable_dis[, is_edge(mask_100km, moveable_dis$mask_100km, x_size), 
-                                       by = 1:nrow(moveable_dis)]
-        edge_points<-moveable_dis[which(edge_points_list$V1),]
-      }else{
-        edge_points<-data.frame()
-      }
-      
-      if (nrow(edge_points)!=0){
-        if (F){
-          plot(prev_dis$x, prev_dis$y)
-          points(edge_points$x, edge_points$y, col="red")
-        }
-        
-        range_x<-range(prev_dis$x)
-        range_x<-c(range_x[1]-1500*max_dispersal, range_x[2]+1500*max_dispersal)
-        range_y<-range(prev_dis$y)
-        range_y<-c(range_y[1]-1500*max_dispersal, range_y[2]+1500*max_dispersal)
-        
-        
+      if (dispersal==0){
         env_item<-item[year==year_i]
-        env_item<-env_item[(x %between% range_x)&(y %between% range_y)]
-        
-        pts     <- sf::st_as_sf(edge_points, coords = c("x", "y"), remove = F, crs=crs(mask_buffer))
-        pts_buf <- sf::st_buffer(pts, edge_points$accumulative_disp)
-        
-        pts_buf_union<-st_cast(st_union(pts_buf), "POLYGON")
-        pts_buf_union_f<-as_Spatial(st_buffer(pts_buf_union, 50000))
-        potential_area<-crop(mask_100km, pts_buf_union_f)
-        potential_area<-mask(potential_area, pts_buf_union_f)
-        
-        
-        if (F){
-          st_write(pts, "../../Figures/Example/point.shp")
-          st_write(pts_buf, "../../Figures/Example/point_buffer.shp")
-          st_write(pts_buf_union, "../../Figures/Example/point_buffer_union.shp")
-          plot(st_geometry(pts))
-          plot(st_geometry(pts_buf), add=T)
-          plot(st_geometry(pts_buf_union), add=T, col="blue")
-          plot(potential_area, add=T, col="red")
-          plot(st_geometry(pts_buf_union), add=T, col="blue")
+        prev_dis$suitable<-0
+        prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
+        prev_dis[suitable==1]$exposure<-0
+        prev_dis[suitable==0]$exposure<-prev_dis[suitable==0]$exposure + 1
+        prev_dis<-prev_dis[exposure<=exposure_threshold]
+        if (nrow(prev_dis)>0){
+          prev_dis$YEAR<-year_i
+          dispersal_log[[as.character(year_i)]]<-prev_dis
+          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp")
+          prev_dis<-unique(prev_dis[, ..selected_cols])
+        }
+      }else{
+        moveable_dis<-prev_dis[suitable==1]
+        if (nrow(moveable_dis)>0){
+          edge_points_list<-moveable_dis[, is_edge(mask_100km, moveable_dis$mask_100km, x_size), 
+                                         by = 1:nrow(moveable_dis)]
+          edge_points<-moveable_dis[which(edge_points_list$V1),]
+        }else{
+          edge_points<-data.frame()
+        }
+        if (nrow(edge_points)!=0){
+          
+          #edge_points<-edge_points[exposure==0]
+          if (F){
+            plot(prev_dis$x, prev_dis$y)
+            points(edge_points$x, edge_points$y, col="red")
+          }
+          
+          range_x<-range(prev_dis$x)
+          range_x<-c(range_x[1]-1500*max_dispersal, range_x[2]+1500*max_dispersal)
+          range_y<-range(prev_dis$y)
+          range_y<-c(range_y[1]-1500*max_dispersal, range_y[2]+1500*max_dispersal)
+          
+          
+          env_item<-item[year==year_i]
+          env_item<-env_item[(x %between% range_x)&(y %between% range_y)]
+          
+          pts     <- sf::st_as_sf(edge_points, coords = c("x", "y"), remove = F, crs=crs(mask_buffer))
+          pts_buf <- sf::st_buffer(pts, edge_points$accumulative_disp)
+          
+          pts_buf_union<-st_cast(st_union(pts_buf), "POLYGON")
+          pts_buf_union_f<-as_Spatial(st_buffer(pts_buf_union, 50000))
+          potential_area<-crop(mask_100km, pts_buf_union_f)
+          potential_area<-mask(potential_area, pts_buf_union_f)
+          
+          
+          if (F){
+            st_write(pts, "../../Figures/Example/point.shp")
+            st_write(pts_buf, "../../Figures/Example/point_buffer.shp")
+            st_write(pts_buf_union, "../../Figures/Example/point_buffer_union.shp")
+            plot(st_geometry(pts))
+            plot(st_geometry(pts_buf), add=T)
+            plot(st_geometry(pts_buf_union), add=T, col="blue")
+            plot(potential_area, add=T, col="red")
+            plot(st_geometry(pts_buf_union), add=T, col="blue")
+          }
+          
+          new_item<-data.table(rasterToPoints(potential_area))
+          new_item<-new_item[!(mask_100km %in% prev_dis$mask_100km)]
+          new_item$exposure<-0
+          new_item$suitable<-1
+          new_item$accumulative_disp<-0
+          new_item<-new_item[mask_100km %in% env_item$mask_100km]
+        }else{
+          new_item<-NULL
+        }
+        prev_dis$suitable<-0
+        prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
+        prev_dis[suitable==1]$exposure<-0
+        prev_dis[suitable==0]$exposure<-prev_dis[suitable==0]$exposure + 1
+        prev_dis<-prev_dis[exposure<=exposure_threshold]
+        if (!is.null(new_item)){
+          prev_dis<-rbindlist(list(prev_dis, new_item))
         }
         
-        new_item<-data.table(rasterToPoints(potential_area))
-        new_item<-new_item[!(mask_100km %in% prev_dis$mask_100km)]
-        new_item$exposure<-0
-        new_item$suitable<-1
-        new_item$accumulative_disp<-0
-        new_item<-new_item[mask_100km %in% env_item$mask_100km]
-      }else{
-        new_item<-NULL
-      }
-      prev_dis$suitable<-0
-      prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
-      prev_dis[suitable==1]$exposure<-0
-      prev_dis[suitable==0]$exposure<-prev_dis[suitable==0]$exposure + 1
-      prev_dis<-prev_dis[exposure<=exposure_threshold]
-      if (!is.null(new_item)){
-        prev_dis<-rbindlist(list(prev_dis, new_item))
-      }
-      if (F){
-        plot(prev_dis$x, prev_dis$y, col=prev_dis$suitable, pch=".")
-        points(new_item$x, new_item$y, col="red")
+        if (F){
+          plot(prev_dis$x, prev_dis$y, col=prev_dis$suitable, pch=".")
+          points(new_item$x, new_item$y, col="red")
+        }
+        
+        
+        if (nrow(prev_dis)>0){
+          prev_dis$YEAR<-year_i
+          dispersal_log[[as.character(year_i)]]<-prev_dis
+          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp")
+          prev_dis<-unique(prev_dis[, ..selected_cols])
+        }
+        #prev_dis<-prev_dis[exposure==0]
+        prev_dis[prev_dis$accumulative_disp>50000]$accumulative_disp<-0
       }
       
-      
-      if (nrow(prev_dis)>0){
-        prev_dis$YEAR<-year_i
-        dispersal_log[[as.character(year_i)]]<-prev_dis
-        selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp")
-        prev_dis<-unique(prev_dis[, ..selected_cols])
-      }
-      #prev_dis<-prev_dis[exposure==0]
-      prev_dis[prev_dis$accumulative_disp>50000]$accumulative_disp<-0
     }
     if (F){
       xxxx=2021
@@ -259,7 +286,8 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
       }
     }
     print("Writing result")
-    saveRDS(dispersal_log, sprintf("%s/%s_%d.rda", target_folder, item_str, exposure_threshold))
+    saveRDS(dispersal_log, sprintf("%s/%s_%d_dispersal_%d.rda", target_folder, item_str,
+                                   exposure_threshold, dispersal))
     print("Done! Writing result")
   }
 }

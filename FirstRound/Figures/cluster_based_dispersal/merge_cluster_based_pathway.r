@@ -32,7 +32,7 @@ l_i<-3
 group<-"Amphibians"
 for (l_i in c(1:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
-  for (threshold in c(1)){
+  for (threshold in c(1, 5)){
     
     for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
       target_rda<-sprintf("../../Objects_Full_species/cluster_based_pathway/merged/%s_%s_exposure_%d.rda",

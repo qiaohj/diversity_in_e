@@ -19,6 +19,12 @@ exposure<-as.numeric(args[2])
 if (is.na(exposure)){
   exposure<-0
 }
+
+dispersal<-as.numeric(args[3])
+if (is.na(dispersal)){
+  dispersal<-0
+}
+
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 
@@ -44,7 +50,8 @@ add_location<-function(indices, location, type){
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
   
-    target_folder<-sprintf("../../Objects/Diversity_exposure_%d/%s/%s", exposure, group, layer$LABEL)
+    target_folder<-sprintf("../../Objects/Diversity_exposure_%d_dispersal_%d/%s/%s", 
+                           exposure, dispersal, group, layer$LABEL)
     
     target<-sprintf("%s/indices_df.rda", target_folder)
     if (file.exists(target)){
