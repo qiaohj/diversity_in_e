@@ -12,7 +12,7 @@ rm(list=ls())
 source("commonFuns/colors.r")
 source("commonFuns/functions.r")
 
-mask<-raster("../../Raster/mask.tif")
+mask<-raster("../../Raster/mask_10km.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 
 p_bak<-ggplot() + 
@@ -32,15 +32,33 @@ j=1
 mask<-raster("../../Raster/mask_index.tif")
 r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-1
-exposure<-0
+exposure<-5
 l_i<-1
-group<-"Birds"
-width<-10
+group<-"Mammals"
+width<-13
 height<-6
 persents<-c(1, 0.5, 0.4, 0.3, 0.2, 0.1)
 all_info<-NULL
 #for (l_i in c(1:nrow(layer_df))){
-for (l_i in c(1, 3)){
+persent<-1
+mask<-raster("../../Raster/mask_100km.tif")
+mask_buffer<-buffer(mask, width=50000)
+dist_row <- function(row1, next_i, dist_df) {
+  if (next_i>=nrow(dist_df)){
+    v<-0
+  }else{
+    row2<-dist_df[next_i,]
+    if (row1$line_group==row2$line_group){
+      v<-sqrt((row1$x-row2$x)^2+(row1$y-row2$y)^2)
+    }else{
+      v<-0
+    }
+  }
+  #print(v)
+  v
+}
+
+for (l_i in c(1:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
   for (exposure in c(5)){
     
@@ -49,7 +67,23 @@ for (l_i in c(1, 3)){
       smooth_path<-readRDS(sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d.rda",
                                    group, layer_item$LABEL, exposure))
       smooth_path$line_group<-paste(smooth_path$sp, smooth_path$path_group)
+      xy<-c("x", "y")
+      smooth_path$continent<-raster::extract(mask_buffer, smooth_path[, ..xy])
+      #smooth_path[!is.na(continent)]$continent<-1
+      #smooth_path[is.na(continent)]$continent<-0
+      #smooth_path_se<-smooth_path[, .(NN=.N), by=list(sp, line_group, continent)]
+      #smooth_path_1<-smooth_path_se[continent==1]
+      #smooth_path_0<-smooth_path_se[continent==0]
+      #smooth_path_all<-merge(smooth_path_1, smooth_path_0, by=c("sp", "line_group"), all=T)
+      #smooth_path_all[is.na(continent.y)]$continent.y<-0
+      #smooth_path_all[is.na(NN.y)]$NN.y<-0
+      #smooth_path_all$ratio<-smooth_path_all$NN.y/(smooth_path_all$NN.x+smooth_path_all$NN.y)
       
+      #distance<-smooth_path[, dist_row(.SD, .I+1, smooth_path), by = seq_len(nrow(smooth_path))]
+      #smooth_path$dist<-distance$V1
+      
+      removed_path<-smooth_path[is.na(continent)]
+      smooth_path<-smooth_path[!(line_group %in% removed_path$line_group)]
       smooth_path_se<-smooth_path[, .(max_year=max(YEAR),
                                       length=.N), by=list(sp, line_group)]
       #smooth_path_se_extant<-smooth_path_se[sp %in% sp_status[STATUS=="extant"]$sp]
@@ -65,7 +99,7 @@ for (l_i in c(1, 3)){
       for (persent in persents){
         print(paste(group, exposure, layer_item$LABEL, persent))
         target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
-                          group, layer_item$LABEL, exposure, persent * 100)
+                            group, layer_item$LABEL, exposure, persent * 100)
         if (file.exists(target_rda)){
           smooth_path_sub<-readRDS(target_rda)
           

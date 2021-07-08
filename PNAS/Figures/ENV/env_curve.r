@@ -7,7 +7,7 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 if (F){
   GCMs<-c("UKESM1")
   SSPs<-c("SSP119", "SSP245", "SSP585")
-  VARs<-c("pr", "tasmax", "tasmin")
+  VARs<-c("bio1", "bio5", "bio6", "bio12", "bio13", "bio14")
   SUBs<-c("mean", "sum", "min", "max")
   years<-c(1850:2100)
   months<-c(1:12)

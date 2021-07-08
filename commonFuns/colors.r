@@ -67,3 +67,8 @@ map_theme<-theme(
   panel.border = element_blank(),
   legend.position="none"
 )
+
+linetype_label<-c(" no exposure no dispersal"=1,
+                  "5-year exposure no dispersal"=6,
+                  " no exposure with dispersal"=2,
+                  "5-year exposure with dispersal"=3)

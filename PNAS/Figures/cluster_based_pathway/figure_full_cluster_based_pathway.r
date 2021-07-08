@@ -12,7 +12,7 @@ rm(list=ls())
 source("commonFuns/colors.r")
 source("commonFuns/functions.r")
 
-mask<-raster("../../Raster/mask.tif")
+mask<-raster("../../Raster/mask_10km.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 
 p_bak<-ggplot() + 
@@ -29,27 +29,28 @@ j=1
 
 
 j=1
-mask<-raster("../../Raster/mask_index.tif")
+mask<-raster("../../Raster/mask_index_100km.tif")
 r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-1
-threshold<-5
+exposrue<-5
 l_i<-1
 group<-"Birds"
-width<-10
+width<-13
 height<-6
+
 persents<-c(1, 0.5, 0.4, 0.3, 0.2, 0.1)
 all_info<-NULL
 persent<-0.2
 #for (l_i in c(1:nrow(layer_df))){
-for (l_i in c(2)){
+for (l_i in c(1)){
   layer_item<-layer_df[l_i,]
-  for (threshold in c(5)){
+  for (exposrue in c(5)){
     for (persent in persents){
       full_pathways<-list()
-      for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-        print(paste(group, threshold, layer_item$LABEL, persent))
-        target_rda<-sprintf("../../Objects_Full_species/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
-                            group, layer_item$LABEL, threshold, persent * 100)
+      for (group in c("Birds", "Mammals")){
+        print(paste(group, exposrue, layer_item$LABEL, persent))
+        target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
+                            group, layer_item$LABEL, exposrue, persent * 100)
         smooth_path_sub<-readRDS(target_rda)
         
         
@@ -58,15 +59,15 @@ for (l_i in c(2)){
       }
       full_pathways<-rbindlist(full_pathways)
       
-      saveRDS(full_pathways, sprintf("../../Objects_Full_species/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
-                                     "ALL", layer_item$LABEL, threshold, persent * 100))
+      saveRDS(full_pathways, sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
+                                     "ALL", layer_item$LABEL, exposrue, persent * 100))
       p<-p_bak+geom_path(data=full_pathways, aes(x=x, y=y, alpha=alpha, color=group,
                                                    group=line_group))+
         scale_alpha_continuous()+
         scale_color_manual(values = color_groups)
       ggsave(p, filename=
-               sprintf("../../Figures_Full_species/cluster_based_pathway/%s_%s_exposure_%d_sub_%d.png", 
-                       "ALL", layer_item$LABEL, threshold, persent * 100), 
+               sprintf("../../Figures/cluster_based_pathway/%s_%s_exposure_%d_sub_%d.png", 
+                       "ALL", layer_item$LABEL, exposrue, persent * 100), 
              width=width, height = height)
       
     }

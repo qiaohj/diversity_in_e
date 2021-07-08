@@ -16,8 +16,8 @@ if (is.na(exposure)){
 }
 
 dispersal<-as.numeric(args[3])
-if (is.na(exposure)){
-  exposure<-0
+if (is.na(dispersal)){
+  dispersal<-0
 }
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
@@ -34,7 +34,7 @@ k=2
 
 #df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 
-mask<-readRDS("../../Objects/mask.rda")
+#mask<-readRDS("../../Objects/mask.rda")
 
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
@@ -58,20 +58,13 @@ for (j in c(1:nrow(layer_df))){
       next()
     }
     #print(paste(Sys.time(), 1))
-    source_folder<-sprintf("../../Objects/%s/%s", group, item$SP)
-    if (dispersal==0){
-      start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", source_folder, exposure, dispersal))
-      #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
-      all_dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda", source_folder, layer$GCM, layer$SSP, exposure, dispersal))
-    }else{
-      start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d.rda", source_folder, exposure))
-      #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
-      all_dis<-readRDS(sprintf("%s/%s_%s_%d.rda", source_folder, layer$GCM, layer$SSP, exposure))
-      
-    }
+    source_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$SP)
+    start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", source_folder, exposure, dispersal))
+    #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
+    all_dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda", source_folder, layer$GCM, layer$SSP, exposure, dispersal))
     all_dis[["2020"]]<-start_dis
     
-    YYYY=2024
+    YYYY=2021
     for (YYYY in c(2020:2100)){
       #print(YYYY)
       diversity<-diversity_df[[as.character(YYYY)]]
@@ -80,6 +73,9 @@ for (j in c(1:nrow(layer_df))){
       if (is.null(env_item)){
         next()
       }
+      #if (YYYY!=2020){
+        #env_item<-env_item[suitable==1]
+      #}
       if (nrow(env_item)==0){
         next()
       }

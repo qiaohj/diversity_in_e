@@ -2,17 +2,18 @@ library(raster)
 library(dplyr)
 library(concaveman)
 library(sf)
+library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-mask<-raster("../../Raster/mask_index.tif")
+mask<-raster("../../Raster/mask_100km.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 if (is.na(group)){
-  group<-"Amphibians"
+  group<-"Mammals"
 }
-threshold<-as.numeric(args[2])
-if (is.na(threshold)){
-  threshold<-1
+exposure<-as.numeric(args[2])
+if (is.na(exposure)){
+  exposure<-5
 }
 if (F){
   r<-raster("../../Raster/Continent.tif")
@@ -33,7 +34,7 @@ if (F){
   writeRaster(r2, "../../Raster/Continent_ect4.tif", overwrite=T)
   plot(r2)
 }
-#threshold<-5
+#exposure<-5
 continent<-raster("../../Raster/Continent_ect4.tif")
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -43,7 +44,7 @@ predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
-df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
 i=1
 #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
 dispersals<-c(1)
@@ -51,15 +52,13 @@ df_list<-df_list[sample(nrow(df_list), nrow(df_list)),]
 final_df<-NULL
 colors<-rainbow(length(2021:2100))
 for (i in c(1:nrow(df_list))){
-  print(paste(i, nrow(df_list)))
-  item<-df_list[i,]
-  item$sp<-gsub(" ", "_", item$sp)
-  if (item$area<=0){
-    next()
-  }
-  target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
   
-  target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+  item<-df_list[i,]
+  item$sp<-gsub(" ", "_", item$SP)
+  print(paste(i, nrow(df_list), item$sp))
+  target_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$sp)
+  
+  target<-sprintf("%s", target_folder)
   
   j=1
   no_na<-!is.na(values(mask))
@@ -68,8 +67,8 @@ for (i in c(1:nrow(df_list))){
     k=1
     for (k in c(1:length(dispersals))){
       dispersal<-dispersals[k]
-      ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
-                   threshold, group, item$sp, layer_item$LABEL, dispersal)
+      ttt<-sprintf("../../Objects/dispersal_path_exposure_%d/%s/%s_%s_%d.rda", 
+                   exposure, group, item$sp, layer_item$LABEL, dispersal)
       if (file.exists(ttt)){
         #ddddd<-readRDS(ttt)
         #if (!is.null(ddddd)){
@@ -78,20 +77,26 @@ for (i in c(1:nrow(df_list))){
         
       }
       dir.create(sprintf("../../Objects/dispersal_path_%d/%s", 
-                         threshold, group), showWarnings = F, recursive = T)
+                         exposure, group), showWarnings = F, recursive = T)
       saveRDS(NULL, ttt)
-      dispersal_log<-readRDS(sprintf("%s/%s_%d.rda", target, layer_item$LABEL, dispersal))
+      dispersal_log<-readRDS(sprintf("%s/%s_%d_dispersal_%d.rda", target, layer_item$LABEL, 
+                                     exposure, dispersal))
       if (is.null(dispersal_log)){
         next()
       }
+      if (length(dispersal_log)==0){
+        next()
+      }
       
-      start_dis<-readRDS(sprintf("%s/occ_with_env.rda", target_folder))
+      start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", 
+                                 target_folder, exposure, dispersal))
       #start_dis<-start_dis%>%dplyr::filter(in_out==1)
-      start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y, mask_index)
+      start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y, mask_100km)
       start_dis$YEAR<-2020
-      dispersal_log<-bind_rows(dispersal_log[, c("x", "y", "mask_index", "YEAR")], start_dis)
-      dispersal_log$continent_i<-raster::extract(continent, dispersal_log[, c("x", "y")])
-      dispersal_log<-dispersal_log%>%dplyr::filter(!is.na(continent_i))
+      dispersal_log<-rbindlist(dispersal_log)
+      dispersal_log<-bind_rows(dispersal_log[, c("x", "y", "mask_100km", "YEAR")], start_dis)
+      #dispersal_log$continent_i<-raster::extract(continent, dispersal_log[, c("x", "y")])
+      #dispersal_log<-dispersal_log%>%dplyr::filter(!is.na(continent_i))
       if (nrow(dispersal_log)==0){
         next()
       }
@@ -113,7 +118,7 @@ for (i in c(1:nrow(df_list))){
           }
         }
       }
-      dispersal_log_se<-dispersal_log%>%dplyr::group_by(YEAR, continent_i)%>%
+      dispersal_log_se<-dispersal_log%>%dplyr::group_by(YEAR)%>%
         dplyr::summarise(gravity_x=mean(x), gravity_y=mean(y))
       saveRDS(dispersal_log_se, ttt)
       if (F){

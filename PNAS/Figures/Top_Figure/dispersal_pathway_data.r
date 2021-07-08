@@ -6,7 +6,7 @@ library(data.table)
 args = commandArgs(trailingOnly=TRUE)
 j_index<-as.numeric(args[1])
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-mask<-raster("../../Raster/mask_index.tif")
+mask<-raster("../../Raster/mask_100km.tif")
 mask_p<-data.frame(rasterToPoints(mask))
 no_na<-!is.na(values(mask))
 if (is.na(j_index)){
@@ -22,21 +22,22 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 predict_range<-c(2021:2100)
 layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
-
+group<-"Mammals"
 if (T){
-  threshold<-as.numeric(args[2])
-  if (is.na(threshold)){
-    threshold<-5
+  exposure<-as.numeric(args[2])
+  if (is.na(exposure)){
+    exposure<-5
   }
   
   smooth_path<-NULL
   final_df<-NULL
   #plot.new()
   #for (j in c(nrow(layer_df):1)){
+  j<-j_index
   for (j in c(j_index)){
     layer_item<-layer_df[j,]
-    for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-      df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s.rda", group))
+    for (group in c("Birds", "Mammals")){
+      df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
       i=1
       #dispersals<-data.frame(M=c(0:5, rep(1, 4), 2), N=c(rep(1,6), c(2:5), 2))
       dispersals<-c(1)
@@ -46,21 +47,19 @@ if (T){
       #p<-ggplot()
       
       for (i in c(1:nrow(df_list))){
-        print(paste(i, nrow(df_list), group, layer_item$LABEL, threshold))
+        print(paste(i, nrow(df_list), group, layer_item$LABEL, exposure))
         item<-df_list[i,]
-        item$sp<-gsub(" ", "_", item$sp)
-        if (item$area<=0){
-          next()
-        }
+        item$sp<-gsub(" ", "_", item$SP)
+        
         target_folder<-sprintf("../../Objects/Niche_Models/%s/%s", group, item$sp)
         
-        target<-sprintf("%s/dispersal_%d", target_folder, threshold)
+        target<-sprintf("%s/dispersal_%d", target_folder, exposure)
         
         k=1
         
         dispersal<-dispersals[k]
-        ttt<-sprintf("../../Objects/dispersal_path_%d/%s/%s_%s_%d.rda", 
-                     threshold, group, item$sp, layer_item$LABEL, dispersal)
+        ttt<-sprintf("../../Objects/dispersal_path_exposure_%d/%s/%s_%s_%d.rda", 
+                     exposure, group, item$sp, layer_item$LABEL, dispersal)
         
         all_c<-readRDS(ttt)
         if (is.null(all_c)){
@@ -110,8 +109,8 @@ if (T){
         }
       }
     }
-    #saveRDS(smooth_path, sprintf("../../Figures/Top_Figure_%d/smooth_path_%s.rda", threshold, layer_item$LABEL))
-    saveRDS(final_df, sprintf("../../Figures/Top_Figure_%d/raw_path_%s.rda", threshold, layer_item$LABEL))
+    #saveRDS(smooth_path, sprintf("../../Figures/Top_Figure_%d/smooth_path_%s.rda", exposure, layer_item$LABEL))
+    saveRDS(final_df, sprintf("../../Figures/Top_Figure_%d/raw_path_%s.rda", exposure, layer_item$LABEL))
     
   }
 }

@@ -64,7 +64,7 @@ for (j in c(1:nrow(layer_df))){
     i=247
     print(paste("READING DATA", target_folder))
     diversity_df<-readRDS(sprintf("%s/diversity_df.rda", target_folder))
-    YYYY<-names(diversity_df)[1]
+    YYYY<-names(diversity_df)[2]
     indices_df<-list()
     sp_dis<-NULL
     for (YYYY in names(diversity_df)){
@@ -143,3 +143,8 @@ for (j in c(1:nrow(layer_df))){
     
   
 }
+if (F){
+  df1<-readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/Diversity_exposure_0_dispersal_1_xxx/Mammals/UKESM1_SSP585/diversity_df.rda")
+  df2<-readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/Diversity_exposure_0_dispersal_1/Mammals/UKESM1_SSP585/diversity_df.rda")
+  
+  }

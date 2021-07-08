@@ -8,10 +8,10 @@ library(Rmisc)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 
 if (F){
-  source("functions.r")
+  source("commonFuns/functions.r")
   
-  keyspots<-read.csv("../../Objects/Species_exposure/Keyspots/keyspots.csv", stringsAsFactors = F)
-  mask<-raster("../../Raster/mask_index.tif")
+  keyspots<-read.csv("../../Objects/keyspots/keyspots.csv", stringsAsFactors = F)
+  mask<-raster("../../Raster/mask_100km.tif")
   plot(mask)
   cord.dec = SpatialPoints(keyspots[, c("lon", "lat")], proj4string=CRS("+proj=longlat"))
   cord.eck4 <- spTransform(cord.dec, crs(mask))

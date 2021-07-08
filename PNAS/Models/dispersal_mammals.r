@@ -42,7 +42,7 @@ get_disp_dist<-function(n, max_disp){
 }
 
 predict_range<-c(2021:2100)
-exposure_threshold<-0
+exposure_threshold<-5
 i=2
 unique<-unique[sample(length(unique), length(unique))]
 x_size<-dim(mask_100km)[2]
@@ -56,14 +56,16 @@ if (F){
   final_df<-NULL
   for (i in 1:length(mammal_full_sum_area$binomial)) {
     bi<-mammal_full_sum_area$binomial[i]
-    print(paste(i, length(mammal_full_sum_area$binomial), bi))
-    target_folder<-sprintf("../../Objects/Mammals/%s", gsub(" ", "_", bi))
+    print(paste(i, length(mammal_full_sum_area$binomial), bi, "exposure", exposure_threshold,
+                "dispersal", ""))
+    
+    target_folder<-sprintf("../../Objects/Dispersal/Mammals/%s", gsub(" ", "_", bi))
     fit_str<-sprintf("%s/fit.rda", target_folder)
     if (!file.exists(fit_str)){
       next()
     }
     N_file<-length(list.files(target_folder))
-    if (N_file==11){
+    if (N_file==41){
       item<-mammal_full_sum_area[i,]
       
       fit<-readRDS(fit_str)
@@ -83,10 +85,23 @@ if (F){
 bi<-mammal_full_sum_area[mammal_full_sum_area$sum_are<=1.5*min(mammal_full_sum_area$sum_are)]$binomial[1]
 mammal_full_sum_area<-mammal_full_sum_area[sample(nrow(mammal_full_sum_area), nrow(mammal_full_sum_area))]
 dispersal<-0
+
+args = commandArgs(trailingOnly=TRUE)
+exposure_threshold<-as.numeric(args[1])
+if (is.na(exposure_threshold)){
+  exposure_threshold<-5
+}
+
+dispersal<-as.numeric(args[2])
+if (is.na(dispersal)){
+  dispersal<-0
+}
+
+
 for (i in 1:length(mammal_full_sum_area$binomial)) {
   bi<-mammal_full_sum_area$binomial[i]
   print(paste(i, length(unique), bi))
-  target_folder<-sprintf("../../Objects/Mammals/%s", gsub(" ", "_", bi))
+  target_folder<-sprintf("../../Objects/Dispersal/Mammals/%s", gsub(" ", "_", bi))
   fit_str<-sprintf("%s/fit.rda", target_folder)
   if (!file.exists(fit_str)){
     next()
@@ -119,7 +134,7 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   
   if (dispersal!=0){
     print("calculating buffer")
-    disp_dist<-mammal_disp[iucn_name==bi]$estimated_disp
+    disp_dist<-mammal_disp[Scientific==bi]$estimated_disp
     buffer<-disp_dist * 80
     tmp_sf_buff<-st_buffer(tmp_sf, ceiling(buffer) * 1000)
     print("cut by buffer")
@@ -130,7 +145,7 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   }else{
     disp_dist<-0
   }
-  item_str<- names(future_env_layers)[9]
+  item_str<-"EC-Earth3-Veg_SSP245"
   tmp_sf_b<-as_Spatial(st_buffer(tmp_sf, 50000))
   mask_nb<-crop(mask_100km, tmp_sf_b)
   mask_nb<-mask(mask_nb, tmp_sf_b)
@@ -166,20 +181,24 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
     prev_dis$accumulative_disp<-0
     year_i = 2021
     for (year_i in predict_range){
-      
-      print(paste("", i, length(unique), bi, year_i, item_str))
+      print(paste(i, length(unique), 
+                  bi, "exposure", exposure_threshold, 
+                  "dispersal", dispersal, year_i, item_str))
       if (nrow(prev_dis)==0){
         next()
       }
+      
+      range_x<-range(prev_dis$x)
+      range_x<-c(range_x[1]-1500*max_dispersal, range_x[2]+1500*max_dispersal)
+      range_y<-range(prev_dis$y)
+      range_y<-c(range_y[1]-1500*max_dispersal, range_y[2]+1500*max_dispersal)
+      
+      
+      env_item<-item[year==year_i]
+      env_item<-env_item[(x %between% range_x)&(y %between% range_y)]
+      
       if (dispersal==0){
         prev_dis$accumulative_disp<-0
-      }else{
-        prev_dis$accumulative_disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000) + prev_dis$accumulative_disp
-      }
-      
-      prev_dis[suitable==0]$accumulative_disp<-0
-      if (dispersal==0){
-        env_item<-item[year==year_i]
         prev_dis$suitable<-0
         prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
         prev_dis[suitable==1]$exposure<-0
@@ -192,6 +211,12 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
           prev_dis<-unique(prev_dis[, ..selected_cols])
         }
       }else{
+        prev_dis$suitable<-0
+        prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
+        prev_dis[suitable==1]$exposure<-0
+        
+        prev_dis$accumulative_disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000) + prev_dis$accumulative_disp
+        
         moveable_dis<-prev_dis[suitable==1]
         if (nrow(moveable_dis)>0){
           edge_points_list<-moveable_dis[, is_edge(mask_100km, moveable_dis$mask_100km, x_size), 
@@ -207,15 +232,6 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
             plot(prev_dis$x, prev_dis$y)
             points(edge_points$x, edge_points$y, col="red")
           }
-          
-          range_x<-range(prev_dis$x)
-          range_x<-c(range_x[1]-1500*max_dispersal, range_x[2]+1500*max_dispersal)
-          range_y<-range(prev_dis$y)
-          range_y<-c(range_y[1]-1500*max_dispersal, range_y[2]+1500*max_dispersal)
-          
-          
-          env_item<-item[year==year_i]
-          env_item<-env_item[(x %between% range_x)&(y %between% range_y)]
           
           pts     <- sf::st_as_sf(edge_points, coords = c("x", "y"), remove = F, crs=crs(mask_buffer))
           pts_buf <- sf::st_buffer(pts, edge_points$accumulative_disp)
@@ -246,9 +262,6 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
         }else{
           new_item<-NULL
         }
-        prev_dis$suitable<-0
-        prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
-        prev_dis[suitable==1]$exposure<-0
         prev_dis[suitable==0]$exposure<-prev_dis[suitable==0]$exposure + 1
         prev_dis<-prev_dis[exposure<=exposure_threshold]
         if (!is.null(new_item)){

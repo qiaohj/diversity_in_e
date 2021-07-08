@@ -18,6 +18,22 @@ print(sprintf("%d CPUs are using", getDTthreads()))
 GCMs<-c("UKESM1", "EC-Earth3-Veg", "MRI-ESM2-0")
 SSPs<-c("SSP245", "SSP585", "SSP119")
 
+args = commandArgs(trailingOnly=TRUE)
+group<-args[1]
+if (is.na(group)){
+  group<-"Mammals"
+}
+exposure<-as.numeric(args[2])
+if (is.na(exposure)){
+  exposure<-5
+}
+
+index<-as.numeric(args[3])
+if (is.na(index)){
+  index<-1
+}
+
+
 layer_df<-expand.grid(SSP=SSPs, GCM=GCMs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 j=1
@@ -28,16 +44,16 @@ j=1
 mask<-raster("../../Raster/mask_index.tif")
 r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-1
-exposure<-5
+#exposure<-5
 l_i<-1
-group<-"Mammals"
+#group<-"Mammals"
 rm<-c()
-for (l_i in c(1:nrow(layer_df))){
-#for (l_i in c(6)){
+#for (l_i in c(1:nrow(layer_df))){
+for (l_i in c(index)){
   layer_item<-layer_df[l_i,]
-  for (exposure in c(0, 5)){
+  for (exposure in c(exposure)){
     
-    for (group in c("Birds", "Mammals")){
+    for (group in c(group)){
       target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d.rda",
                           group, layer_item$LABEL, exposure)
       if (file.exists(target_rda)){
@@ -62,7 +78,7 @@ for (l_i in c(1:nrow(layer_df))){
         path_rds<-sprintf("%s/pathways.rda", target_folder)
         #if ((file.exists(smooth_path_rds))&(file.exists(path_rds))){
         if (file.exists(path_rds)){
-          next()
+          #next()
           path<-readRDS(path_rds)
           path$from_label<-path$from
           path$to_label<-path$to
@@ -144,9 +160,9 @@ for (l_i in c(1:nrow(layer_df))){
         }
       }
       smooth_path_full<-rbindlist(smooth_path_full)
-      #saveRDS(smooth_path_full, target_rda)
+      saveRDS(smooth_path_full, target_rda)
     }
   }
 }
 
-write.table(rm, file="~/xxx.sh", quote=F, row.names = F, col.names = F)
+#write.table(rm, file="~/xxx.sh", quote=F, row.names = F, col.names = F)

@@ -77,8 +77,8 @@ for (l_i in c(1:nrow(layer_df))){
         next()
       }
       dir.create(target_folder, showWarnings = F, recursive = T)
-      source_folder<-sprintf("../../Objects/%s/%s", sp_test$group, sp_test$SP)
-      dis_details<-readRDS(sprintf("%s/%s_%d.rda", 
+      source_folder<-sprintf("../../Objects/Dispersal/%s/%s", sp_test$group, sp_test$SP)
+      dis_details<-readRDS(sprintf("%s/%s_%d_dispersal_1.rda", 
                                    source_folder, layer_item$LABEL, exposure))
       dis_details<-rbindlist(dis_details)
       if (is.null(dis_details)){

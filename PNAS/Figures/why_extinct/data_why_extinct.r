@@ -1,45 +1,59 @@
 library(dplyr)
 library(data.table)
 rm(list=ls())
-threshold<-1
-ttt<-2
-g<-"Amphibians"
+exposure<-0
+g<-"Mammals"
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-env_layers<-readRDS("../../Objects_Full_species/stacked_layers_2021_2100.rda")
+env_layers<-readRDS("../../Objects/stacked_layers_2021_2100_list_100km.rda")
 source("commonFuns/functions.r")
 all_result<-NULL
-for (threshold in c(1,5)){
+for (exposure in c(0,5)){
   when_extinct<-NULL
   
-  for (g in c("Amphibians", "Birds", "Reptiles", "Mammals")){
-    sp_list<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", g))
-    sp_list<-sp_list[which(sp_list$area>ttt),]
+  for (g in c("Birds", "Mammals")){
+    sp_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", g))
     
-    df<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
+    df<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/%s.rda", exposure, g))
+    sp_list$sp<-sp_list$SP
     sp_list$sp2<-gsub(" ", "_", sp_list$sp)
     df<-df%>%dplyr::filter(sp%in%sp_list$sp2)
     when_extinct<-df%>%dplyr::distinct(group, sp, GCM, SSP, extinct_year, dispersal)
     when_extinct<-when_extinct%>%dplyr::filter(!is.infinite(extinct_year))
+    i=1
     for (i in c(1:nrow(when_extinct))){
-      print(paste(threshold, g, i, nrow(when_extinct)))
+      print(paste(exposure, g, i, nrow(when_extinct)))
       item<-when_extinct[i,]
       
-      target_folder<-sprintf("../../Objects_Full_species/Niche_Models/%s/%s", g, item$sp)
+      target_folder<-sprintf("../../Objects/Dispersal/%s/%s", g, item$sp)
       fit<-readRDS(sprintf("%s/fit.rda", target_folder))
-      dis<-readRDS(sprintf("%s/dispersal_%d/%s_%s_%d.rda",
-                           target_folder, threshold, item$GCM, item$SSP, item$dispersal))
+      dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda", 
+                           target_folder, item$GCM, item$SSP, exposure, item$dispersal))
+      dis<-rbindlist(dis)
+      if (is.null(dis)){
+        next()
+      }
+      if (nrow(dis)==0){
+        next()
+      }
+      
       dis<-dis%>%dplyr::filter(YEAR==(item$extinct_year-1))
-      env_layer<-env_layers[[sprintf("%s_%s_%d", item$GCM, item$SSP, item$extinct_year)]]
-      env_layer<-env_layer%>%dplyr::filter(mask_index %in% dis$mask_index)
-      env_layer$is_temp_in<-between(env_layer$TEMP_MAX, fit$range_TEMP_sd_min, fit$range_TEMP_sd_max)&
-        between(env_layer$TEMP_MIN, fit$range_TEMP_sd_min, fit$range_TEMP_sd_max)
-      env_layer$is_prec_in<-between(env_layer$PR, fit$range_PR_sd_min, fit$range_PR_sd_max)
+      env_layer<-env_layers[[sprintf("%s_%s", item$GCM, item$SSP)]]
+      env_layer<-env_layer%>%dplyr::filter(year==item$extinct_year)
+      env_layer<-env_layer%>%dplyr::filter(mask_100km %in% dis$mask_100km)
+      env_layer$is_bio1<-between(env_layer$bio1, fit$range_bio1_sd_min, fit$range_bio1_sd_max)
+      env_layer$is_bio5<-between(env_layer$bio5, fit$range_bio5_sd_min, fit$range_bio5_sd_max)
+      env_layer$is_bio6<-between(env_layer$bio6, fit$range_bio6_sd_min, fit$range_bio6_sd_max)
+      env_layer$is_bio12<-between(env_layer$bio12, fit$range_bio12_sd_min, fit$range_bio12_sd_max)
+      env_layer$is_bio13<-between(env_layer$bio13, fit$range_bio13_sd_min, fit$range_bio13_sd_max)
+      env_layer$is_bio14<-between(env_layer$bio14, fit$range_bio14_sd_min, fit$range_bio14_sd_max)
+      env_layer<-as_tibble(env_layer)
+      item<-data.frame(item)
       for (nn in names(item)){
         env_layer[, nn]<-item[, nn]
       }
-      env_layer$threshold<-threshold
+      env_layer$exposure<-exposure
       all_result<-bind_dplyr(all_result, env_layer)
     }
   }
 }
-saveRDS(all_result, "../../Objects_Full_species/why_extinct/why_extinct.rda")
+saveRDS(all_result, "../../Objects/why_extinct/why_extinct.rda")
