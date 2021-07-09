@@ -29,7 +29,7 @@ j=1
 
 
 j=1
-mask<-raster("../../Raster/mask_index.tif")
+mask<-raster("../../Raster/mask_100km.tif")
 r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-1
 exposure<-5
@@ -60,7 +60,7 @@ dist_row <- function(row1, next_i, dist_df) {
 
 for (l_i in c(1:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
-  for (exposure in c(5)){
+  for (exposure in c(0, 5)){
     
     for (group in c("Birds", "Mammals")){
       print(paste(group, exposure, layer_item$LABEL))
@@ -97,6 +97,10 @@ for (l_i in c(1:nrow(layer_df))){
       info_item$exposure<-ifelse(exposure==1, " no exposure", "5-year exposure")
       all_info<-bind(all_info, info_item)
       for (persent in persents){
+        if (file.exists(sprintf("../../Figures/cluster_based_pathway/%s_%s_exposure_%d_sub_%d.png", 
+                                group, layer_item$LABEL, exposure, persent * 100))){
+          next()
+        }
         print(paste(group, exposure, layer_item$LABEL, persent))
         target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
                             group, layer_item$LABEL, exposure, persent * 100)

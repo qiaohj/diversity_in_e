@@ -37,9 +37,25 @@ is_edge<-function(index, all_index, xsize){
   }
 }
 get_disp_dist<-function(n, max_disp){
-  disp_seed<-rexp(n = n, rate = .1)
+  disp_seed<-rexp(n = n, rate = 0.1)
   disp_seed/max(disp_seed) * max_disp
 }
+
+test<-100
+y<-get_disp_dist(1000, 100)
+hist(y)
+saveRDS(y, "../../Figures/exponential_distribution/data.rda")
+
+y<-get_disp_dist(10000, 100)
+png(filename = "../../Figures/exponential_distribution/exponential_distribution.png",
+    width = 1000, height = 800, units = "px")
+
+hist(y,xlab=NULL,main=NULL, cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+dev.off()
+df<-data.frame(y=y)
+p<-ggplot(df[which(df$y>0),], aes(x=y))+geom_histogram(binwidth=5, fill="grey")+
+  geom_density(aes(y=3 * ..count..))+theme_bw()
+p
 
 predict_range<-c(2021:2100)
 exposure_threshold<-5

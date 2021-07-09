@@ -46,7 +46,7 @@ exposure=5
 #for (j in c(1:nrow(layer_df))){
 #  for (exposure in c(1, 5)){
 persent<-0.2
-for (j in c(6)){
+for (j in c(3, 9)){
   for (exposure in c(5)){
     layer_item<-layer_df[j,]
     for (group in c("Birds", "Mammals")){
@@ -95,19 +95,19 @@ for (j in c(6)){
 asdf
 
 library(magick)
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 exposure<-5
-label<-"UKESM1_SSP245"
-ttt<-2
+label<-"UKESM1_SSP585"
 g<-"Birds"
 year<-2021
 persent<-0.2
 
 for (year in c(2021:2100)){
   print(year)
-  png(sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/Combined/%s/per_%d/%d.png", 
-              exposure, label, round(persent * 100), year), 
+  png(sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/Combined/%s/%d.png", 
+              exposure, label, year), 
       width=1920, height=540, units = "px")
-  par(mfrow=c(2,2),
+  par(mfrow=c(1,2),
       oma = c(0,0,0,0),
       mar = c(0,0,0,0),
       mgp = c(0, 0, 0),    # axis label at 2 rows distance, tick labels at 1 row
@@ -116,12 +116,12 @@ for (year in c(2021:2100)){
   )
   for (g in c("Birds", "Mammals")){
     persent<-ifelse(g=="Birds", 0.2, 0.5)
-    folder<-sprintf("../../Figures_Full_species/cluster_based_pathway_movies/Movies/exposure_%d/%s/%s/per_%d", 
+    folder<-sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/%s/%s/per_%d", 
                     exposure, g, label, round(persent * 100))
     
     
     path<-image_read(sprintf("%s/%d.png", folder, year))
-    path<-image_crop(path, "2400x725+300+100")
+    path<-image_crop(path, "3000x1650+600+50")
     
     path<-image_annotate(path, g, gravity = "south", 
                          size = 120,  color = "#000000",
@@ -131,15 +131,17 @@ for (year in c(2021:2100)){
     plot(path)
     
   }
-  text(0,100,year,cex=6,font=2)
+  text(0,100,year,cex=5,font=2)
   
   dev.off()
 }
-cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP119/per_20
-ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../../UKESM1_SSP119_exposure_5_per_20.mp4
 
-cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP245/per_20
-ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../../UKESM1_SSP245_exposure_5_per_20.mp4
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP119
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../UKESM1_SSP119_exposure_5.mp4
 
-cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP585/per_20
-ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../../UKESM1_SSP585_exposure_5_per_20.mp4
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP245
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../UKESM1_SSP245_exposure_5.mp4
+
+cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP585
+ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../../../UKESM1_SSP585_exposure_5.mp4
+

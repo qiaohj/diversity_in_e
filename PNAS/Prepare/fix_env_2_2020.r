@@ -26,6 +26,15 @@ if (F){
   plot(mask)
   writeRaster(mask, "../../Raster/mask_100km.tif", overwrite=T)
   
+  mask<-raster("../../Raster/mask_100km.tif")
+  continent<-raster("../../Raster/Continent_ect4.tif")
+  
+  na<-is.na(values(continent))
+  
+  values(mask)[na]<-NA
+  plot(mask)
+  writeRaster(mask, "../../Raster/mask_100km_plot.tif", overwrite=T)
+  
 }
 mask<-data.frame(rasterToPoints(raster("../../Raster/mask_100km.tif")))
 start_env_layers<-list()

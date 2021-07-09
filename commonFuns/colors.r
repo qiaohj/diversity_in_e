@@ -29,6 +29,12 @@ linetype_gcm<-c("EC-Earth3-Veg"=1,
                 "UKESM1"=5)
 color_causation<-c("Temperature"=colors_red[7],
                    "Precipitation"=colors_blue[7])
+
+color_causation_ul<-c("Temperature (upper limit)"=colors_red[5],
+                   "Temperature (lower limit)"=colors_red[7],
+                   "Precipitation (upper limit)"=colors_blue[5],
+                   "Precipitation (lower limit)"=colors_blue[7])
+
 color_dipsersal_type<-c("neither higher elevation nor higher latitude"=colors_red[7],
                         "higher elevation and/or higher latitude"=colors_blue[7])
 

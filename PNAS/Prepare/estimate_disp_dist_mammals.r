@@ -389,7 +389,7 @@ p
 ggsave(p, filename="../../Figures/Estimate_Disp/Model_Results_mammals.png", width=8, height=6)
 
 p<-ggplot(evaluated_metrics_all)+
-  geom_point(aes(x=factor(model), y=RMSE, color=factor(formulas), size=cor))+
+  geom_point(aes(x=factor(model), y=RMSE_Full, color=factor(formulas), size=cor))+
   theme_bw()
 
 p
@@ -420,6 +420,7 @@ best_model_info<-
 
 #best_model_info<-best_model_info[2,]
 best_model_info<-evaluated_metrics_all[which(evaluated_metrics_all$RMSE_Full==min(evaluated_metrics_all$RMSE_Full)),]
+write.csv(evaluated_metrics_all, "../../Figures/Estimate_Disp/evaluated_metrics_all_mammals.csv")
 #best_model_info<-evaluated_metrics_all[which(evaluated_metrics_all$cor==max(evaluated_metrics_all$cor, na.rm=T)),]
 best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank_mammals.rda", tolower(best_model_info$model)))
 #best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank.rda", "rf"))

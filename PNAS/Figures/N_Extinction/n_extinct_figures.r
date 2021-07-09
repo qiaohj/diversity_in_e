@@ -53,6 +53,14 @@ if (F){
             colnames(sp_dis)[which(colnames(sp_dis)=="N")]<-"N_CELL"
             colnames(sp_dis)[which(colnames(sp_dis)=="YEAR")]<-"year"
             
+            sp_dis_init<-sp_dis%>%dplyr::filter(year==2020)
+            sp_dis_init<-sp_dis_init[, c("sp", "N_CELL")]
+            colnames(sp_dis_init)<-c("sp", "N_CELL_2020")
+            sp_dis<-inner_join(sp_dis, sp_dis_init, by="sp")
+            sp_dis$N_CELL_Ratio<-sp_dis$N_CELL/sp_dis$N_CELL_2020
+            sp_dis$Extinct_Type<-""
+            sp_list<-unique(sp_dis[which(sp_dis$N_CELL_Ratio<=0.05), "sp"])
+            sp_dis[which(sp_dis$sp %in% sp_list$sp), "Extinct_Type"]<-"ENDANGERED"
             
             keys<-seq(2040, 2100, by=20)
             sp_dis_key<-NULL
@@ -67,6 +75,7 @@ if (F){
             }
             
             sp_dis_key[which(is.na(sp_dis_key$N_CELL)), "N_CELL"]<-0
+            
             sp_dis_key$group<-group
             sp_dis_key$GCM<-layer$GCM
             sp_dis_key$SSP<-layer$SSP
@@ -87,10 +96,6 @@ if (F){
     sp_dis_all<-inner_join(sp_dis_all, N_SP, by=c("group"))
     sp_dis_all$Label1<-paste(sp_dis_all$GCM, sp_dis_all$SSP)
     saveRDS(sp_dis_all, sprintf("../../Figures/N_Extinction/sp_dis_all_%d.rda", exposure))
-    
-    
-    
-    
   }
 }
 
@@ -104,7 +109,8 @@ for (exposure in c(0, 5)){
   print(paste("Reading", rda))
   sp_dis_all<-readRDS(rda)
   sp_dis_all_sub_1<-sp_dis_all%>%dplyr::filter(year==2100)
-  sp_dis_all_sub<-sp_dis_all_sub_1%>%dplyr::filter(N_type=="EXTINCT")
+  sp_dis_all_sub<-sp_dis_all_sub_1%>%dplyr::filter((Extinct_Type!="")|(N_type=="EXTINCT"))
+  sp_dis_all_sub[which(sp_dis_all_sub$N_type!="EXTINCT"), "N_type"]<-"ENDANGERED"
   sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, GCM, SSP, M, N_type, N_SP, TYPE)%>%
     dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
   sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
@@ -176,13 +182,40 @@ sp_mean_3<-sp_mean_gcm%>%
 
 write.csv(sp_mean_3, sprintf("../../Figures/N_Extinction/Extinction_by_exposure.csv"))
 
-p<-ggplot(sp_mean, aes(y=persentile_MEAN, x=SSP))+
-  geom_bar(stat="identity", position=position_dodge(), aes(fill=factor(M)))+
-  geom_errorbar(position=position_dodge(.9), width=0.2,
-                aes(ymin=persentile_MEAN-persentile_SD, 
-                    ymax=persentile_MEAN+persentile_SD,
-                    group=factor(M))) +
+sp_mean$x_label<-as.numeric(as.factor(sp_mean$SSP))
+sp_mean$N_type<-factor(sp_mean$N_type, levels=c("ENDANGERED", "EXTINCT"))
+
+sp_mean_eee<-sp_mean%>%dplyr::filter(N_type=="EXTINCT")
+sp_mean<-inner_join(sp_mean, sp_mean_eee, by=c("group", "SSP", "M", "N_SP", "TYPE", "Label", "exposure"))
+sp_mean$persentile_MEAN<-sp_mean$persentile_MEAN.x
+sp_mean$persentile_MEAN2<-sp_mean$persentile_MEAN.x
+
+sp_mean$N_type<-sp_mean$N_type.x
+sp_mean$persentile_SD<-sp_mean$persentile_SD.x
+sp_mean[which(sp_mean$N_type=="ENDANGERED"), "persentile_MEAN2"]<-sp_mean[which(sp_mean$N_type=="ENDANGERED"), "persentile_MEAN.x"]+sp_mean[which(sp_mean$N_type=="ENDANGERED"), "persentile_MEAN.y"]
+sp_mean$x_label<-sp_mean$x_label.x
+SSPs<-c("SSP119", "SSP245", "SSP585")
+p<-ggplot(sp_mean, aes())+
+  geom_bar(data=sp_mean%>%dplyr::filter(M==0), 
+           stat="identity", position="stack", 
+           aes(y=persentile_MEAN, x=x_label-0.23, fill=factor(M), group=N_type), width=0.45, color="grey")+
+  geom_bar(data=sp_mean%>%dplyr::filter(M==1), 
+           stat="identity", position="stack", 
+           aes(y=persentile_MEAN, x=x_label+0.23, fill=factor(M), group=N_type), width=0.45, color="grey")+
+  geom_errorbar(data=sp_mean%>%dplyr::filter(M==0), 
+                position=position_dodge(0.1), width=0.1,
+                aes(ymin=persentile_MEAN2-persentile_SD, 
+                    ymax=persentile_MEAN2+persentile_SD,
+                    y=persentile_MEAN2, x=x_label-0.24,
+                    group=N_type)) +
+  geom_errorbar(data=sp_mean%>%dplyr::filter(M==1), 
+                position=position_dodge(0.1), width=0.1,
+                aes(ymin=persentile_MEAN2-persentile_SD, 
+                    ymax=persentile_MEAN2+persentile_SD,
+                    y=persentile_MEAN2, x=x_label+0.24,
+                    group=N_type)) +
   xlab("SSP scenario")+
+  scale_x_continuous(breaks=c(1:3), labels=SSPs)+
   #ggtitle(sprintf("Distribution>%d", ttt))+
   #ylim(c(0, 1))+
   theme_bw()+
@@ -215,7 +248,8 @@ p<-ggplot(sp_dis_extinct)+
   ylab("Number of species")+
   #ggtitle(sprintf("Distribution>%d", ttt))+
   facet_grid(exposure~Label)
-#saveRDS(p, "../../Figures/NB_hist_combined/nb_range_size.rda")
+p
+saveRDS(p, "../../Figures/NB_hist_combined/nb_range_size.rda")
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.pdf"), width=12, height=6)
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.png"), width=12, height=6)
 

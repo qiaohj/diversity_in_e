@@ -46,6 +46,19 @@ for (exposure in c(0,5)){
       env_layer$is_bio12<-between(env_layer$bio12, fit$range_bio12_sd_min, fit$range_bio12_sd_max)
       env_layer$is_bio13<-between(env_layer$bio13, fit$range_bio13_sd_min, fit$range_bio13_sd_max)
       env_layer$is_bio14<-between(env_layer$bio14, fit$range_bio14_sd_min, fit$range_bio14_sd_max)
+      env_layer$upper_bio1<-env_layer$bio1>fit$range_bio1_sd_max
+      env_layer$lower_bio1<-env_layer$bio1<fit$range_bio1_sd_min
+      env_layer$upper_bio5<-env_layer$bio5>fit$range_bio5_sd_max
+      env_layer$lower_bio5<-env_layer$bio5<fit$range_bio5_sd_min
+      env_layer$upper_bio6<-env_layer$bio6>fit$range_bio6_sd_max
+      env_layer$lower_bio6<-env_layer$bio6<fit$range_bio6_sd_min
+      env_layer$upper_bio12<-env_layer$bio12>fit$range_bio12_sd_max
+      env_layer$lower_bio12<-env_layer$bio12<fit$range_bio12_sd_min
+      env_layer$upper_bio13<-env_layer$bio13>fit$range_bio13_sd_max
+      env_layer$lower_bio13<-env_layer$bio13<fit$range_bio13_sd_min
+      env_layer$upper_bio14<-env_layer$bio14>fit$range_bio14_sd_max
+      env_layer$lower_bio14<-env_layer$bio14<fit$range_bio14_sd_min
+      
       env_layer<-as_tibble(env_layer)
       item<-data.frame(item)
       for (nn in names(item)){

@@ -40,7 +40,7 @@ birds_trait<-data.table(birds_trait)
 
 
 unique(birds_trait$Diet)
-iucn_bird<-read.csv("../../Data/Birds/HBW-BirdLife_List_of_Birds_v5.csv", head=T, stringsAsFactors = F)
+iucn_bird<-read.csv("../../Data/Dispersal_distance/Birds/HBW-BirdLife_List_of_Birds_v5.csv", head=T, stringsAsFactors = F)
 iucn_bird<-data.table(iucn_bird)
 
 
@@ -103,7 +103,7 @@ summary(ratio)
 ratio<-quantile(ratio, 0.5)
 df_with_family<-merge(df_item, iucn_bird, by.x="sp", by.y="Scientific.name", all.x=T, all.y=F)
 df_with_family[is.na(df_with_family$Order),]
-
+write.csv(df_with_family, "../../Data/Dispersal_distance/bird.csv")
 
 df_with_family<-df_with_family[!is.na(df_with_family$Order),]
 #df_with_family[is.na(df_with_family$median_dis), "median_dis"]<-

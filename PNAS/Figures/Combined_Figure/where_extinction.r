@@ -12,32 +12,29 @@ setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e"
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
 
-tttt=2
-
 SSPi<-"SSP245"
-n_ext_final<-readRDS("../../Figures_Full_species/when_where_extinction_all/n_ext_final_with_ttt.rda")
+n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final.rda")
 n_ext_final_1<-n_ext_final%>%dplyr::filter((dispersal==0)&
-                                             (ttt==tttt)&
                                              (SSP==SSPi)&
-                                             (threshold==1))
+                                             (exposure==0))
 n_ext_final_2<-n_ext_final%>%dplyr::filter((dispersal==1)&
-                                             (ttt==tttt)&
                                              (SSP==SSPi)&
-                                             (threshold==5))
+                                             (exposure==5))
 n_ext_final<-bind_rows(n_ext_final_1, n_ext_final_2)
 n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
-n_ext_final$exposure<-ifelse(n_ext_final$threshold==1, " no exposure", "5-year exposure")
+n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no exposure", "5-year exposure")
 n_ext_final$da<-ifelse(n_ext_final$dispersal==0, "no dispersal", "with dispersal")
-mask<-raster("../../Raster/mask_index.tif")
+mask<-raster("../../Raster/mask_100km_plot.tif")
 
 mask_p<-data.frame(rasterToPoints(mask))
+colnames(mask_p)[3]<-"mask_100km"
 n_ext_final$label<-paste(n_ext_final$SSP, n_ext_final$exposure, n_ext_final$da, sep=", ")
 n_ext_final$label<-factor(n_ext_final$label, 
                           levels = c(sprintf("%s,  no exposure, no dispersal", SSPi),
                                      sprintf("%s, 5-year exposure, with dispersal", SSPi)))
 
 if (T){
-  keyspots<-read.csv("../../Objects_Full_species/keyspots/keyspots.csv", stringsAsFactors = F)
+  keyspots<-read.csv("../../Objects/keyspots/keyspots.csv", stringsAsFactors = F)
   cord.dec = SpatialPoints(keyspots[, c("lon", "lat")], proj4string=CRS("+proj=longlat"))
   cord.eck4 <- spTransform(cord.dec, crs(mask))
   plot(mask)
@@ -70,10 +67,10 @@ if (T){
     facet_wrap(~label)+
     
     scale_fill_gradient(low=color_two_map[1], high=color_two_map[2],
-                        limits=c(0, 100), oob=squish,
-                        breaks=c(0, 20, 40, 60, 80, 100),
-                        labels=c("0", "20", "40", "60", "80", 
-                                 sprintf(">100, up to %d", round(max(n_ext_final$sum_V)))))+
+                        limits=c(0, 80), oob=squish,
+                        breaks=c(0, 20, 40, 60, 80),
+                        labels=c("0", "20", "40", "60", 
+                                 sprintf(">80, up to %d", round(max(n_ext_final$sum_V)))))+
     scale_color_manual(values=color_keyspots)+
     labs(fill = "Number of extinctions", color="Key locations")+
     theme(
@@ -99,7 +96,9 @@ if (T){
   head(mask_p_sp)
   
   plot(mask_p_sp$x, mask_p_sp$y)
-  n_ext_final_with_keyspots<-left_join(n_ext_final, mask_p_sp_df[, c("mask_index", "keysport")], by="mask_index")
+  n_ext_final_with_keyspots<-left_join(n_ext_final, 
+                                       mask_p_sp_df[, c("mask_100km", "keysport")], 
+                                       by="mask_100km")
   N_keys<-unique(n_ext_final_with_keyspots$keysport)
   N_keys<-N_keys[!is.na(N_keys)]
   N_keys<-as.character(N_keys)
@@ -112,6 +111,7 @@ if (T){
     p2_item<-ggplot()+
       geom_density(data=item_df, aes(x=sum_V, y=..density.. * nrow(item_df) * binwidth), 
                    bw=binwidth, fill="grey50", color="grey50", alpha=0.2)
+    p2_item<-ggplot()
     i=1
     for (i in c(1:length(N_keys))){
       item_df_sub<-item_df%>%dplyr::filter(keysport==N_keys[i])
@@ -143,6 +143,31 @@ if (T){
         legend.position = "none"
         #axis.title.y=element_blank()
       )
+    p2_insert<-ggplot()+geom_density(data=item_df, aes(x=sum_V, y=..density.. * nrow(item_df) * binwidth), 
+                                         bw=binwidth, fill="grey50", color="grey50", alpha=0.2)+
+      scale_x_log10()+
+      #scale_x_sqrt(breaks=seq(0, 14, by=2)^2)+
+      #scale_y_log10()+
+      #scale_y_sqrt(breaks=seq(0, 20, by=5)^2, labels=seq(0, 20, by=5)^2)+
+      #scale_y_continuous()+
+      theme_bw()+
+      scale_color_manual(values=color_keyspots)+
+      scale_fill_manual(values=color_keyspots)+
+      labs(x="Number of extinction events (log transformed)", y="Number of cells (sq root transformed)")+
+      theme(
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #plot.background = element_rect(fill = map_background, color = NA), 
+        panel.background = element_blank(),
+        axis.title = element_blank(),
+        legend.position = "none"
+        #axis.title.y=element_blank()
+      )
+    ggsave(p2_insert, filename=sprintf("../../Figures/Combined_Figure/keyspots_extinction_%s_%s.png", 
+                                       SSPi, gsub(",", "", ll)), width=6, height=3)
+    
     p2[[ll]]<-p2_item
   }
 }
@@ -156,6 +181,7 @@ p2_c<-annotate_figure(p2_c,
 
 g_legend<-get_legend(p)
 p3<-ggarrange(p, p2_c, nrow=2, ncol=1, common.legend=T, legend = "right", legend.grob = g_legend)
-ggsave(p3, filename=sprintf("../../Figures_Full_species/Combined_Figure/keyspots_extinction_%s.pdf", SSPi), width=12, height=6)
-ggsave(p3, filename=sprintf("../../Figures_Full_species/Combined_Figure/keyspots_extinction_%s.png", SSPi), width=12, height=6)
+p3
+ggsave(p3, filename=sprintf("../../Figures/Combined_Figure/keyspots_extinction_%s.pdf", SSPi), width=12, height=6)
+ggsave(p3, filename=sprintf("../../Figures/Combined_Figure/keyspots_extinction_%s.png", SSPi), width=12, height=6)
 

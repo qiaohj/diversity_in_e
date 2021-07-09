@@ -3,7 +3,7 @@ library(data.table)
 library(ggplot2)
 library(Rmisc)
 source("commonFuns/colors.r")
-df_all<-readRDS("../../Objects_Full_species/dispersal_trait/all.rda")
+df_all<-readRDS("../../Objects/dispersal_trait/all.rda")
 df_all$status<-ifelse(df_all$extinct_year==2101, "extant", "extinct")
 df_all$exposure<-ifelse(df_all$threshold==1, " no exposure", "5-year exposure")
 df_all$da<-ifelse(df_all$dispersal==0, "no dispersal", "with dispersal")
@@ -61,9 +61,9 @@ p<-ggplot(df_se_across_GCM)+
   theme(legend.position="top",
         legend.direction = "vertical",
         axis.line=element_line())
-ggsave(p, filename = "../../Figures_Full_species/dispersal_traits/dispersal_stat.png", width=3, height=4)
+ggsave(p, filename = "../../Figures/dispersal_traits/dispersal_stat.png", width=3, height=4)
 hist(df_se_across_GCM$mean_N, col=factor(df_se_across_GCM$status))
-write.table(df_se_across_GCM, "../../Figures_Full_species/dispersal_traits/dispersal_stat.csv", sep=",", row.names = F)
+write.table(df_se_across_GCM, "../../Figures/dispersal_traits/dispersal_stat.csv", sep=",", row.names = F)
 ggplot(df_se_across_GCM)+geom_point(aes(x=SSP, y=mean_N, color=factor(status), shape=factor(exposure)))+
   facet_grid(change_alt~change_lat)
   

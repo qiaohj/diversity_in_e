@@ -4,27 +4,27 @@ library(ggpmisc)
 library(ggpubr)
 library(data.table)
 df<-NULL
-for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+g<-"Birds"
+for (g in c("Birds", "Mammals")){
   print(g)
-  nb<-readRDS(sprintf("../../Objects_Full_species/Species_property/%s_property.rda", g))
+  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
   
-  nb<-nb%>%dplyr::select(nb_TEMP_sd, nb_PR_sd, N_CELL, sp)
+  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
   nb<-as.data.frame(nb)
-  ttt<-2
-  for (threshold in c(1, 5)){
-    extinct<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
+  
+  for (exposure in c(0, 5)){
+    extinct<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/%s.rda", exposure, g))
     extinct<-extinct%>%dplyr::distinct(sp, GCM, SSP, extinct_year, dispersal)
     extinct[is.infinite(extinct$extinct_year), "extinct_year"]<-2020
     df1<-full_join(nb, extinct, by="sp")
     df1<-df1%>%filter(!is.na(extinct_year))
-    df1<-df1%>%dplyr::filter(N_CELL>ttt)
-    df1$threshold<-threshold
+    df1$exposure<-exposure
     df1$group<-g
     df<-bind(df, df1)
   }
 }
 plot(df1$extinct_year, df1$N_CELL)
-
+source("commonFuns/colors.r")
 
 lm_eqn <- function(df, lm_object) {
   v<-coef(lm_object)
@@ -49,7 +49,9 @@ lmp <- function (modelobject) {
   return(p)
 }
 
-df_se<-df%>%dplyr::group_by(nb_TEMP_sd, nb_PR_sd, N_CELL, sp, dispersal, threshold, group)%>%
+df_se<-df%>%dplyr::group_by(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd,
+                            nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
+                            N_CELL, sp, dispersal, exposure, group)%>%
   dplyr::summarise(mean_extinct_year=mean(extinct_year))
 
 
@@ -68,10 +70,10 @@ a<-result$coefficients[2,1]
 #  stat_regline_equation(label.x = 3, label.y = 32)+
 #  labs(x="Temperature", y="N", title=w)+
 #  theme(text = element_text(family = 'STSong'))
-df_se$exposure<-ifelse(df_se$threshold==1, " no exposure", "5-year exposure")
+df_se$exposure<-ifelse(df_se$exposure==0, " no exposure", "5-year exposure")
 df_se$da<-ifelse(df_se$dispersal==1, "with dispersal", "no dispersal")
 labels<-c("Distribution range", "Range of temperature", "Range of precipitation")
-vars<-c("N_CELL", "nb_TEMP_sd", "nb_PR_sd")
+vars<-c("N_CELL", "nb_bio1_sd", "nb_bio12_sd")
 i=1
 
              
@@ -99,11 +101,11 @@ for (i in c(1:3)){
     colnames(df_hist)[3]<-"V"
   }
   if (i==2){
-    df_hist<-df_se%>%ungroup()%>%distinct(sp, group, nb_TEMP_sd)%>%dplyr::select(sp, group, nb_TEMP_sd)
+    df_hist<-df_se%>%ungroup()%>%distinct(sp, group, nb_bio1_sd)%>%dplyr::select(sp, group, nb_bio1_sd)
     colnames(df_hist)[3]<-"V"
   }
   if (i==3){
-    df_hist<-df_se%>%ungroup()%>%distinct(sp, group, nb_PR_sd)%>%dplyr::select(sp, group, nb_PR_sd)
+    df_hist<-df_se%>%ungroup()%>%distinct(sp, group, nb_bio12_sd)%>%dplyr::select(sp, group, nb_bio12_sd)
     colnames(df_hist)[3]<-"V"
   }
   
@@ -118,9 +120,9 @@ for (i in c(1:3)){
   }
   p
   ppp<-ggarrange(pp, p, widths=c(3, 2))
-  ggsave(ppp, filename=sprintf("../../Figures_Full_species/Extinction_Range_NB_Stat/%s.png", var),
+  ggsave(ppp, filename=sprintf("../../Figures/Extinction_Range_NB_Stat/%s.png", var),
          width=15, height=4)
-  ggsave(ppp, filename=sprintf("../../Figures_Full_species/Extinction_Range_NB_Stat/%s.pdf", var),
+  ggsave(ppp, filename=sprintf("../../Figures/Extinction_Range_NB_Stat/%s.pdf", var),
          width=15, height=4)
 }
 
@@ -129,22 +131,21 @@ SSPs<-c("SSP119", "SSP245", "SSP585")
 dispersals<-c(0, 1)
 
 df<-NULL
-for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+for (g in c("Birds", "Mammals")){
   print(g)
-  nb<-readRDS(sprintf("../../Objects_Full_species/Species_property/%s_property.rda", g))
+  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
   
-  nb<-nb%>%dplyr::select(nb_TEMP_sd, nb_PR_sd, N_CELL, sp)
+  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
+  
   nb<-as.data.frame(nb)
   full_sp<-expand.grid(GCM=GCMs, SSP=SSPs, sp=unique(nb$sp), dispersal=dispersals, stringsAsFactors = F)
   full_sp_with_nb<-full_join(full_sp, nb, by="sp")
-  ttt<-2
-  for (threshold in c(1, 5)){
-    extinct<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
+  for (exposure in c(0, 5)){
+    extinct<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/%s.rda", exposure, g))
     extinct<-extinct%>%dplyr::distinct(sp, GCM, SSP, extinct_year, dispersal)
     extinct[is.infinite(extinct$extinct_year), "extinct_year"]<-2020
     df1<-full_join(full_sp_with_nb, extinct, by=c("sp", "GCM", "SSP", "dispersal"))
-    df1<-df1%>%dplyr::filter(N_CELL>ttt)
-    df1$threshold<-threshold
+    df1$exposure<-exposure
     df1$group<-g
     df<-bind(df, df1)
   }
@@ -155,40 +156,41 @@ for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
 
 
 df$is_extinct<-ifelse(is.na(df$extinct_year), "NO", "YES")
-df$exposure<-ifelse(df$threshold==1, " no exposure", "5-year exposure")
+df$exposure<-ifelse(df$exposure==0, " no exposure", "5-year exposure")
 df$da<-ifelse(df$dispersal==1, "with dispersal", "no dispersal")
 df$Label<-paste(df$SSP, df$da)
 p1<-ggplot(df)+
-  geom_histogram(aes(x=nb_TEMP_sd), fill=colors_black[4], bins=50)+
+  geom_histogram(aes(x=nb_bio1_sd/100), fill=colors_black[4], bins=50)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
-                 aes(x=nb_TEMP_sd), fill=colors_red[9], bins=50)+
+                 aes(x=nb_bio1_sd/100), fill=colors_red[9], bins=50)+
   theme_bw()+
   xlab("Niche breadth in temperature")+
   ylab("Number of species")+
   facet_grid(exposure~Label, scale="free")
 p1
-saveRDS(p1, "../../Figures_Full_species/NB_hist_combined/nb_temp.rda")
-ggsave(p1, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.pdf", ttt), width=12, height=6)
-ggsave(p1, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_temp_%d.png", ttt), width=12, height=6)
+saveRDS(p1, "../../Figures/NB_hist_combined/nb_temp.rda")
+ggsave(p1, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_temp.pdf"), width=12, height=6)
+ggsave(p1, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_temp.png"), width=12, height=6)
 
 
 p2<-ggplot(df)+
-  geom_histogram(aes(x=nb_PR_sd), fill=colors_black[4], bins=50)+
+  geom_histogram(aes(x=nb_bio12_sd/100), fill=colors_black[4], bins=50)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
-                 aes(x=nb_PR_sd), fill=colors_red[9], bins=50)+
+                 aes(x=nb_bio12_sd/100), fill=colors_red[9], bins=50)+
   theme_bw()+
   xlab("Niche breadth in precipitation")+
   ylab("Number of species")+
   facet_grid(exposure~Label)
-saveRDS(p2, "../../Figures_Full_species/NB_hist_combined/nb_prec.rda")
+p2
+saveRDS(p2, "../../Figures/NB_hist_combined/nb_prec.rda")
 
 p2<-p2+
   theme(strip.background.x = element_blank(),
         strip.text.x = element_blank())
-ggsave(p2, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.pdf", ttt), width=12, height=6)
-ggsave(p2, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_prec_%d.png", ttt), width=12, height=6)
+ggsave(p2, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_prec.pdf"), width=12, height=6)
+ggsave(p2, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_prec.png"), width=12, height=6)
 
 
 pp<-ggarrange(p1, p2, ncol=1, nrow=2)
-ggsave(pp, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_combined_%d.pdf", ttt), width=12, height=6)
-ggsave(pp, filename=sprintf("../../Figures_Full_species/N_Extinction/NB_Extinct/Extinction_hist_nb_combined_%d.png", ttt), width=12, height=6)
+ggsave(pp, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_combined.pdf"), width=12, height=6)
+ggsave(pp, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_combined.png"), width=12, height=6)
