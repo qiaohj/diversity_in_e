@@ -2,12 +2,14 @@ library(ggplot2)
 library(dplyr)
 library(Rmisc)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-g<-"Amphibians"
+g<-"Birds"
 source("commonFuns/functions.r")
+
 if (F){
+  exposure=0
   df_extincts<-list()
-  for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-    df_extinct<-readRDS(sprintf("../../Objects_Full_species/when_where_extinction_%d/%s.rda", threshold, g))
+  for (g in c("Birds", "Mammals")){
+    df_extinct<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/%s.rda", exposure, g))
     df_extinct<-df_extinct%>%dplyr::filter(dispersal==1)
     df_extinct<-df_extinct%>%dplyr::distinct(group, sp, GCM, SSP, extinct_year, dispersal)
     df_extinct[is.infinite(df_extinct$extinct_year), "extinct_year"]<-2020
@@ -16,10 +18,12 @@ if (F){
   df_all<-NULL
   for (y in c(2021:2100)){
     print(y)
-    for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
+    for (g in c("Birds", "Mammals")){
       
-      df<-readRDS(sprintf("../../Objects_Full_species/Min_distance_to_Dispersal/%s/%d.rda", g, y))
+      df<-readRDS(sprintf("../../Objects/Min_distance_to_Dispersal/%s/%d.rda", g, y))
       df_extinct<-df_extincts[[g]]
+      df$sp<-df$SP
+      df$group<-g
       df<-left_join(df, df_extinct, by=c("group", "sp", "GCM", "SSP"))
       df[is.na(df$extinct_year), "extinct_year"]<-9999
       #hist(df$dist_min)
@@ -33,22 +37,20 @@ if (F){
       df_all<-bind(df_all, df_filter)
     }
   }
-  saveRDS(df_all, "../../Figures_Full_species/Min_distance_to_Dispersal/full.rda")
+  saveRDS(df_all, "../../Figures/Min_distance_to_Dispersal/full.rda")
 }
 source("commonFuns/colors.r")
-df_all<-readRDS("../../Figures_Full_species/Min_distance_to_Dispersal/full.rda")
+df_all<-readRDS("../../Figures/Min_distance_to_Dispersal/full.rda")
 
 df_sp_list<-list()
-threshold<-1
-for (group in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-  df_list<-readRDS(sprintf("../../Objects_Full_species/IUCN_List/%s.rda", group))
+exposure<-0
+for (group in c("Birds", "Mammals")){
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
   df_sp_list[[group]]<-df_list
 }
-df_sp_list<-rbindlist(df_sp_list)
+df_sp_list<-rbindlist(df_sp_list, fill=T)
 
-ttt<-2
-df_sp_list<-df_sp_list[area>ttt]
-df_sp_list$sp<-gsub(" ", "_", df_sp_list$sp)
+df_sp_list$sp<-gsub(" ", "_", df_sp_list$SP)
 df_all<-df_all[sp %in% df_sp_list$sp]
 
 df_all_SSP<-df_all%>%dplyr::group_by(SSP, group, year, extinct_year)%>%
@@ -65,15 +67,23 @@ p<-ggplot(df_all_SSP%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)),
   facet_wrap(~SSP, ncol=1)
   
 p
-ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/start_end_ttt_%d.png", ttt))
+ggsave(p, filename=sprintf("../../Figures/Min_distance_to_Dispersal/start_end.png"))
 yyy=2040
+
+df_all_se<-df_all%>%dplyr::group_by(SSP, group, year)%>%
+  dplyr::summarise(mean_dist_mean=mean(dist_min),
+                   sd_dist_mean=sd(dist_min),
+                   ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
+write.csv(df_all_se, sprintf("../../Figures/Min_distance_to_Dispersal/mean.csv"))
+
+
 for (yyy in c(2040, 2100)){
   df_all_se<-df_all%>%dplyr::filter(extinct_year>yyy)%>%dplyr::group_by(SSP, group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min),
                      sd_dist_mean=sd(dist_min),
                      ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
   df_all_se%>%filter(year==yyy)
-  write.csv(df_all_se, sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_ttt_%d_%d.csv", ttt, yyy))
+  write.csv(df_all_se, sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_%d.csv", yyy))
   
   df_all_se_grouped<-df_all%>%dplyr::filter(extinct_year>yyy)%>%group_by(group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min),
@@ -83,7 +93,7 @@ for (yyy in c(2040, 2100)){
   
   
   write.csv(df_all_se_grouped, 
-            sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_all_SSP_ttt_%d_%d.csv", ttt, yyy))
+            sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_all_SSP_%d.csv", yyy))
   
   p<-ggplot(df_all_se)+
     geom_ribbon(data=df_all_se, 
@@ -100,8 +110,8 @@ for (yyy in c(2040, 2100)){
     scale_fill_manual(values=color_groups)+
     facet_wrap(~SSP, ncol=1)
   p
-  ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_ttt_%d_%d.png", ttt, yyy))
-  ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_ttt_%d_%d.png", ttt, yyy))
+  ggsave(p, filename=sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_%d.png", yyy))
+  ggsave(p, filename=sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_%d.png", yyy))
   
   p<-ggplot(df_all_se)+
     geom_ribbon(data=df_all_se, 
@@ -120,8 +130,8 @@ for (yyy in c(2040, 2100)){
     xlim(2020, 2100)+
     facet_wrap(~SSP, ncol=1, scale="free")
   p
-  ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_ttt_%d_scale_free_%d.png", ttt, yyy))
-  ggsave(p, filename=sprintf("../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_ttt_%d_scale_free_%d.pdf", ttt, yyy))
+  ggsave(p, filename=sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_scale_free_%d.png", yyy))
+  ggsave(p, filename=sprintf("../../Figures/Min_distance_to_Dispersal/mean_by_year_scale_free_%d.pdf", yyy))
 }
 
 #p<-ggplot(df_all, aes(x=year, y = dist_min_mean, color=factor(group)))+
@@ -139,7 +149,7 @@ if (F){
     ylab("Average distance need to dispersal")+
     scale_color_manual(values=color_groups)+
     facet_wrap(~SSP, ncol=1)
-  ggsave(p, filename="../../Figures_Full_species/Min_distance_to_Dispersal/mean_by_year_without_zero.png")
+  ggsave(p, filename="../../Figures/Min_distance_to_Dispersal/mean_by_year_without_zero.png")
   
   df_all_se_all<-df_all%>%dplyr::filter(dist_min_mean>=1)%>%dplyr::group_by(group, year)%>%
     dplyr::summarise(mean_dist_mean=mean(dist_min_mean),

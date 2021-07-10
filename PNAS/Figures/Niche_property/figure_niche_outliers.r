@@ -1,95 +1,222 @@
 library(data.table)
 library(ggplot2)
-g<-"Amphibians"
+g<-"Mammals"
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
 df_all<-NULL
-for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-  df<-readRDS(sprintf("../../Objects_Full_species/Species_property/%s_property.rda", g))
+for (g in c("Birds", "Mammals")){
+  df<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
   df$group<-g
   df_all<-bind(df_all, df)
 }
-df_all[which(df_all$range_TEMP_sd_max>df_all$t_max_max), "range_TEMP_sd_max"]<-
-  df_all[which(df_all$range_TEMP_sd_max>df_all$t_max_max), "t_max_max"]
+df_all[which(df_all$range_bio1_sd_max>df_all$bio1_max), "range_bio1_sd_max"]<-
+  df_all[which(df_all$range_bio1_sd_max>df_all$bio1_max), "bio1_max"]
+df_all[which(df_all$range_bio1_sd_min>df_all$bio1_min), "range_bio1_sd_min"]<-
+  df_all[which(df_all$range_bio1_sd_min>df_all$bio1_min), "bio1_min"]
 
-df_all[which(df_all$range_TEMP_sd_min<df_all$t_min_min), "range_TEMP_sd_min"]<-
-  df_all[which(df_all$range_TEMP_sd_min<df_all$t_min_min), "t_min_min"]
+df_all[which(df_all$range_bio5_sd_max>df_all$bio5_max), "range_bio5_sd_max"]<-
+  df_all[which(df_all$range_bio5_sd_max>df_all$bio5_max), "bio5_max"]
+df_all[which(df_all$range_bio5_sd_min>df_all$bio5_min), "range_bio5_sd_min"]<-
+  df_all[which(df_all$range_bio5_sd_min>df_all$bio5_min), "bio5_min"]
 
-df_all[which(df_all$range_PR_sd_max>df_all$pr_max), "range_PR_sd_max"]<-
-  df_all[which(df_all$range_PR_sd_max>df_all$pr_max), "pr_max"]
+df_all[which(df_all$range_bio6_sd_max>df_all$bio6_max), "range_bio6_sd_max"]<-
+  df_all[which(df_all$range_bio6_sd_max>df_all$bio6_max), "bio6_max"]
+df_all[which(df_all$range_bio6_sd_min>df_all$bio6_min), "range_bio6_sd_min"]<-
+  df_all[which(df_all$range_bio6_sd_min>df_all$bio6_min), "bio6_min"]
 
-df_all[which(df_all$range_PR_sd_min<df_all$pr_min), "range_PR_sd_min"]<-
-  df_all[which(df_all$range_PR_sd_min<df_all$pr_min), "pr_min"]
+df_all[which(df_all$range_bio12_sd_max>df_all$bio12_max), "range_bio12_sd_max"]<-
+  df_all[which(df_all$range_bio12_sd_max>df_all$bio12_max), "bio12_max"]
+df_all[which(df_all$range_bio12_sd_min>df_all$bio12_min), "range_bio12_sd_min"]<-
+  df_all[which(df_all$range_bio12_sd_min>df_all$bio12_min), "bio12_min"]
 
-df_all$range_real_temp<-df_all$t_max_max-df_all$t_min_min
-df_all$range_real_prec<-df_all$pr_max-df_all$pr_min
-df_all$scaled_t_max_max<-scale(c(df_all$t_max_max, df_all$t_min_min, 
-                                 df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_t_min_min<-scale(c(df_all$t_min_min, df_all$t_max_max, 
-                                 df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_range_TEMP_sd_max<-scale(c(df_all$range_TEMP_sd_max, df_all$t_max_max, df_all$t_min_min, 
-                                  df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_range_TEMP_sd_min<-scale(c(df_all$range_TEMP_sd_min, df_all$t_max_max, df_all$t_min_min, 
-                                         df_all$range_TEMP_sd_max))[1:length(df_all$t_max_max)]
+df_all[which(df_all$range_bio13_sd_max>df_all$bio13_max), "range_bio13_sd_max"]<-
+  df_all[which(df_all$range_bio13_sd_max>df_all$bio13_max), "bio13_max"]
+df_all[which(df_all$range_bio13_sd_min>df_all$bio13_min), "range_bio13_sd_min"]<-
+  df_all[which(df_all$range_bio13_sd_min>df_all$bio13_min), "bio13_min"]
 
-df_all$scaled_range_real_temp<-df_all$scaled_t_max_max-df_all$scaled_t_min_min
-df_all$scaled_range_SD_temp<-df_all$scaled_range_TEMP_sd_max-df_all$scaled_range_TEMP_sd_min
-plot(df_all$scaled_range_real_temp, df_all$scaled_range_SD_temp)
+df_all[which(df_all$range_bio14_sd_max>df_all$bio14_max), "range_bio14_sd_max"]<-
+  df_all[which(df_all$range_bio14_sd_max>df_all$bio14_max), "bio14_max"]
+df_all[which(df_all$range_bio14_sd_min>df_all$bio14_min), "range_bio14_sd_min"]<-
+  df_all[which(df_all$range_bio14_sd_min>df_all$bio14_min), "bio14_min"]
 
-df_all$scaled_pr_max<-scale(c(df_all$pr_max, df_all$pr_min, 
-                              df_all$range_PR_sd_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_pr_min<-scale(c(df_all$pr_min, df_all$pr_max, 
-                              df_all$range_PR_sd_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_range_PR_sd_max<-scale(c(df_all$range_PR_sd_max, df_all$pr_min, 
-                                       df_all$pr_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_range_PR_sd_min<-scale(c(df_all$range_PR_sd_min, df_all$pr_min, df_all$pr_max, 
-                                       df_all$range_PR_sd_max))[1:length(df_all$pr_max)]
+df_all$range_real_bio1<-df_all$bio1_max-df_all$bio1_min
+df_all$range_real_bio5<-df_all$bio5_max-df_all$bio5_min
+df_all$range_real_bio6<-df_all$bio6_max-df_all$bio6_min
+df_all$range_real_bio12<-df_all$bio12_max-df_all$bio12_min
+df_all$range_real_bio13<-df_all$bio13_max-df_all$bio13_min
+df_all$range_real_bio14<-df_all$bio14_max-df_all$bio14_min
+df_all<-df_all[(!is.infinite(bio1_max))&
+                 (!is.infinite(bio5_max))&
+                 (!is.infinite(bio6_max))&
+                 (!is.infinite(bio12_max))&
+                 (!is.infinite(bio13_max))&
+                 (!is.infinite(bio14_max))&
+                 (!is.infinite(bio1_min))&
+                 (!is.infinite(bio5_min))&
+                 (!is.infinite(bio6_min))&
+                 (!is.infinite(bio12_min))&
+                 (!is.infinite(bio13_min))&
+                 (!is.infinite(bio14_min))]
 
-plot(df_all$scaled_pr_max, df_all$scaled_range_PR_sd_max)
-plot(df_all$scaled_pr_min, df_all$scaled_range_PR_sd_min)
-plot(df_all$pr_max, df_all$range_PR_sd_max)
-plot(df_all$pr_min, df_all$range_PR_sd_min)
+df_all$scaled_bio1_max<-scale(c(df_all$bio1_max, df_all$bio1_min, 
+                                 df_all$range_bio1_sd_max, 
+                                df_all$range_bio1_sd_min))[1:length(df_all$bio1_max)]
+df_all$scaled_bio1_min<-scale(c(df_all$bio1_min, df_all$bio1_max, 
+                                 df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio1_max)]
+df_all$scaled_range_bio1_sd_max<-scale(c(df_all$range_bio1_sd_max, df_all$bio1_max, df_all$bio1_min, 
+                                  df_all$range_bio1_sd_min))[1:length(df_all$bio1_max)]
+df_all$scaled_range_bio1_sd_min<-scale(c(df_all$range_bio1_sd_min, df_all$bio1_max, df_all$bio1_min, 
+                                         df_all$range_bio1_sd_max))[1:length(df_all$bio1_max)]
 
-df_all$scaled_range_real_prec<-df_all$scaled_pr_max-df_all$scaled_pr_min
-df_all$scaled_range_SD_prec<-df_all$scaled_range_PR_sd_max-df_all$scaled_range_PR_sd_min
-plot(df_all$scaled_range_real_prec, df_all$scaled_range_SD_prec)
+df_all$scaled_range_real_bio1<-df_all$scaled_bio1_max-df_all$scaled_bio1_min
+df_all$scaled_range_SD_bio1<-df_all$scaled_range_bio1_sd_max-df_all$scaled_range_bio1_sd_min
+plot(df_all$scaled_range_real_bio1, df_all$scaled_range_SD_bio1)
 
-hist(df_all$scaled_range_real_prec)
-df_all$real_nb_size<-df_all$scaled_range_real_temp*df_all$scaled_range_real_prec
-df_all$sd_nb_size<-df_all$scaled_range_SD_temp*df_all$scaled_range_SD_prec
+df_all$scaled_bio5_max<-scale(c(df_all$bio5_max, df_all$bio5_min, 
+                                df_all$range_bio5_sd_max, 
+                                df_all$range_bio5_sd_min))[1:length(df_all$bio5_max)]
+df_all$scaled_bio5_min<-scale(c(df_all$bio5_min, df_all$bio5_max, 
+                                df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio5_max)]
+df_all$scaled_range_bio5_sd_max<-scale(c(df_all$range_bio5_sd_max, df_all$bio5_max, df_all$bio5_min, 
+                                         df_all$range_bio5_sd_min))[1:length(df_all$bio5_max)]
+df_all$scaled_range_bio5_sd_min<-scale(c(df_all$range_bio5_sd_min, df_all$bio5_max, df_all$bio5_min, 
+                                         df_all$range_bio5_sd_max))[1:length(df_all$bio5_max)]
 
-#df_all$real_nb_size<-df_all$range_real_prec*df_all$range_real_temp
-#df_all$sd_nb_size<-df_all$nb_PR_sd*df_all$nb_TEMP_sd
-ttt<-2
-df_all<-df_all[N_CELL>ttt]
+df_all$scaled_range_real_bio5<-df_all$scaled_bio5_max-df_all$scaled_bio5_min
+df_all$scaled_range_SD_bio5<-df_all$scaled_range_bio5_sd_max-df_all$scaled_range_bio5_sd_min
+plot(df_all$scaled_range_real_bio5, df_all$scaled_range_SD_bio5)
+
+df_all$scaled_bio6_max<-scale(c(df_all$bio6_max, df_all$bio6_min, 
+                                df_all$range_bio6_sd_max, 
+                                df_all$range_bio6_sd_min))[1:length(df_all$bio6_max)]
+df_all$scaled_bio6_min<-scale(c(df_all$bio6_min, df_all$bio6_max, 
+                                df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio6_max)]
+df_all$scaled_range_bio6_sd_max<-scale(c(df_all$range_bio6_sd_max, df_all$bio6_max, df_all$bio6_min, 
+                                         df_all$range_bio6_sd_min))[1:length(df_all$bio6_max)]
+df_all$scaled_range_bio6_sd_min<-scale(c(df_all$range_bio6_sd_min, df_all$bio6_max, df_all$bio6_min, 
+                                         df_all$range_bio6_sd_max))[1:length(df_all$bio6_max)]
+
+df_all$scaled_range_real_bio6<-df_all$scaled_bio6_max-df_all$scaled_bio6_min
+df_all$scaled_range_SD_bio6<-df_all$scaled_range_bio6_sd_max-df_all$scaled_range_bio6_sd_min
+plot(df_all$scaled_range_real_bio6, df_all$scaled_range_SD_bio6)
+
+df_all$scaled_bio12_max<-scale(c(df_all$bio12_max, df_all$bio12_min, 
+                                df_all$range_bio12_sd_max, 
+                                df_all$range_bio12_sd_min))[1:length(df_all$bio12_max)]
+df_all$scaled_bio12_min<-scale(c(df_all$bio12_min, df_all$bio12_max, 
+                                df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio12_max)]
+df_all$scaled_range_bio12_sd_max<-scale(c(df_all$range_bio12_sd_max, df_all$bio12_max, df_all$bio12_min, 
+                                         df_all$range_bio12_sd_min))[1:length(df_all$bio12_max)]
+df_all$scaled_range_bio12_sd_min<-scale(c(df_all$range_bio12_sd_min, df_all$bio12_max, df_all$bio12_min, 
+                                         df_all$range_bio12_sd_max))[1:length(df_all$bio12_max)]
+
+df_all$scaled_range_real_bio12<-df_all$scaled_bio12_max-df_all$scaled_bio12_min
+df_all$scaled_range_SD_bio12<-df_all$scaled_range_bio12_sd_max-df_all$scaled_range_bio12_sd_min
+plot(df_all$scaled_range_real_bio12, df_all$scaled_range_SD_bio12)
+
+df_all$scaled_bio13_max<-scale(c(df_all$bio13_max, df_all$bio13_min, 
+                                df_all$range_bio13_sd_max, 
+                                df_all$range_bio13_sd_min))[1:length(df_all$bio13_max)]
+df_all$scaled_bio13_min<-scale(c(df_all$bio13_min, df_all$bio13_max, 
+                                df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio13_max)]
+df_all$scaled_range_bio13_sd_max<-scale(c(df_all$range_bio13_sd_max, df_all$bio13_max, df_all$bio13_min, 
+                                         df_all$range_bio13_sd_min))[1:length(df_all$bio13_max)]
+df_all$scaled_range_bio13_sd_min<-scale(c(df_all$range_bio13_sd_min, df_all$bio13_max, df_all$bio13_min, 
+                                         df_all$range_bio13_sd_max))[1:length(df_all$bio13_max)]
+
+df_all$scaled_range_real_bio13<-df_all$scaled_bio13_max-df_all$scaled_bio13_min
+df_all$scaled_range_SD_bio13<-df_all$scaled_range_bio13_sd_max-df_all$scaled_range_bio13_sd_min
+plot(df_all$scaled_range_real_bio13, df_all$scaled_range_SD_bio13)
+
+df_all$scaled_bio14_max<-scale(c(df_all$bio14_max, df_all$bio14_min, 
+                                df_all$range_bio14_sd_max, 
+                                df_all$range_bio14_sd_min))[1:length(df_all$bio14_max)]
+df_all$scaled_bio14_min<-scale(c(df_all$bio14_min, df_all$bio14_max, 
+                                df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio14_max)]
+df_all$scaled_range_bio14_sd_max<-scale(c(df_all$range_bio14_sd_max, df_all$bio14_max, df_all$bio14_min, 
+                                         df_all$range_bio14_sd_min))[1:length(df_all$bio14_max)]
+df_all$scaled_range_bio14_sd_min<-scale(c(df_all$range_bio14_sd_min, df_all$bio14_max, df_all$bio14_min, 
+                                         df_all$range_bio14_sd_max))[1:length(df_all$bio14_max)]
+
+df_all$scaled_range_real_bio14<-df_all$scaled_bio14_max-df_all$scaled_bio14_min
+df_all$scaled_range_SD_bio14<-df_all$scaled_range_bio14_sd_max-df_all$scaled_range_bio14_sd_min
+plot(df_all$scaled_range_real_bio14, df_all$scaled_range_SD_bio14)
+
+df_all$real_nb_size<-df_all$scaled_range_real_bio1*df_all$scaled_range_real_bio12
+df_all$sd_nb_size<-df_all$scaled_range_SD_bio1*df_all$scaled_range_SD_bio12
+
 plot(df_all$sd_nb_size, df_all$real_nb_size)
 
-cor_df<-data.frame(p_t_max=cor(df_all$t_max_max, df_all$range_TEMP_sd_max, method="spearman"),
-                   mean_diff_t_max=mean(df_all$range_TEMP_sd_max-df_all$t_max_max),
-                   sd_diff_t_max=sd(df_all$range_TEMP_sd_max-df_all$t_max_max),
-                   p_t_min=cor(df_all$t_min_min, df_all$range_TEMP_sd_min, method="spearman"),
-                   mean_diff_t_min=mean(df_all$range_TEMP_sd_min-df_all$t_min_min),
-                   sd_diff_t_min=sd(df_all$range_TEMP_sd_min-df_all$t_min_min),
-                   p_pr_max=cor(df_all$pr_max, df_all$range_PR_sd_max, method="spearman"),
-                   mean_diff_pr_max=mean(df_all$range_PR_sd_max-df_all$pr_max),
-                   sd_diff_pr_max=sd(df_all$range_PR_sd_max-df_all$pr_max),
-                   p_pr_min=cor(df_all$pr_min, df_all$range_PR_sd_min, method="spearman"),
-                   mean_diff_pr_min=mean(df_all$range_PR_sd_min-df_all$pr_min),
-                   sd_diff_pr_min=sd(df_all$range_PR_sd_min-df_all$pr_min),
-                   p_range_t=cor(df_all$range_real_temp, df_all$nb_TEMP_sd, method="spearman"),
-                   mean_diff_range_t=mean(df_all$nb_TEMP_sd-df_all$range_real_temp),
-                   sd_diff_range_t=sd(df_all$nb_TEMP_sd-df_all$range_real_temp),
-                   p_range_p=cor(df_all$range_real_pr, df_all$nb_PR_sd, method="spearman"),
-                   mean_diff_range_p=mean(df_all$nb_PR_sd-df_all$range_real_prec),
-                   sd_diff_range_p=sd(df_all$nb_PR_sd-df_all$range_real_prec),
+cor_df<-data.frame(p_bio1_max=cor(df_all$bio1_max, df_all$range_bio1_sd_max, method="spearman"),
+                   mean_diff_bio1_max=mean(df_all$range_bio1_sd_max-df_all$bio1_max),
+                   sd_diff_bio1_max=sd(df_all$range_bio1_sd_max-df_all$bio1_max),
+                   p_bio5_max=cor(df_all$bio5_max, df_all$range_bio5_sd_max, method="spearman"),
+                   mean_diff_bio5_max=mean(df_all$range_bio5_sd_max-df_all$bio5_max),
+                   sd_diff_bio5_max=sd(df_all$range_bio5_sd_max-df_all$bio5_max),
+                   p_bio6_max=cor(df_all$bio6_max, df_all$range_bio6_sd_max, method="spearman"),
+                   mean_diff_bio6_max=mean(df_all$range_bio6_sd_max-df_all$bio6_max),
+                   sd_diff_bio6_max=sd(df_all$range_bio6_sd_max-df_all$bio6_max),
+                   p_bio12_max=cor(df_all$bio12_max, df_all$range_bio12_sd_max, method="spearman"),
+                   mean_diff_bio12_max=mean(df_all$range_bio12_sd_max-df_all$bio12_max),
+                   sd_diff_bio12_max=sd(df_all$range_bio12_sd_max-df_all$bio12_max),
+                   p_bio13_max=cor(df_all$bio13_max, df_all$range_bio13_sd_max, method="spearman"),
+                   mean_diff_bio13_max=mean(df_all$range_bio13_sd_max-df_all$bio13_max),
+                   sd_diff_bio13_max=sd(df_all$range_bio13_sd_max-df_all$bio13_max),
+                   p_bio14_max=cor(df_all$bio14_max, df_all$range_bio14_sd_max, method="spearman"),
+                   mean_diff_bio14_max=mean(df_all$range_bio14_sd_max-df_all$bio14_max),
+                   sd_diff_bio14_max=sd(df_all$range_bio14_sd_max-df_all$bio14_max),
+                   
+                   p_bio1_max=cor(df_all$bio1_min, df_all$range_bio1_sd_min, method="spearman"),
+                   mean_diff_bio1_max=mean(df_all$range_bio1_sd_min-df_all$bio1_min),
+                   sd_diff_bio1_max=sd(df_all$range_bio1_sd_min-df_all$bio1_min),
+                   p_bio5_max=cor(df_all$bio5_min, df_all$range_bio5_sd_min, method="spearman"),
+                   mean_diff_bio5_max=mean(df_all$range_bio5_sd_min-df_all$bio5_min),
+                   sd_diff_bio5_max=sd(df_all$range_bio5_sd_min-df_all$bio5_min),
+                   p_bio6_max=cor(df_all$bio6_min, df_all$range_bio6_sd_min, method="spearman"),
+                   mean_diff_bio6_max=mean(df_all$range_bio6_sd_min-df_all$bio6_min),
+                   sd_diff_bio6_max=sd(df_all$range_bio6_sd_min-df_all$bio6_min),
+                   p_bio12_max=cor(df_all$bio12_min, df_all$range_bio12_sd_min, method="spearman"),
+                   mean_diff_bio12_max=mean(df_all$range_bio12_sd_min-df_all$bio12_min),
+                   sd_diff_bio12_max=sd(df_all$range_bio12_sd_min-df_all$bio12_min),
+                   p_bio13_max=cor(df_all$bio13_min, df_all$range_bio13_sd_min, method="spearman"),
+                   mean_diff_bio13_max=mean(df_all$range_bio13_sd_min-df_all$bio13_min),
+                   sd_diff_bio13_max=sd(df_all$range_bio13_sd_min-df_all$bio13_min),
+                   p_bio14_max=cor(df_all$bio14_min, df_all$range_bio14_sd_min, method="spearman"),
+                   mean_diff_bio14_max=mean(df_all$range_bio14_sd_min-df_all$bio14_min),
+                   sd_diff_bio14_max=sd(df_all$range_bio14_sd_min-df_all$bio14_min),
+                   
+                   p_range_bio1=cor(df_all$range_real_bio1, df_all$nb_bio1_sd, method="spearman"),
+                   mean_diff_range_bio1=mean(df_all$nb_bio1_sd-df_all$range_real_bio1),
+                   sd_diff_range_bio1=sd(df_all$nb_bio1_sd-df_all$range_real_bio1),
+                   
+                   p_range_bio5=cor(df_all$range_real_bio5, df_all$nb_bio5_sd, method="spearman"),
+                   mean_diff_range_bio5=mean(df_all$nb_bio5_sd-df_all$range_real_bio5),
+                   sd_diff_range_bio5=sd(df_all$nb_bio5_sd-df_all$range_real_bio5),
+                   
+                   p_range_bio6=cor(df_all$range_real_bio6, df_all$nb_bio6_sd, method="spearman"),
+                   mean_diff_range_bio6=mean(df_all$nb_bio6_sd-df_all$range_real_bio6),
+                   sd_diff_range_bio6=sd(df_all$nb_bio6_sd-df_all$range_real_bio6),
+                   
+                   p_range_bio12=cor(df_all$range_real_bio12, df_all$nb_bio12_sd, method="spearman"),
+                   mean_diff_range_bio12=mean(df_all$nb_bio12_sd-df_all$range_real_bio12),
+                   sd_diff_range_bio12=sd(df_all$nb_bio12_sd-df_all$range_real_bio12),
+                   
+                   p_range_bio13=cor(df_all$range_real_bio13, df_all$nb_bio13_sd, method="spearman"),
+                   mean_diff_range_bio13=mean(df_all$nb_bio13_sd-df_all$range_real_bio13),
+                   sd_diff_range_bio13=sd(df_all$nb_bio13_sd-df_all$range_real_bio13),
+                   
+                   p_range_bio14=cor(df_all$range_real_bio14, df_all$nb_bio14_sd, method="spearman"),
+                   mean_diff_range_bio14=mean(df_all$nb_bio14_sd-df_all$range_real_bio14),
+                   sd_diff_range_bio14=sd(df_all$nb_bio14_sd-df_all$range_real_bio14),
+                   
                    p_nb=cor(df_all$sd_nb_size, df_all$real_nb_size, method="spearman"),
                    mean_diff_nb=mean(df_all$sd_nb_size-df_all$real_nb_size),
                    sd_diff_nb=sd(df_all$sd_nb_size-df_all$real_nb_size)
                    
                    )
 
-write.csv(cor_df, "../../Figures_Full_species/niche_property/cor.csv")
+write.csv(cor_df, "../../Figures/niche_property/cor.csv")
 
 get_density <- function(x, y, ...) {
   dens <- MASS::kde2d(x, y, ...)
@@ -99,123 +226,47 @@ get_density <- function(x, y, ...) {
   return(dens$z[ii])
 }
 
-df_all$diff_t_max<-df_all$range_TEMP_sd_max-df_all$t_max_max
-df_all$diff_t_min<-df_all$range_TEMP_sd_min-df_all$t_min_min
-df_all$diff_pr_max<-df_all$range_PR_sd_max-df_all$pr_max
-df_all$diff_pr_min<-df_all$range_PR_sd_min-df_all$pr_min
-df_all$diff_t_range<-df_all$nb_TEMP_sd-df_all$range_real_temp
-df_all$diff_pr_range<-df_all$nb_PR_sd-df_all$range_real_prec
+df_all$diff_bio1_max<-df_all$range_bio1_sd_max-df_all$bio1_max
+df_all$diff_bio1_min<-df_all$range_bio1_sd_min-df_all$bio1_min
+df_all$diff_bio5_max<-df_all$range_bio5_sd_max-df_all$bio5_max
+df_all$diff_bio5_min<-df_all$range_bio5_sd_min-df_all$bio5_min
+df_all$diff_bio6_max<-df_all$range_bio6_sd_max-df_all$bio6_max
+df_all$diff_bio6_min<-df_all$range_bio6_sd_min-df_all$bio6_min
+df_all$diff_bio12_max<-df_all$range_bio12_sd_max-df_all$bio12_max
+df_all$diff_bio12_min<-df_all$range_bio12_sd_min-df_all$bio12_min
+df_all$diff_bio13_max<-df_all$range_bio13_sd_max-df_all$bio13_max
+df_all$diff_bio13_min<-df_all$range_bio13_sd_min-df_all$bio13_min
+df_all$diff_bio14_max<-df_all$range_bio14_sd_max-df_all$bio14_max
+df_all$diff_bio14_min<-df_all$range_bio14_sd_min-df_all$bio14_min
+
+df_all$diff_bio1_range<-df_all$nb_bio1_sd-df_all$range_real_bio1
+df_all$diff_bio5_range<-df_all$nb_bio5_sd-df_all$range_real_bio5
+df_all$diff_bio6_range<-df_all$nb_bio6_sd-df_all$range_real_bio6
+df_all$diff_bio12_range<-df_all$nb_bio12_sd-df_all$range_real_bio12
+df_all$diff_bio13_range<-df_all$nb_bio13_sd-df_all$range_real_bio13
+df_all$diff_bio14_range<-df_all$nb_bio14_sd-df_all$range_real_bio14
+
 df_all$diff_nb_range<-df_all$sd_nb_size-df_all$real_nb_size
 
-df_all$TEMP_MAX_density <- get_density(df_all$range_TEMP_sd_max, df_all$t_max_max, n = 100)
+df_all$bio1_max_density <- get_density(df_all$range_bio1_sd_max, df_all$bio1_max, n = 100)
 
-p<-ggplot(df_all)+geom_point(aes(x=range_TEMP_sd_max, y=t_max_max, color=TEMP_MAX_density))+
-  xlim(0, 60)+
-  ylim(0, 60)+
+p<-ggplot(df_all)+geom_point(aes(x=range_bio1_sd_max/100, y=bio1_max/100, color=bio1_max_density))+
+  xlim(0, 40)+
+  ylim(0, 40)+
   geom_text(x=10, y=60, 
                 label=sprintf("ρ=%.3f, mean(x-y)=%.3f°C", 
-                              cor_df$p_t_max, cor_df$mean_diff_t_max))+
+                              cor_df$p_bio1_max, cor_df$mean_diff_bio1_max))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$TEMP_MAX_density, 0.2))+
+                        midpoint = quantile(df_all$bio1_max_density, 0.2))+
   theme_bw()+
-  labs(x="Species Tmax (excluding outliers)",
-       y="Species Tmax (including outliers)",
+  labs(x="Species bio1 (excluding outliers)",
+       y="Species bio1 (including outliers)",
        color="Density")+
   theme(legend.position = "none")
 p
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_max.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_max.png")
+ggsave(p, filename="../../Figures/niche_property/bio1_max.pdf")
+ggsave(p, filename="../../Figures/niche_property/bio1_max.png")
 
-df_all$TEMP_MIN_density <- get_density(df_all$range_TEMP_sd_min, df_all$diff_t_min, n = 100)
-
-p<-ggplot(df_all)+geom_point(aes(x=range_TEMP_sd_min, y=t_min_min, color=TEMP_MIN_density))+
-  xlim(-80, 30)+
-  ylim(-80, 30)+
-  geom_text(x=-60, y=20, 
-            label=sprintf("ρ=%.3f, mean(x-y)=%.3f°C", 
-                          cor_df$p_t_min, cor_df$mean_diff_t_min))+
-  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$TEMP_MIN_density, 0.2))+
-  theme_bw()+
-  labs(x="Species Tmin (excluding outliers)",
-       y="Species Tmin (including outliers)",
-       color="Density")+
-  theme(legend.position = "none")
-p
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_min.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_min.png")
-
-df_all$PR_MAX_density <- get_density(df_all$range_PR_sd_max, df_all$pr_max, n = 100)
-
-p<-ggplot(df_all)+geom_point(aes(x=range_PR_sd_max, y=pr_max, color=PR_MAX_density))+
-  xlim(0, 8000)+
-  ylim(0, 8000)+
-  geom_text(x=1500, y=7500, 
-            label=sprintf("ρ=%.3f, mean(x-y)=%.3fmm", 
-                          cor_df$p_pr_max, cor_df$mean_diff_pr_max))+
-  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$PR_MAX_density, 0.2))+
-  theme_bw()+
-  labs(x="Species Pmax (excluding outliers)",
-       y="Species Pmax (including outliers)",
-       color="Density")+
-  theme(legend.position = "none")
-ggsave(p, filename="../../Figures_Full_species/niche_property/PR_max.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/PR_max.png")
-
-df_all$PR_MIN_density <- get_density(df_all$range_PR_sd_min, df_all$pr_min, n = 100)
-
-p<-ggplot(df_all)+geom_point(aes(x=range_PR_sd_min, y=pr_min, color=PR_MIN_density))+
-  xlim(0, 6000)+
-  ylim(0, 6000)+
-  geom_text(x=1000, y=5000, 
-            label=sprintf("ρ=%.3f, mean(x-y)=%.3fmm", 
-                          cor_df$p_pr_min, cor_df$mean_diff_pr_min))+
-  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$PR_MIN_density, 0.2))+
-  theme_bw()+
-  labs(x="Species Pmin (excluding outliers)",
-       y="Species Pmin (including outliers)",
-       color="Density")+
-  theme(legend.position = "none")
-ggsave(p, filename="../../Figures_Full_species/niche_property/PR_min.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/PR_min.png")
-
-df_all$nb_TEMP_density <- get_density(df_all$nb_TEMP_sd, df_all$range_real_temp, n = 100)
-
-p<-ggplot(df_all)+geom_point(aes(x=nb_TEMP_sd, y=range_real_temp, color=nb_TEMP_density))+
-  xlim(0, 200)+
-  ylim(0, 150)+
-  geom_text(x=30, y=150, 
-            label=sprintf("ρ=%.3f, mean(x-y)=%.3f°C", 
-                          cor_df$p_range_t, cor_df$mean_diff_range_t))+
-  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$nb_TEMP_density, 0.2))+
-  theme_bw()+
-  labs(x="Species temperature breadth (excluding outliers)",
-       y="Species temperature breadth (including outliers)",
-       color="Density")+
-  theme(legend.position = "none")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_breadth.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Temp_breadth.png")
-
-df_all$nb_PR_density <- get_density(df_all$nb_PR_sd, df_all$range_real_prec, n = 100)
-
-p<-ggplot(df_all)+geom_point(aes(x=nb_PR_sd, y=range_real_prec, color=nb_PR_density))+
-  xlim(0, 11500)+
-  ylim(0, 8000)+
-  geom_text(x=2000, y=8000, 
-            label=sprintf("ρ=%.3f, mean(x-y)=%.3fmm", 
-                          cor_df$p_range_p, cor_df$mean_diff_range_p))+
-  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$nb_PR_density, 0.2))+
-  theme_bw()+
-  labs(x="Species precipitation breadth (excluding outliers)",
-       y="Species precipitation breadth (including outliers)",
-       color="Density")+
-  theme(legend.position = "none")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Prec_breadth.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Prec_breadth.png")
 
 df_all$nb_size_density <- get_density(df_all$sd_nb_size, df_all$real_nb_size, n = 100)
 
@@ -233,86 +284,21 @@ p<-ggplot(df_all)+geom_point(aes(x=sd_nb_size, y=real_nb_size, color=nb_size_den
        color="Density")+
   theme(legend.position = "none")
 p
-ggsave(p, filename="../../Figures_Full_species/niche_property/Niche_area.pdf")
-ggsave(p, filename="../../Figures_Full_species/niche_property/Niche_area.png")
+ggsave(p, filename="../../Figures/niche_property/Niche_area.pdf")
+ggsave(p, filename="../../Figures/niche_property/Niche_area.png")
 
 
 
-df_all<-NULL
-for (g in c("Amphibians", "Birds", "Mammals", "Reptiles")){
-  df<-readRDS(sprintf("../../Objects_Full_species/Species_property/%s_property_compared.rda", g))
-  df$group<-g
-  
-  df_all<-bind(df_all, df)
-}
-df_all[which(df_all$range_TEMP_sd_max>df_all$t_max_max), "range_TEMP_sd_max"]<-
-  df_all[which(df_all$range_TEMP_sd_max>df_all$t_max_max), "t_max_max"]
-
-df_all[which(df_all$range_TEMP_sd_min<df_all$t_min_min), "range_TEMP_sd_min"]<-
-  df_all[which(df_all$range_TEMP_sd_min<df_all$t_min_min), "t_min_min"]
-
-df_all[which(df_all$range_PR_sd_max>df_all$pr_max), "range_PR_sd_max"]<-
-  df_all[which(df_all$range_PR_sd_max>df_all$pr_max), "pr_max"]
-
-df_all[which(df_all$range_PR_sd_min<df_all$pr_min), "range_PR_sd_min"]<-
-  df_all[which(df_all$range_PR_sd_min<df_all$pr_min), "pr_min"]
-df_all$diff_t_max<-df_all$range_TEMP_sd_max-df_all$t_max_max
-df_all$diff_t_min<-df_all$range_TEMP_sd_min-df_all$t_min_min
-df_all$diff_pr_max<-df_all$range_PR_sd_max-df_all$pr_max
-df_all$diff_pr_min<-df_all$range_PR_sd_min-df_all$pr_min
-df_all$nb_TEMP_sd
-
-ttt<-2
-df_all<-df_all[N_CELL>ttt]
+p_v<-cor(df_all[target=="1850"]$sd_nb_size, df_all[target=="1970"]$sd_nb_size)
+mean<-mean(df_all[target=="1850"]$sd_nb_size- df_all[target=="1970"]$sd_nb_size)
 
 
-df_all$scaled_t_max_max<-scale(c(df_all$t_max_max, df_all$t_min_min, 
-                                 df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_t_min_min<-scale(c(df_all$t_min_min, df_all$t_max_max, 
-                                 df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_range_TEMP_sd_max<-scale(c(df_all$range_TEMP_sd_max, df_all$t_max_max, df_all$t_min_min, 
-                                         df_all$range_TEMP_sd_min))[1:length(df_all$t_max_max)]
-df_all$scaled_range_TEMP_sd_min<-scale(c(df_all$range_TEMP_sd_min, df_all$t_max_max, df_all$t_min_min, 
-                                         df_all$range_TEMP_sd_max))[1:length(df_all$t_max_max)]
-
-df_all$scaled_range_real_temp<-df_all$scaled_t_max_max-df_all$scaled_t_min_min
-df_all$scaled_range_SD_temp<-df_all$scaled_range_TEMP_sd_max-df_all$scaled_range_TEMP_sd_min
-
-df_all$scaled_pr_max<-scale(c(df_all$pr_max, df_all$pr_min, 
-                              df_all$range_PR_sd_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_pr_min<-scale(c(df_all$pr_min, df_all$pr_max, 
-                              df_all$range_PR_sd_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_range_PR_sd_max<-scale(c(df_all$range_PR_sd_max, df_all$pr_min, 
-                                       df_all$pr_max, df_all$range_PR_sd_min))[1:length(df_all$pr_max)]
-df_all$scaled_range_PR_sd_min<-scale(c(df_all$range_PR_sd_min, df_all$pr_min, df_all$pr_max, 
-                                       df_all$range_PR_sd_max))[1:length(df_all$pr_max)]
-
-plot(df_all$scaled_pr_max, df_all$scaled_range_PR_sd_max)
-plot(df_all$scaled_pr_min, df_all$scaled_range_PR_sd_min)
-plot(df_all$pr_max, df_all$range_PR_sd_max)
-plot(df_all$pr_min, df_all$range_PR_sd_min)
-
-df_all$scaled_range_real_prec<-df_all$scaled_pr_max-df_all$scaled_pr_min
-df_all$scaled_range_SD_prec<-df_all$scaled_range_PR_sd_max-df_all$scaled_range_PR_sd_min
-
-df_all$real_nb_size<-df_all$scaled_range_real_temp*df_all$scaled_range_real_prec
-df_all$sd_nb_size<-df_all$scaled_range_SD_temp*df_all$scaled_range_SD_prec
-
-
-p_v<-cor(df_all[target=="Niche_Models"]$sd_nb_size, df_all[target=="Niche_Models_1850_1970"]$sd_nb_size)
-mean<-mean(df_all[target=="Niche_Models"]$sd_nb_size- df_all[target=="Niche_Models_1850_1970"]$sd_nb_size)
-
-mean(df_all[target=="Niche_Models"]$range_TEMP_sd_max-df_all[target=="Niche_Models_1850_1970"]$range_TEMP_sd_max)
-mean(df_all[target=="Niche_Models"]$range_TEMP_sd_min-df_all[target=="Niche_Models_1850_1970"]$range_TEMP_sd_min)
-mean(df_all[target=="Niche_Models"]$range_PR_sd_max -df_all[target=="Niche_Models_1850_1970"]$range_PR_sd_max)
-mean(df_all[target=="Niche_Models"]$range_PR_sd_min -df_all[target=="Niche_Models_1850_1970"]$range_PR_sd_min)
-
-df_g<-data.frame(NB_1850=df_all[target=="Niche_Models"]$sd_nb_size,
-                 NB_1970=df_all[target=="Niche_Models_1850_1970"]$sd_nb_size)
+df_g<-data.frame(NB_1850=df_all[target=="1850"]$sd_nb_size,
+                 NB_1970=df_all[target=="1970"]$sd_nb_size)
 df_g$diff_nb_range<-df_g$NB_1850-df_g$NB_1970
 
 df_g$nb_size_density <- get_density(df_g$NB_1850, df_g$NB_1970, n = 100)
-
+df_all$nb_size_d
 
 p<-ggplot(df_all)+geom_point(aes(x=sd_nb_size, y=real_nb_size, color=nb_size_density))+
   #xlim(0, 11500)+
@@ -336,7 +322,7 @@ p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_size_density))+
   #ylim(0, 8000)+
   geom_abline(intercept = 0, slope = 1, color="black", 
               linetype="dashed", size=1.5, alpha=0.5)+
-  geom_text(x=2.5, y=10, 
+  geom_text(x=3, y=10, 
             label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
                           p_v, mean))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
@@ -347,10 +333,10 @@ p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_size_density))+
        color="Density")+
   theme(legend.position = "none")
 p2
-ggsave(p2, filename="../../Figures_Full_species/niche_property/Niche_area_1850_1970.pdf")
-ggsave(p2, filename="../../Figures_Full_species/niche_property/Niche_area_1850_1970.png")
-
+ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.pdf")
+ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.png")
+library(ggpubr)
 pp<-ggarrange(p, p2, nrow = 1, ncol=2, labels=c("(a)", "(b)"))
 pp
-ggsave(pp, filename="../../Figures_Full_species/niche_property/Niche_area_combined.pdf",width=10, height=4)
-ggsave(pp, filename="../../Figures_Full_species/niche_property/Niche_area_combined.png",width=10, height=4)
+ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.pdf",width=10, height=4)
+ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.png",width=10, height=4)

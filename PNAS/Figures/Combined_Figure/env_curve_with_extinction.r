@@ -115,3 +115,38 @@ p2
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year.pdf", width=9, height=4)
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year.png", width=9, height=4)
 
+p2<-ggplot()+
+  geom_ribbon(data=dataset1, aes(x=Y, ymin=min_v, ymax=max_v, fill=SSP), alpha=0.2)+
+  #geom_line(data=dataset1, aes(x=Y, y=mean_v, color=SSP))+
+  geom_line(data=dataset2%>%dplyr::filter(label %in% c(" no exposure no dispersal", "5-year exposure with dispersal")), 
+            aes(x=extinct_year, y=n_sp/scale+intercept, color=SSP, linetype=label), size=1)+
+  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no exposure no dispersal", "5-year exposure with dispersal")), 
+               aes(x = extinct_year, y=min_y1, 
+                   xend = extinct_year, yend=n_sp_scale, 
+                   color=SSP), linetype=2)+
+  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no exposure no dispersal", "5-year exposure with dispersal")), 
+               aes(x = extinct_year, y=n_sp_scale, 
+                   xend = 2020, yend=n_sp_scale, 
+                   color=SSP), linetype=2)+
+  scale_color_manual(values=color_ssp)+
+  scale_fill_manual(values=color_ssp)+
+  scale_x_continuous(breaks = c(seq(2020, 2100, by=10)))+
+  scale_y_continuous(
+    name = "Annual maximum temperature",
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans=~(.-intercept)*scale, 
+                        name="Average number of extinctions across ESMs",
+                        breaks=waiver(),
+                        labels=waiver())
+  )+
+  geom_text(data=labels%>%dplyr::filter(label==" no exposure no dispersal"), aes(x=2020, y=n_sp_scale, 
+                                                                                 label=sprintf(">%d%%", extinct_threshold*100)),
+            hjust=0.1, vjust=-0.8)+
+  xlab("Year")+
+  scale_linetype_manual(values=linetype_label)+
+  labs(linetype="")+
+  theme_bw()
+#theme(legend.position = "bottom", legend.box="vertical")
+p2
+ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.pdf", width=9, height=4)
+ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.png", width=9, height=4)

@@ -124,6 +124,7 @@ if (T){
     }
     p2_item<-p2_item+
       scale_x_log10()+
+      ylim(0, 30)+
       #scale_x_sqrt(breaks=seq(0, 14, by=2)^2)+
       #scale_y_log10()+
       #scale_y_sqrt(breaks=seq(0, 20, by=5)^2, labels=seq(0, 20, by=5)^2)+

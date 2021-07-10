@@ -139,6 +139,37 @@ formulas<-c("max_dis~Diet",
             "max_dis~log_body_mass+Diet",
             "max_dis~ForStrat+log_body_mass+Diet")
 
+empirical_disp_list<-rbind(Santini_se, Sutherland_se)
+empirical_disp_list[which(empirical_disp_list$sp=="Aotus azarai"), "sp"]<-"Aotus azarae"
+empirical_disp_list[which(empirical_disp_list$sp=="Cervus canadensis"), "sp"]<-"Cervus canadensis"
+empirical_disp_list[which(empirical_disp_list$sp=="Clethrionomys glareolus"), "sp"]<-"Myodes glareolus"
+empirical_disp_list[which(empirical_disp_list$sp=="Didelphis virginianus"), "sp"]<-"Bubo virginianus"
+empirical_disp_list[which(empirical_disp_list$sp=="Felis concolor"), "sp"]<-"Puma concolor"
+empirical_disp_list[which(empirical_disp_list$sp=="Giraffa camelopardalis thornicrofti"), "sp"]<-"Giraffa camelopardalis"
+empirical_disp_list[which(empirical_disp_list$sp=="Lepus europea"), "sp"]<-"Lepus europaeus"
+empirical_disp_list[which(empirical_disp_list$sp=="Lutra canadensis"), "sp"]<-"Lontra canadensis"
+empirical_disp_list[which(empirical_disp_list$sp=="Lynx lynx **"), "sp"]<-"Lynx lynx"
+empirical_disp_list[which(empirical_disp_list$sp=="Microtus townsendi"), "sp"]<-"Microtus townsendii"
+empirical_disp_list[which(empirical_disp_list$sp=="Mustela putorius furo"), "sp"]<-"Mustela putorius"
+empirical_disp_list[which(empirical_disp_list$sp=="Mustela vison"), "sp"]<-"Neovison vison"
+empirical_disp_list[which(empirical_disp_list$sp=="Odocoileus hemionus columbianus"), "sp"]<-"Odocoileus hemionus"
+empirical_disp_list[which(empirical_disp_list$sp=="Odocoileus hemionus hemionus"), "sp"]<-"Odocoileus hemionus"
+empirical_disp_list[which(empirical_disp_list$sp=="Panthera leo persica"), "sp"]<-"Panthera leo"
+empirical_disp_list[which(empirical_disp_list$sp=="Perognathus formosa"), "sp"]<-"Chaetodipus formosus"
+#empirical_disp_list[which(empirical_disp_list$sp=="Peromyscus longicaudus"), "sp"]<-"xxxxx"
+empirical_disp_list[which(empirical_disp_list$sp=="Phascogale tapotafa"), "sp"]<-"Phascogale tapoatafa"
+empirical_disp_list[which(empirical_disp_list$sp=="Spermophilus tridecemliniatus"), "sp"]<-"Ictidomys tridecemlineatus"
+#empirical_disp_list[which(empirical_disp_list$sp=="Spermophilus leucopus"), "sp"]<-"xxxxx"
+empirical_disp_list[which(empirical_disp_list$sp=="Sus scrofa **"), "sp"]<-"Sus scrofa"
+empirical_disp_list[which(empirical_disp_list$sp=="Sylvilagus bachmani ubericolor"), "sp"]<-"Sylvilagus bachmani"
+empirical_disp_list[which(empirical_disp_list$sp=="Vulpes mactrotis"), "sp"]<-"Vulpes macrotis"
+
+
+model_df_mammals_list<-merge(empirical_disp_list, mammals_trait, by.x="sp", by.y="Scientific", all.x=T, all.y=F)
+write.csv(model_df_mammals_list, "../../Data/Dispersal_distance/mammal.csv")
+
+iucn_mammals<-readRDS("../../Objects/IUCN_List/Mammals_df.rda")
+
 
 if (T){
   ########For random forest##########################
@@ -372,7 +403,9 @@ if (T){
   saveRDS(predicted_all, "../../Objects/estimate_disp_dist/models/predicted_mammals.rda")
   
 }
-
+if (F){
+  readRDS("../../Objects/estimate_disp_dist/models/rpart_no_rank_mammals.rda")
+}
 library(ggplot2)
 predicted_all<-readRDS("../../Objects/estimate_disp_dist/models/predicted_mammals.rda")
 

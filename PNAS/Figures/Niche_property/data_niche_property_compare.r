@@ -8,7 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 if (is.na(group)){
-  group<-"Mammals"
+  group<-"Birds"
 }
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
@@ -32,7 +32,7 @@ source("commonFuns/functions.r")
 nb<-NULL
 target<-"Dispersal"
 i=1
-for (target in c("Dispersal")){
+for (target in c("1850", "1970")){
   
   for (i in c(1:nrow(df_list))){
     print(paste(i, nrow(df_list), group))
@@ -43,10 +43,14 @@ for (target in c("Dispersal")){
     #enm_folder<-sprintf("../../Objects/Niche_Models/%s/%s/dispersal_%d", group, item$sp, threshold)
     
     
-    source_folder<-sprintf("../../Objects/%s/%s/%s", target, group, item$sp)
+    source_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$sp)
     start_dis<-readRDS(sprintf("%s/initial_disp_exposure_0_dispersal_0.rda", source_folder))
     start_dis<-merge(start_dis, env_layers, by=c("x", "y", "mask_100km"))
-    fit<-readRDS(sprintf("%s/fit.rda", source_folder))
+    if (target=="1850"){
+      fit<-readRDS(sprintf("%s/fit.rda", source_folder))
+    }else{
+      fit<-readRDS(sprintf("%s/fit_1970.rda", source_folder))
+    }
     
     fit$bio1_max<-max(start_dis$bio1, na.rm = T)
     fit$bio1_min<-min(start_dis$bio1, na.rm = T)
@@ -71,7 +75,7 @@ for (target in c("Dispersal")){
     fit$nb_bio12_sd<-fit$range_bio12_sd_max-fit$range_bio12_sd_min
     fit$nb_bio13_sd<-fit$range_bio13_sd_max-fit$range_bio13_sd_min
     fit$nb_bio14_sd<-fit$range_bio14_sd_max-fit$range_bio14_sd_min
-    
+    fit$target<-target
     nb<-bind(nb, fit)
   }
 }

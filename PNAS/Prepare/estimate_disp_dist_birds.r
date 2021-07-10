@@ -31,6 +31,7 @@ plot(Sutherland_se$median_dis, Sutherland_se$max_dis)
 
 birds_trait<-read.table("../../Data/Dispersal_distance/EltonTraits/Dataset_HWI.csv", sep=",", head=T, stringsAsFactors = F)
 birds_trait[which(birds_trait$Diet=="fruit"), "Diet"]<-"plants"
+birds_trait[which(birds_trait$Diet=="seeds"), "Diet"]<-"plants"
 birds_trait[which(birds_trait$Diet=="nectar"), "Diet"]<-"plants"
 birds_trait[which(birds_trait$Diet=="scav"), "Diet"]<-"omnivore"
 birds_trait[which(is.na(birds_trait$Diet)), "Diet"]<-"omnivore"
@@ -103,13 +104,18 @@ summary(ratio)
 ratio<-quantile(ratio, 0.5)
 df_with_family<-merge(df_item, iucn_bird, by.x="sp", by.y="Scientific.name", all.x=T, all.y=F)
 df_with_family[is.na(df_with_family$Order),]
-write.csv(df_with_family, "../../Data/Dispersal_distance/bird.csv")
+length(unique(df_with_family$sp))
 
-df_with_family<-df_with_family[!is.na(df_with_family$Order),]
+
+#df_with_family<-df_with_family[!is.na(df_with_family$Order),]
 #df_with_family[is.na(df_with_family$median_dis), "median_dis"]<-
 #  df_with_family[is.na(df_with_family$median_dis), "max_dis"]/ratio
 #View(df_with_family[is.na(Family.name)])
 df_with_family<-data.table(df_with_family)
+
+df_with_family_table<-merge(df_with_family, birds_trait, by.x="sp", by.y="iucn_name", all.x=T, all.y=F)
+write.csv(df_with_family_table, "../../Data/Dispersal_distance/bird.csv")
+
 df_with_family<-df_with_family[, .(max_dis = max(max_dis)), 
                                by=list(sp, Order, Family.name)]
 df_with_family<-merge(df_with_family, birds_trait, by.x="sp", by.y="iucn_name", all.x=T, all.y=F)
@@ -372,6 +378,7 @@ library(ggplot2)
 predicted_all<-readRDS("../../Objects/estimate_disp_dist/models/predicted_birds.rda")
 
 evaluated_metrics_all<-readRDS("../../Objects/estimate_disp_dist/models/evaluated_metrics_birds.rda")
+write.csv(evaluated_metrics_all, "../../Figures/Estimate_Disp/evaluated_metrics_all_birds.csv")
 
 evaluated_metrics_all[which(evaluated_metrics_all$RMSE_Full==min(evaluated_metrics_all$RMSE_Full)),]
 if (F){
