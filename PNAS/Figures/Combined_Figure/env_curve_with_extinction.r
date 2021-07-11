@@ -150,3 +150,5 @@ p2<-ggplot()+
 p2
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.pdf", width=9, height=4)
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.png", width=9, height=4)
+
+write.csv(extinct_propotion_with_sp, "../../Figures/Combined_Figure/extinct_propotion_with_sp.csv")

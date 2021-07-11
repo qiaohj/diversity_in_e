@@ -16,6 +16,7 @@ if (F){
     df_extincts[[g]]<-df_extinct
   }
   df_all<-NULL
+  y<-2021
   for (y in c(2021:2100)){
     print(y)
     for (g in c("Birds", "Mammals")){
@@ -41,7 +42,8 @@ if (F){
 }
 source("commonFuns/colors.r")
 df_all<-readRDS("../../Figures/Min_distance_to_Dispersal/full.rda")
-
+df_all%>%dplyr::group_by(GCM, SSP, year, group, dispersal)%>%
+  dplyr::summarise(N=n())
 df_sp_list<-list()
 exposure<-0
 for (group in c("Birds", "Mammals")){
@@ -57,7 +59,12 @@ df_all_SSP<-df_all%>%dplyr::group_by(SSP, group, year, extinct_year)%>%
   dplyr::summarise(dist_min_mean=mean(dist_min),
                    dist_min_sd=sd(dist_min),
                    dist_min_CI=CI(dist_min)[2]-CI(dist_min)[3])
-                   
+              
+df_allxxx<-df_all%>%dplyr::group_by(group, year)%>%
+  dplyr::summarise(dist_min_mean=mean(dist_min),
+                   dist_min_sd=sd(dist_min),
+                   dist_min_CI=CI(dist_min)[2]-CI(dist_min)[3])
+write.csv(df_allxxx, sprintf("../../Figures/Min_distance_to_Dispersal/all.csv"))
 p<-ggplot(df_all_SSP%>%dplyr::filter((year %in% c(2100))&(dist_min_mean>-1)), 
        aes(x=dist_min_mean, fill=group)) +
   geom_histogram(bins=20, position="dodge")+theme_bw()+

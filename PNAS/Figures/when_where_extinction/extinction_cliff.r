@@ -6,7 +6,7 @@ library(ggpubr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
-exposure<-1
+exposure<-0
 
 if (F){
   result<-NULL
@@ -43,7 +43,7 @@ if (F){
         item$N_st_Cell<-N_st_Cell
         item$N_extinct_Cell<-N_extinct_Cell
         item$Max_N_Cell<-Max_N_Cell
-        item$exposure<-ifelse(exposure==1, " no exposure", "5-year exposure")
+        item$exposure<-ifelse(exposure==0, " no exposure", "5-year exposure")
         result<-bind_dplyr(result, item)
       }
     }
@@ -84,6 +84,7 @@ p<-ggplot(cliff)+geom_density(aes(x=N_extinct_Cell, color=da))+
   scale_x_log10()+
   scale_color_manual(values=color_da)+
   theme_bw()
+p
 ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff.pdf"), 
        width=12, height=6)
 ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff.png"), 
@@ -110,9 +111,10 @@ p<-ggplot(cliff_se_all)+
   scale_color_manual(values=color_da)+
   scale_fill_manual(values=color_da)+
   theme_bw()
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff__by_year.pdf"), 
+p
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year.pdf"), 
        width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff__by_year.png"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year.png"), 
        width=12, height=6)
 
 cliff$extinct_proportion_st<-cliff$N_extinct_Cell/cliff$N_st_Cell
@@ -121,6 +123,7 @@ cliff$extinct_proportion_max<-cliff$N_extinct_Cell/cliff$Max_N_Cell
 
 cliff_se_all<-cliff%>%dplyr::group_by(SSP, dispersal, exposure, extinct_year)%>%
   dplyr::summarise(group="ALL",
+                   N=n(),
                    mean_extinct_st=mean(extinct_proportion_st),
                    sd_extinct_st=sd(extinct_proportion_st),
                    CI_extinct_st=CI(extinct_proportion_st)[1]-CI(extinct_proportion_st)[2],
@@ -128,6 +131,9 @@ cliff_se_all<-cliff%>%dplyr::group_by(SSP, dispersal, exposure, extinct_year)%>%
                    sd_extinct_max=sd(extinct_proportion_max),
                    CI_extinct_max=CI(extinct_proportion_max)[1]-CI(extinct_proportion_max)[2])
 cliff_se_all$da=ifelse(cliff_se_all$dispersal==0, "no dispersal", "with dispersal")
+
+cliff_se_all%>%dplyr::filter(N==1)
+cliff%>%dplyr::filter((SSP=="SSP119")&(da=="no dispersal")&(exposure==" no exposure")&(extinct_year==2098))
 
 p<-ggplot(cliff_se_all)+
   geom_ribbon(aes(x=extinct_year,

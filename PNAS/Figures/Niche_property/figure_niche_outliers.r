@@ -167,24 +167,24 @@ cor_df<-data.frame(p_bio1_max=cor(df_all$bio1_max, df_all$range_bio1_sd_max, met
                    mean_diff_bio14_max=mean(df_all$range_bio14_sd_max-df_all$bio14_max),
                    sd_diff_bio14_max=sd(df_all$range_bio14_sd_max-df_all$bio14_max),
                    
-                   p_bio1_max=cor(df_all$bio1_min, df_all$range_bio1_sd_min, method="spearman"),
-                   mean_diff_bio1_max=mean(df_all$range_bio1_sd_min-df_all$bio1_min),
-                   sd_diff_bio1_max=sd(df_all$range_bio1_sd_min-df_all$bio1_min),
-                   p_bio5_max=cor(df_all$bio5_min, df_all$range_bio5_sd_min, method="spearman"),
-                   mean_diff_bio5_max=mean(df_all$range_bio5_sd_min-df_all$bio5_min),
-                   sd_diff_bio5_max=sd(df_all$range_bio5_sd_min-df_all$bio5_min),
-                   p_bio6_max=cor(df_all$bio6_min, df_all$range_bio6_sd_min, method="spearman"),
-                   mean_diff_bio6_max=mean(df_all$range_bio6_sd_min-df_all$bio6_min),
-                   sd_diff_bio6_max=sd(df_all$range_bio6_sd_min-df_all$bio6_min),
-                   p_bio12_max=cor(df_all$bio12_min, df_all$range_bio12_sd_min, method="spearman"),
-                   mean_diff_bio12_max=mean(df_all$range_bio12_sd_min-df_all$bio12_min),
-                   sd_diff_bio12_max=sd(df_all$range_bio12_sd_min-df_all$bio12_min),
-                   p_bio13_max=cor(df_all$bio13_min, df_all$range_bio13_sd_min, method="spearman"),
-                   mean_diff_bio13_max=mean(df_all$range_bio13_sd_min-df_all$bio13_min),
-                   sd_diff_bio13_max=sd(df_all$range_bio13_sd_min-df_all$bio13_min),
-                   p_bio14_max=cor(df_all$bio14_min, df_all$range_bio14_sd_min, method="spearman"),
-                   mean_diff_bio14_max=mean(df_all$range_bio14_sd_min-df_all$bio14_min),
-                   sd_diff_bio14_max=sd(df_all$range_bio14_sd_min-df_all$bio14_min),
+                   p_bio1_min=cor(df_all$bio1_min, df_all$range_bio1_sd_min, method="spearman"),
+                   mean_diff_bio1_min=mean(df_all$range_bio1_sd_min-df_all$bio1_min),
+                   sd_diff_bio1_min=sd(df_all$range_bio1_sd_min-df_all$bio1_min),
+                   p_bio5_min=cor(df_all$bio5_min, df_all$range_bio5_sd_min, method="spearman"),
+                   mean_diff_bio5_min=mean(df_all$range_bio5_sd_min-df_all$bio5_min),
+                   sd_diff_bio5_min=sd(df_all$range_bio5_sd_min-df_all$bio5_min),
+                   p_bio6_min=cor(df_all$bio6_min, df_all$range_bio6_sd_min, method="spearman"),
+                   mean_diff_bio6_min=mean(df_all$range_bio6_sd_min-df_all$bio6_min),
+                   sd_diff_bio6_min=sd(df_all$range_bio6_sd_min-df_all$bio6_min),
+                   p_bio12_min=cor(df_all$bio12_min, df_all$range_bio12_sd_min, method="spearman"),
+                   mean_diff_bio12_min=mean(df_all$range_bio12_sd_min-df_all$bio12_min),
+                   sd_diff_bio12_min=sd(df_all$range_bio12_sd_min-df_all$bio12_min),
+                   p_bio13_min=cor(df_all$bio13_min, df_all$range_bio13_sd_min, method="spearman"),
+                   mean_diff_bio13_min=mean(df_all$range_bio13_sd_min-df_all$bio13_min),
+                   sd_diff_bio13_min=sd(df_all$range_bio13_sd_min-df_all$bio13_min),
+                   p_bio14_min=cor(df_all$bio14_min, df_all$range_bio14_sd_min, method="spearman"),
+                   mean_diff_bio14_min=mean(df_all$range_bio14_sd_min-df_all$bio14_min),
+                   sd_diff_bio14_min=sd(df_all$range_bio14_sd_min-df_all$bio14_min),
                    
                    p_range_bio1=cor(df_all$range_real_bio1, df_all$nb_bio1_sd, method="spearman"),
                    mean_diff_range_bio1=mean(df_all$nb_bio1_sd-df_all$range_real_bio1),
@@ -336,7 +336,7 @@ p2
 ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.pdf")
 ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.png")
 library(ggpubr)
-pp<-ggarrange(p, p2, nrow = 1, ncol=2, labels=c("(a)", "(b)"))
+pp<-ggarrange(p, p2, nrow = 1, ncol=2, labels=c("A", "B"))
 pp
 ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.pdf",width=10, height=4)
 ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.png",width=10, height=4)

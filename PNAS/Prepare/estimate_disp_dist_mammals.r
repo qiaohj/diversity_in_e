@@ -171,7 +171,7 @@ write.csv(model_df_mammals_list, "../../Data/Dispersal_distance/mammal.csv")
 iucn_mammals<-readRDS("../../Objects/IUCN_List/Mammals_df.rda")
 
 
-if (T){
+if (F){
   ########For random forest##########################
   # define training control for 10-fold Cross Validation
   evaluated_metrics_all<-NULL
@@ -473,34 +473,32 @@ summary(new_df_mammals$estimated_disp)
 
 model_df_mammals$estimated_disp<-predict(best_model, model_df_mammals)
 
-p1<-ggplot(model_df_mammals)+geom_point(aes(x=max_dis, y=estimated_disp, color=factor(Diet)))+theme_bw()
-p1
-p2<-ggplot(model_df_mammals)+geom_point(aes(x=log_body_mass, y=max_dis, color=factor(Diet)))+theme_bw()
-p2
-p<-ggpubr::ggarrange(p2, p1, nrow=2)
-ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_mammals.png", width=8, height=8)
-
-
-p<-ggplot(new_df_mammals)+geom_boxplot(aes(y=estimated_disp, color=factor(Diet)))+theme_bw()
-p
-ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_mammals.png", width=8, height=6)
-
-p1<-ggplot(new_df_mammals)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(Diet)))+theme_bw()
-p1
-p2<-ggplot(new_df_birds)+geom_point(aes(x=HWI, y=estimated_disp, color=factor(Diet)))+theme_bw()
-p2
-p<-ggpubr::ggarrange(p1, p2, nrow=2)
-p
-ggsave(p, filename="../../Figures/Estimate_Disp/Final_results.png", width=8, height=6)
-
 saveRDS(new_df_mammals, "../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
 
-ggplot(model_df_mammals) + geom_boxplot(aes(x=Diet, y=max_dis)) +geom_point(aes(x=Diet, y=max_dis), color="red")
+
+min_mass<-min(model_df_mammals$log_body_mass)
+max_mass<-max(model_df_mammals$log_body_mass)
 
 
-emperical_disp<-rbind(data.frame(clade="Bird", max_dis=model_df_birds$max_dis), 
-                      data.frame(clade="Mammal", max_dis=model_df_mammals$max_dis))
+p2<-ggplot(new_df_mammals)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(Diet)))+
+  geom_vline(xintercept = min_mass, color="black", linetype=2)+
+  geom_vline(xintercept = max_mass, color="black", linetype=2)+
+  xlab("Log body mass")+
+  ylab("Estimated natal dispersal distance")+
+  labs(color="Diet")+
+  theme_bw()
+p2
 
-p<-ggplot(emperical_disp)+geom_boxplot(aes(x=clade, y=max_dis))
-p
+p1<-ggplot(new_df_mammals)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(ForStrat)))+
+  geom_vline(xintercept = min_mass, color="black", linetype=2)+
+  geom_vline(xintercept = max_mass, color="black", linetype=2)+
+  xlab("Log body mass")+
+  ylab("Estimated natal dispersal distance")+
+  labs(color="Foraging strategy")+
+  theme_bw()
+p1
+
+
+#p<-ggpubr::ggarrange(p2, p1, nrow=2)
+ggsave(p2, filename="../../Figures/Estimate_Disp/emperical_predicted_mammals.png", width=8, height=4)
 

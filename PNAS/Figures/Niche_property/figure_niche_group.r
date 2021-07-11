@@ -8,8 +8,15 @@ source("commonFuns/functions.r")
 source("commonFuns/colors.r")
 df_all<-NULL
 for (g in c("Birds", "Mammals")){
-  df<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
+  df<-readRDS(sprintf("../../Objects/Species_property/%s_property.rda", g))
   df$group<-g
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", g))
+  df_list$sp<-gsub(" ", "_", df_list$SP)
+  #df_list$estimated_disp
+  cols<-c("sp", "estimated_disp")
+  df_list<-df_list[, ..cols]
+  df<-inner_join(df, df_list, by="sp")
+  
   df_all<-bind(df_all, df)
 }
 df_all[which(df_all$range_bio1_sd_max>df_all$bio1_max), "range_bio1_sd_max"]<-
@@ -49,11 +56,22 @@ p<-ggplot(df_nb_bio1_sd)+
   scale_fill_manual(values=color_groups)+
   scale_color_manual(values=color_groups)+
   theme_bw()+
-  labs(fill="", color="", x="Niche breadth in temperature")
+  labs(fill="", color="", x="Niche breadth in annual mean temperature")
 
 p
 
 saveRDS(p, "../../Figures/NB_hist_combined/nb_temp_hist.rda")
+
+p<-ggplot(df_all)+
+  geom_density(aes(x = estimated_disp, color=group, fill = group), alpha=0.3)+
+  scale_fill_manual(values=color_groups)+
+  scale_color_manual(values=color_groups)+
+  theme_bw()+
+  labs(fill="", color="", x="Estimated natal dispersal distance")
+
+p
+
+saveRDS(p, "../../Figures/NB_hist_combined/disp_dist_hist.rda")
 
 ggsave(p, filename="../../Figures/niche_property/nb_hist_temp.png")
 ggsave(p, filename="../../Figures/niche_property/nb_hist_temp.pdf")
@@ -63,7 +81,7 @@ p<-ggplot(df_nb_bio12_sd)+
   scale_fill_manual(values=color_groups)+
   scale_color_manual(values=color_groups)+
   theme_bw()+
-  labs(fill="", color="", x="Niche breadth in precipitation", y="")
+  labs(fill="", color="", x="Niche breadth in annual precipitation", y="")
 p
 saveRDS(p, "../../Figures/NB_hist_combined/nb_prec_hist.rda")
 ggsave(p, filename="../../Figures/niche_property/nb_hist_prec.png")

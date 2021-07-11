@@ -3,11 +3,13 @@ library(ggplot2)
 library(ggpmisc)
 library(ggpubr)
 library(data.table)
+source("commonFuns/functions.r")
+source("commonFuns/colors.r")
 df<-NULL
 g<-"Birds"
 for (g in c("Birds", "Mammals")){
   print(g)
-  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
+  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property.rda", g))
   
   nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
   nb<-as.data.frame(nb)
@@ -49,6 +51,19 @@ lmp <- function (modelobject) {
   return(p)
 }
 
+
+group<-"Mammals"
+df_sp_list<-list()
+for (group in c("Mammals", "Birds")){
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
+  df_list$sp<-gsub(" ", "_", df_list$SP)
+  #df_list$estimated_disp
+  cols<-c("sp", "estimated_disp")
+  df_list<-df_list[, ..cols]
+  df_sp_list[[group]]<-df_list
+}
+df_sp_list<-rbindlist(df_sp_list)
+df<-merge(df, df_sp_list, by="sp")
 df_se<-df%>%dplyr::group_by(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd,
                             nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
                             N_CELL, sp, dispersal, exposure, group)%>%
@@ -133,9 +148,16 @@ dispersals<-c(0, 1)
 df<-NULL
 for (g in c("Birds", "Mammals")){
   print(g)
-  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", g))
-  
-  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
+  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property.rda", g))
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", g))
+  df_list$sp<-gsub(" ", "_", df_list$SP)
+  #df_list$estimated_disp
+  cols<-c("sp", "estimated_disp")
+  df_list<-df_list[, ..cols]
+  nb<-inner_join(nb, df_list, by="sp")
+  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, 
+                         nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
+                         N_CELL, estimated_disp, sp)
   
   nb<-as.data.frame(nb)
   full_sp<-expand.grid(GCM=GCMs, SSP=SSPs, sp=unique(nb$sp), dispersal=dispersals, stringsAsFactors = F)
@@ -164,7 +186,7 @@ p1<-ggplot(df)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
                  aes(x=nb_bio1_sd/100), fill=colors_red[9], bins=50)+
   theme_bw()+
-  xlab("Niche breadth in temperature")+
+  xlab("Niche breadth in annual mean temperature")+
   ylab("Number of species")+
   facet_grid(exposure~Label, scale="free")
 p1
@@ -178,11 +200,25 @@ p2<-ggplot(df)+
   geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
                  aes(x=nb_bio12_sd/100), fill=colors_red[9], bins=50)+
   theme_bw()+
-  xlab("Niche breadth in precipitation")+
+  xlab("Niche breadth in annual precipitation")+
   ylab("Number of species")+
   facet_grid(exposure~Label)
 p2
 saveRDS(p2, "../../Figures/NB_hist_combined/nb_prec.rda")
+#hist((df%>%dplyr::filter(is_extinct=="YES"))$estimated_disp)
+p3<-ggplot(df)+
+  geom_histogram(aes(x=estimated_disp), fill=colors_black[4], bins=50)+
+  geom_histogram(data=df%>%dplyr::filter(is_extinct=="YES"), 
+                 aes(x=estimated_disp), fill=colors_red[9], bins=50)+
+  scale_x_log10()+
+  scale_y_sqrt(breaks=seq(0, 80, by=10)^2)+
+  theme_bw()+
+  xlab("Estimated natal dispersal distance (km, log transformed)")+
+  ylab("Number of species (sq root transformed)")+
+  facet_grid(exposure~Label)
+p3
+saveRDS(p3, "../../Figures/NB_hist_combined/disp_dist.rda")
+
 
 p2<-p2+
   theme(strip.background.x = element_blank(),

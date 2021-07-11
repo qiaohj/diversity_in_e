@@ -136,7 +136,7 @@ model_df_birds<-df_with_family[, ..cols]
 dim(model_df_birds)
 table(model_df_birds$Diet)
 
-if (T){
+if (F){
   ########For random forest##########################
   # define training control for 10-fold Cross Validation
   evaluated_metrics_all<-NULL
@@ -439,7 +439,7 @@ best_model_info<-
 
 
 
-best_model_info<-best_model_info[which(best_model_info$RMSE==min(best_model_info$RMSE)),]
+best_model_info<-evaluated_metrics_all[which(evaluated_metrics_all$RMSE==min(evaluated_metrics_all$RMSE)),]
 best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank_birds.rda", tolower(best_model_info$model)))
 #best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank.rda", "rf"))
 
@@ -460,12 +460,32 @@ new_df_birds
 
 saveRDS(new_df_birds, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
 
-model_df_birds$estimated_disp<-predict(best_model, model_df_birds[, "HWI"])
+new_df_birds$estimated_disp<-predict(best_model, new_df_birds)
+model_df_birds$estimated_disp<-predict(best_model, model_df_birds)
 
-p1<-ggplot(model_df_birds)+geom_point(aes(x=max_dis, y=estimated_disp, color=factor(Diet)))+theme_bw()
+min_HWI<-min(model_df_birds$HWI)
+max_HWI<-max(model_df_birds$HWI)
+p1<-ggplot(new_df_birds)+geom_point(aes(x=HWI, y=estimated_disp, color=factor(Diet)))+
+  geom_vline(xintercept = min_HWI, color="black", linetype=2)+
+  geom_vline(xintercept = max_HWI, color="black", linetype=2)+
+  xlab("Hand-wing index (HWI)")+
+  ylab("Estimated natal dispersal distance")+
+  labs(color="Diet")+
+  theme_bw()
 p1
-p2<-ggplot(model_df_birds)+geom_point(aes(x=HWI, y=max_dis, color=factor(Diet)))+theme_bw()
+min_mass<-min(model_df_birds$log_body_mass)
+max_mass<-max(model_df_birds$log_body_mass)
+
+
+p2<-ggplot(new_df_birds)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(Diet)))+
+  geom_vline(xintercept = min_mass, color="black", linetype=2)+
+  geom_vline(xintercept = max_mass, color="black", linetype=2)+
+  xlab("Log body mass")+
+  ylab("Estimated natal dispersal distance")+
+  labs(color="Diet")+
+  theme_bw()
 p2
+
 p<-ggpubr::ggarrange(p2, p1, nrow=2)
 ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_birds.png", width=8, height=8)
 

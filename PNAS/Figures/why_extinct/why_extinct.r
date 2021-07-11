@@ -296,3 +296,78 @@ pp
 ggsave(pp, filename="../../Figures/why_extinct/combined_why_extinct_ul.png", width=10, height=8)
 ggsave(pp, filename="../../Figures/why_extinct/combined_why_extinct_ul.pdf", width=10, height=8)
 
+
+
+df_se_temp_upper<-df%>%dplyr::filter((upper_bio1)|(upper_bio5)|(upper_bio6))%>%
+  dplyr::group_by(SSP, GCM, x, y, da, exposure)%>%
+  dplyr::summarise(N=n())
+df_se_temp_upper<-df_se_temp_upper%>%dplyr::group_by(SSP, x, y, da, exposure)%>%
+  dplyr::summarise(mean_N=mean(N, na.rm=T),
+                   sd_N=sd(N),
+                   CI_N=CI(N)[2]-CI(N)[3])
+df_se_temp_upper$causation<-"Temperature (upper limit)"
+
+df_se_temp_lower<-df%>%dplyr::filter((lower_bio1)|(lower_bio5)|(lower_bio6))%>%
+  dplyr::group_by(SSP, GCM, x, y, extinct_year, da, exposure)%>%
+  dplyr::summarise(N=n())
+df_se_temp_lower<-df_se_temp_lower%>%dplyr::group_by(SSP, x, y, da, exposure)%>%
+  dplyr::summarise(mean_N=mean(N, na.rm=T),
+                   sd_N=sd(N),
+                   CI_N=CI(N)[2]-CI(N)[3])
+df_se_temp_lower$causation<-"Temperature (lower limit)"
+
+df_se_prec_upper<-df%>%dplyr::filter((upper_bio12)|(upper_bio13)|(upper_bio14))%>%
+  dplyr::group_by(SSP, GCM, x, y, extinct_year, da, exposure)%>%
+  dplyr::summarise(N=n())
+df_se_prec_upper<-df_se_prec_upper%>%dplyr::group_by(SSP, x, y, da, exposure)%>%
+  dplyr::summarise(mean_N=mean(N, na.rm=T),
+                   sd_N=sd(N),
+                   CI_N=CI(N)[2]-CI(N)[3])
+df_se_prec_upper$causation<-"Precipitation (upper limit)"
+df_se_prec_lower<-df%>%dplyr::filter((lower_bio12)|(lower_bio13)|(lower_bio14))%>%
+  dplyr::group_by(SSP, GCM, x, y, extinct_year, da, exposure)%>%
+  dplyr::summarise(N=n())
+df_se_prec_lower<-df_se_prec_lower%>%dplyr::group_by(SSP, x, y, da, exposure)%>%
+  dplyr::summarise(mean_N=mean(N, na.rm=T),
+                   sd_N=sd(N),
+                   CI_N=CI(N)[2]-CI(N)[3])
+df_se_prec_lower$causation<-"Precipitation (lower limit)"
+
+df_se<-bind_rows(bind_rows(df_se_temp_upper, df_se_temp_lower), 
+                 bind_rows(df_se_prec_upper, df_se_prec_lower))
+
+table(df_se$causation)
+df_se[which(df_se$causation=="Precipitation (lower limit)"),]
+
+df_se_se<-df_se%>%dplyr::group_by(SSP, da, exposure, causation)%>%
+  dplyr::summarise(N=mean(mean_N),
+                   SD_N=sd(mean_N))
+df_se_se[which(is.na(df_se_se$SD_N)), "SD_N"]<-0
+p<-ggplot(df_se_se)+
+  geom_point(aes(x=da, y=N, color=factor(causation)), position=position_dodge(width=0.4), size=2)+
+  geom_errorbar(aes(x=da, y=N, ymin=N-SD_N, ymax=N+SD_N, group=factor(causation)),
+                width=.2, position=position_dodge(width=0.4), color="grey")+
+  
+  facet_grid(exposure~SSP, scale="free")+
+  theme_bw()+
+  xlab("Dispersal")+
+  ylab("Number of extinction")+
+  labs(color="Causation")
+  #theme(axis.text.x = element_text(angle = -45, vjust = 1, hjust=0))
+p
+ggsave(p, filename="../../Figures/why_extinct/why_extinct_mean_errorbar.png", width=13, height=6)
+
+p<-ggplot(df_se)+
+  geom_boxplot(aes(x=da, y=mean_N, color=factor(causation)))+
+  facet_grid(exposure~SSP, scale="free")+
+  theme_bw()+
+  xlab("Dispersal")+
+  ylab("Number of extinction")+
+  labs(color="Causation")
+  #ylim(0,3)
+  #scale_y_continuous(trans = squish_trans(5, 100, 1))
+
+#theme(axis.text.x = element_text(angle = -45, vjust = 1, hjust=0))
+p
+ggsave(p, filename="../../Figures/why_extinct/why_extinct_boxplot.png", width=13, height=6)
+
