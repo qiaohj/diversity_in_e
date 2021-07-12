@@ -167,7 +167,7 @@ if (T){
         #axis.title.y=element_blank()
       )
     ggsave(p2_insert, filename=sprintf("../../Figures/Combined_Figure/keyspots_extinction_%s_%s.png", 
-                                       SSPi, gsub(",", "", ll)), width=6, height=3)
+                                       SSPi, gsub(",", "", ll)), width=2.5, height=1.5)
     
     p2[[ll]]<-p2_item
   }

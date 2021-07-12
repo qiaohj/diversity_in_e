@@ -65,14 +65,14 @@ for (SSP_i in c(1:length(SSPs))){
 df_final$exposure_label<-ifelse(df_final$exposure==0, " no exposure", "5-year exposure")
 df_final$SSP<-as.character(df_final$SSP)
 p<-ggplot()+
-  geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+  geom_tile(data=mask_p, aes(x=x, y=y), fill="#e5f5f9")+
   #geom_tile(data=df_final%>%dplyr::filter((exposure==5)&(SSP=="SSP119")), aes(x=x, y=y, fill=mean_count))+
   geom_tile(data=df_final, aes(x=x, y=y, fill=mean_count))+
   facet_grid(exposure_label~SSP, scale="free")+
   scale_fill_gradient(low="#e5f5f9", high="#2ca25f")+
   
   
-  labs(fill = "Number of usage")+
+  labs(fill = "Number of uses for dispersal")+
   theme(
     axis.line = element_blank(),
     axis.text.x = element_blank(),
@@ -111,7 +111,7 @@ p<-ggplot(df_final_alt, aes(x=alt, y=mean_count))+geom_point(size=1, color="grey
   geom_smooth(method="lm")+
   facet_grid(exposure_label~SSP, scale="free")+
   xlab("Elevation (m)")+
-  ylab("Number of usage")+
+  ylab("Number of uses for dispersal")+
   theme_bw()
 p
 ggsave(p, filename="../../Figures/density_based_pathway/density_vs_elevation.png", width=13, height=6)
@@ -119,7 +119,7 @@ p<-ggplot(df_final, aes(x=slope, y=mean_count))+geom_point(size=1, color="grey")
   geom_smooth(method="lm")+
   facet_grid(exposure_label~SSP, scale="free")+
   xlab("Slope")+
-  ylab("Number of usage")+
+  ylab("Number of uses for dispersal")+
   theme_bw()
 p
 ggsave(p, filename="../../Figures/density_based_pathway/density_vs_slope.png", width=13, height=6)
@@ -129,10 +129,10 @@ for (SSP_i in c(1:length(SSPs))){
   for (exposure_l in c(0, 5)){
     df_final_item<-df_final[((SSP==SSP_l)&(exposure==exposure_l))]
     p_item<-ggplot()+
-      geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+      geom_tile(data=mask_p, aes(x=x, y=y), fill="#e5f5f9")+
       geom_tile(data=df_final_item, aes(x=x, y=y, fill=mean_count))+
       scale_fill_gradient(low="#e5f5f9", high="#2ca25f")+
-      labs(fill = "Number of usage")+
+      labs(fill = "Number of uses for dispersal")+
       theme(
         axis.line = element_blank(),
         axis.text.x = element_blank(),
@@ -194,14 +194,14 @@ for (yyy in c(2021:2100)){
       facet_grid(SSP~exposure)
   }
   p<-ggplot()+
-    geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+    geom_tile(data=mask_p, aes(x=x, y=y), fill="#e5f5f9")+
     geom_tile(data=df_all_by_year[year==yyy], aes(x=x, y=y, fill=mean_count))+
     scale_fill_gradient(low="#e5f5f9", high="#2ca25f",
                         limits=c(0, 100), oob=squish,
                         breaks=seq(0, 100, by=20),
                         labels=c(as.character(seq(0, 100, by=20)[1:5]), 
                                  sprintf(">100, up to %d", max_count)))+
-    labs(fill = "Number of usage")+
+    labs(fill = "Number of uses for dispersal")+
     ggtitle(yyy)+
     facet_grid(exposure~SSP)+
     theme(

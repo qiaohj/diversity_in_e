@@ -165,6 +165,7 @@ p<-ggplot(cliff_se_all)+
   labs(color="", fill="")+
   scale_color_manual(values=color_da)+
   scale_fill_manual(values=color_da)+
+  scale_y_continuous(breaks=seq(0, 1, 0.2), labels = seq(0, 1, 0.2))+
   theme_bw()
 ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell.pdf"), 
        width=12, height=6)
