@@ -488,4 +488,6 @@ p2
 
 p<-ggpubr::ggarrange(p2, p1, nrow=2)
 ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_birds.png", width=8, height=8)
+ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_birds.pdf", width=8, height=8)
+
 

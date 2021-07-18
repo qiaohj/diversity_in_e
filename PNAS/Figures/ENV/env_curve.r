@@ -8,23 +8,25 @@ if (F){
   GCMs<-c("UKESM1")
   SSPs<-c("SSP119", "SSP245", "SSP585")
   VARs<-c("bio1", "bio5", "bio6", "bio12", "bio13", "bio14")
-  SUBs<-c("mean", "sum", "min", "max")
+  #SUBs<-c("mean", "sum", "min", "max")
   years<-c(1850:2100)
   months<-c(1:12)
-  coms<-expand.grid(GCM=GCMs, SSP=SSPs, VAR=VARs, SUB=SUBs, Y=years, M=months)
-  base<-"../../Raster"
+  coms<-expand.grid(GCM=GCMs, SSP=SSPs, VAR=VARs,Y=years)
+  base<-"/media/huijieqiao/QNAS/Sp_Richness_GCM/Raster/ENV/Bioclim"
   i=1
   df<-NULL
   for (i in c(1:nrow(coms))){
     s<-coms[i,]
-    r_file<-sprintf("%s/%s/%s/%s/%d/%s_%d.tif", base, s$GCM, s$SSP, s$VAR, s$Y, s$SUB, s$M)
+    #/media/huijieqiao/QNAS/Sp_Richness_GCM/Raster/ENV/Bioclim/EC-Earth3-Veg/SSP119/1850
+    r_file<-sprintf("%s/%s/%s/%d/%s_eck4.tif", 
+                    base, s$GCM, s$SSP, s$Y, s$VAR)
     
     if (!file.exists(r_file)){
       next()
     }
     print(r_file)
     r<-raster(r_file)
-    s$v<-mean(values(r), na.rm=T)
+    s$v<-mean(values(r), na.rm=T)/100
     if (is.null(df)){
       df<-s
     }else{
@@ -34,7 +36,7 @@ if (F){
   df$DATE<-as.Date(paste(df$Y, df$M, 1, sep="/"), format="%Y/%m/%d")
   df$Label<-paste(df$GCM, df$SSP)
   
-  saveRDS(df, "../../Objects/mean_env_year.rda")
+  saveRDS(df, "../../Objects/mean_env_year_bioclim.rda")
 }
 source("commonFuns/colors.r")
 source("commonFuns/functions.r")

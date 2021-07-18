@@ -55,36 +55,34 @@ lmp <- function (modelobject) {
 group<-"Mammals"
 df_sp_list<-list()
 for (group in c("Mammals", "Birds")){
-  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
+  if (F){
+    group<-"Birds"
+    df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
+    iucn_bird<-read.csv("../../Data/Dispersal_distance/Birds/HBW-BirdLife_List_of_Birds_v5.csv", head=T, stringsAsFactors = F)
+    iucn_bird<-iucn_bird[, c("Order", "Family.name", "Scientific.name")]
+    iucn_bird<-data.table(iucn_bird)
+    colnames(iucn_bird)<-c("Order", "family", "SP")
+    df_list<-merge(df_list, iucn_bird, by="SP", all.x=T, all.y=F)
+    saveRDS(df_list, sprintf("../../Objects/IUCN_List/%s_df_with_family.rda", group))
+  }
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df_with_family.rda", group))
   df_list$sp<-gsub(" ", "_", df_list$SP)
   #df_list$estimated_disp
-  cols<-c("sp", "estimated_disp")
+  cols<-c("sp", "estimated_disp", "family")
   df_list<-df_list[, ..cols]
   df_sp_list[[group]]<-df_list
 }
 df_sp_list<-rbindlist(df_sp_list)
 df<-merge(df, df_sp_list, by="sp")
+
 df_se<-df%>%dplyr::group_by(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd,
                             nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
                             N_CELL, sp, dispersal, exposure, group)%>%
   dplyr::summarise(mean_extinct_year=mean(extinct_year))
 
 
-fit<-lm(extinct_year~N_CELL, data=df1%>%filter(dispersal==0)) 
-eqn <- lm_eqn(item_g, fit)
-result<-summary(fit)
-r<-sqrt(result$r.squared)
-f <- summary(fit)$fstatistic
-p <- pf(f[1],f[2],f[3],lower.tail=F)
-b<-result$coefficients[1,1]
-a<-result$coefficients[2,1]
+  
 
-
-#p<-ggscatter(item_g, x = "temperature", y = "mean_v", add = "reg.line") +
-#  stat_cor(label.x = 3, label.y = 34) +
-#  stat_regline_equation(label.x = 3, label.y = 32)+
-#  labs(x="Temperature", y="N", title=w)+
-#  theme(text = element_text(family = 'STSong'))
 df_se$exposure<-ifelse(df_se$exposure==0, " no exposure", "5-year exposure")
 df_se$da<-ifelse(df_se$dispersal==1, "with dispersal", "no dispersal")
 labels<-c("Distribution range", "Range of temperature", "Range of precipitation")
@@ -149,15 +147,24 @@ df<-NULL
 for (g in c("Birds", "Mammals")){
   print(g)
   nb<-readRDS(sprintf("../../Objects/Species_property/%s_property.rda", g))
-  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", g))
+  df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df_with_family.rda", g))
   df_list$sp<-gsub(" ", "_", df_list$SP)
   #df_list$estimated_disp
-  cols<-c("sp", "estimated_disp")
+  if (g=="Mammals"){
+    colnames(df_list)[8]<-"Order"
+  }
+  cols<-c("sp", "estimated_disp", "family", "Order")
   df_list<-df_list[, ..cols]
   nb<-inner_join(nb, df_list, by="sp")
   nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, 
                          nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
-                         N_CELL, estimated_disp, sp)
+                         N_CELL, estimated_disp, sp, family, Order, 
+                         range_bio1_sd_min, range_bio1_sd_max,
+                         range_bio5_sd_min, range_bio5_sd_max,
+                         range_bio6_sd_min, range_bio6_sd_max,
+                         range_bio12_sd_min, range_bio12_sd_max,
+                         range_bio13_sd_min, range_bio13_sd_max,
+                         range_bio14_sd_min, range_bio14_sd_max)
   
   nb<-as.data.frame(nb)
   full_sp<-expand.grid(GCM=GCMs, SSP=SSPs, sp=unique(nb$sp), dispersal=dispersals, stringsAsFactors = F)
@@ -230,3 +237,203 @@ ggsave(p2, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hi
 pp<-ggarrange(p1, p2, ncol=1, nrow=2)
 ggsave(pp, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_combined.pdf"), width=12, height=6)
 ggsave(pp, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hist_nb_combined.png"), width=12, height=6)
+
+
+df$range_bio1_sd_min<-df$range_bio1_sd_min/100
+df$range_bio1_sd_max<-df$range_bio1_sd_max/100
+df$range_bio5_sd_min<-df$range_bio5_sd_min/100
+df$range_bio5_sd_max<-df$range_bio5_sd_max/100
+df$range_bio6_sd_min<-df$range_bio6_sd_min/100
+df$range_bio6_sd_max<-df$range_bio6_sd_max/100
+df$range_bio12_sd_min<-df$range_bio12_sd_min/100
+df$range_bio12_sd_max<-df$range_bio12_sd_max/100
+df$range_bio13_sd_min<-df$range_bio13_sd_min/100
+df$range_bio13_sd_max<-df$range_bio13_sd_max/100
+df$range_bio14_sd_min<-df$range_bio14_sd_min/100
+df$range_bio14_sd_max<-df$range_bio14_sd_max/100
+
+df$scaled_range_bio1_sd_min<-scale(c(df$range_bio1_sd_min, df$range_bio1_sd_max))[1:nrow(df)]
+df$scaled_range_bio1_sd_max<-scale(c(df$range_bio1_sd_max, df$range_bio1_sd_min))[1:nrow(df)]
+df$scaled_range_bio5_sd_min<-scale(c(df$range_bio5_sd_min, df$range_bio5_sd_max))[1:nrow(df)]
+df$scaled_range_bio5_sd_max<-scale(c(df$range_bio5_sd_max, df$range_bio5_sd_min))[1:nrow(df)]
+df$scaled_range_bio6_sd_min<-scale(c(df$range_bio6_sd_min, df$range_bio6_sd_max))[1:nrow(df)]
+df$scaled_range_bio6_sd_max<-scale(c(df$range_bio6_sd_max, df$range_bio6_sd_min))[1:nrow(df)]
+df$scaled_range_bio12_sd_min<-scale(c(df$range_bio12_sd_min, df$range_bio12_sd_max))[1:nrow(df)]
+df$scaled_range_bio12_sd_max<-scale(c(df$range_bio12_sd_max, df$range_bio12_sd_min))[1:nrow(df)]
+df$scaled_range_bio13_sd_min<-scale(c(df$range_bio13_sd_min, df$range_bio13_sd_max))[1:nrow(df)]
+df$scaled_range_bio13_sd_max<-scale(c(df$range_bio13_sd_max, df$range_bio13_sd_min))[1:nrow(df)]
+df$scaled_range_bio14_sd_min<-scale(c(df$range_bio14_sd_min, df$range_bio14_sd_max))[1:nrow(df)]
+df$scaled_range_bio14_sd_max<-scale(c(df$range_bio14_sd_max, df$range_bio14_sd_min))[1:nrow(df)]
+
+df$scaled_nb_bio1_sd<-df$scaled_range_bio1_sd_max - df$scaled_range_bio1_sd_min
+df$scaled_nb_bio5_sd<-df$scaled_range_bio5_sd_max - df$scaled_range_bio5_sd_min
+df$scaled_nb_bio6_sd<-df$scaled_range_bio6_sd_max - df$scaled_range_bio6_sd_min
+df$scaled_nb_bio12_sd<-df$scaled_range_bio12_sd_max - df$scaled_range_bio12_sd_min
+df$scaled_nb_bio13_sd<-df$scaled_range_bio13_sd_max - df$scaled_range_bio13_sd_min
+df$scaled_nb_bio14_sd<-df$scaled_range_bio14_sd_max - df$scaled_range_bio14_sd_min
+
+
+df$nb_bio1_sd<-df$nb_bio1_sd/100
+df$nb_bio5_sd<-df$nb_bio5_sd/100
+df$nb_bio6_sd<-df$nb_bio6_sd/100
+df$nb_bio12_sd<-df$nb_bio12_sd/100
+df$nb_bio13_sd<-df$nb_bio13_sd/100
+df$nb_bio14_sd<-df$nb_bio14_sd/100
+
+df$N_CELL<-ceiling(df$N_CELL/100)
+df$nb_volume<-df$scaled_nb_bio1_sd*df$scaled_nb_bio5_sd*df$scaled_nb_bio6_sd*
+  df$scaled_nb_bio12_sd*df$scaled_nb_bio13_sd*df$scaled_nb_bio14_sd
+write.csv(df, "../../Figures/raw_result.csv", row.names=F)
+df$is_extinct<-as.factor(df$is_extinct)
+table(df$is_extinct)
+df[is.nan(is_extinct)]
+item<-NULL
+
+library(lme4)
+library(RLRsim)
+ggplot(df_bio12)+
+  geom_histogram(aes(x=range_bio12_sd_min), fill="red")+
+  geom_histogram(aes(x=range_bio12_sd_max), fill="blue")
+cols<-c("sp", "range_bio12_sd_min", "range_bio12_sd_max", "group")
+df_bio12<-unique(df[, ..cols])
+table(df_bio12[range_bio12_sd_min<0]$group)
+all_result<-NULL
+for (SSPx in SSPs){
+  for (GCMx in GCMs){
+    for (dda in unique(df$da)){
+      for (exp in unique(df$exposure)){
+        for (g in unique(df$group)){
+          item<-df[(SSP==SSPx)&(GCM==GCMx)&(da==dda)&(exposure==exp)&(group==g)]
+          item<-item[!is.na(family)]
+
+          m_glmer <- glmer(is_extinct ~ nb_volume+N_CELL+estimated_disp +
+                       (1 | family), data = item, family = binomial)
+          
+          #m_glm_family <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp+family, data = item, family = binomial)
+          m_glm <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp, data = item, family = binomial)
+          
+          ano<-anova(m_glmer, m_glm)
+          
+          summ<-summary(m_glm)
+          #m_glm<-glm(is_extinct~nb_volume+N_CELL+estimated_disp, data=item, family="binomial")
+          result_item<-data.frame(SSP=SSPx, GCM=GCMx, da=dda, exposure=exp, group=g)
+          
+          result_item$aic<-summ$aic
+          result_item$anova_pr<-ano$`Pr(>Chisq)`[2]
+          result_item$anova_Chisq<-ano$Chisq[2]
+          ccc3<-summ$coefficients
+          result_item$Intercept_Estimate<-ccc3[1,1]
+          result_item$Intercept_Std_Error<-ccc3[1,2]
+          result_item$Intercept_z_value<-ccc3[1,3]
+          result_item$Intercept_Pr<-ccc3[1,4]
+          
+          result_item$nb_volume_Estimate<-ccc3[2,1]
+          result_item$nb_volume_Std_Error<-ccc3[2,2]
+          result_item$nb_volume_z_value<-ccc3[2,3]
+          result_item$nb_volume_Pr<-ccc3[2,4]
+          
+          result_item$N_CELL_Estimate<-ccc3[3,1]
+          result_item$N_CELL_Std_Error<-ccc3[3,2]
+          result_item$N_CELL_z_value<-ccc3[3,3]
+          result_item$N_CELL_Pr<-ccc3[3,4]
+          
+          result_item$estimated_disp_Estimate<-ccc3[4,1]
+          result_item$estimated_disp_Std_Error<-ccc3[4,2]
+          result_item$estimated_disp_z_value<-ccc3[4,3]
+          result_item$estimated_disp_Pr<-ccc3[4,4]
+          
+          
+          
+          ccc<-summ$coefficients[,4]
+          result_item$p_value_nb_volume<-ccc[2]
+          result_item$p_value_nb_volume_label<-""
+          if (result_item$p_value_nb_volume<0.05){
+            result_item$p_value_nb_volume_label<-"p<0.05*"
+          }
+          if (result_item$p_value_nb_volume<0.01){
+            result_item$p_value_nb_volume_label<-"p<0.01**"
+          }
+          if (result_item$p_value_nb_volume<0.001){
+            result_item$p_value_nb_volume_label<-"p<0.001***"
+          }
+          result_item$p_value_N_CELL<-ccc[3]
+          result_item$p_value_N_CELL_label<-""
+          if (result_item$p_value_N_CELL<0.05){
+            result_item$p_value_N_CELL_label<-"p<0.05*"
+          }
+          if (result_item$p_value_N_CELL<0.01){
+            result_item$p_value_N_CELL_label<-"p<0.01**"
+          }
+          if (result_item$p_value_N_CELL<0.001){
+            result_item$p_value_N_CELL_label<-"p<0.001***"
+          }
+          result_item$p_value_estimated_disp<-ccc[4]
+          result_item$p_value_estimated_disp_label<-""
+          if (result_item$p_value_estimated_disp<0.05){
+            result_item$p_value_estimated_disp_label<-"p<0.05*"
+          }
+          if (result_item$p_value_estimated_disp<0.01){
+            result_item$p_value_estimated_disp_label<-"p<0.01**"
+          }
+          if (result_item$p_value_estimated_disp<0.001){
+            result_item$p_value_estimated_disp_label<-"p<0.001***"
+          }
+          
+          all_result<-bind_dplyr(all_result, result_item)
+          #for m_glmer
+          if (F){
+            table(item$family)
+            hist(item$nb_volume)
+            hist(item$estimated_disp)
+            
+            summ<-summary(m_glmer)
+            #m_glm<-glm(is_extinct~nb_volume+N_CELL+estimated_disp, data=item, family="binomial")
+            result_item<-data.frame(SSP=SSPx, GCM=GCMx, da=dda, exposure=exp, group=g)
+            
+            result_item$aic<-summ$AICtab[1]
+            result_item$bic<-summ$AICtab[2]
+            
+            ccc<-summ$coefficients[,4]
+            result_item$p_value_nb_volume<-ccc[2]
+            result_item$p_value_nb_volume_label<-""
+            if (result_item$p_value_nb_volume<0.05){
+              result_item$p_value_nb_volume_label<-"p<0.05*"
+            }
+            if (result_item$p_value_nb_volume<0.01){
+              result_item$p_value_nb_volume_label<-"p<0.01**"
+            }
+            if (result_item$p_value_nb_volume<0.001){
+              result_item$p_value_nb_volume_label<-"p<0.001***"
+            }
+            result_item$p_value_N_CELL<-ccc[3]
+            result_item$p_value_N_CELL_label<-""
+            if (result_item$p_value_N_CELL<0.05){
+              result_item$p_value_N_CELL_label<-"p<0.05*"
+            }
+            if (result_item$p_value_N_CELL<0.01){
+              result_item$p_value_N_CELL_label<-"p<0.01**"
+            }
+            if (result_item$p_value_N_CELL<0.001){
+              result_item$p_value_N_CELL_label<-"p<0.001***"
+            }
+            result_item$p_value_estimated_disp<-ccc[4]
+            result_item$p_value_estimated_disp_label<-""
+            if (result_item$p_value_estimated_disp<0.05){
+              result_item$p_value_estimated_disp_label<-"p<0.05*"
+            }
+            if (result_item$p_value_estimated_disp<0.01){
+              result_item$p_value_estimated_disp_label<-"p<0.01**"
+            }
+            if (result_item$p_value_estimated_disp<0.001){
+              result_item$p_value_estimated_disp_label<-"p<0.001***"
+            }
+            
+            all_result<-bind_dplyr(all_result, result_item)
+          }
+        }
+      }
+    }
+  }
+}
+
+write.csv(all_result, "../../Figures/NB_hist_combined/p_values.csv", row.names=F)

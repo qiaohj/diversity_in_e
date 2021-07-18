@@ -25,19 +25,56 @@ df_all[which(df_all$range_bio1_sd_max>df_all$bio1_max), "range_bio1_sd_max"]<-
 df_all[which(df_all$range_bio1_sd_min<df_all$bio1_min), "range_bio1_sd_min"]<-
   df_all[which(df_all$range_bio1_sd_min<df_all$bio1_min), "bio1_min"]
 
+df_all[which(df_all$range_bio5_sd_max>df_all$bio5_max), "range_bio5_sd_max"]<-
+  df_all[which(df_all$range_bio5_sd_max>df_all$bio5_max), "bio5_max"]
+
+df_all[which(df_all$range_bio5_sd_min<df_all$bio5_min), "range_bio5_sd_min"]<-
+  df_all[which(df_all$range_bio5_sd_min<df_all$bio5_min), "bio5_min"]
+
+df_all[which(df_all$range_bio6_sd_max>df_all$bio6_max), "range_bio6_sd_max"]<-
+  df_all[which(df_all$range_bio6_sd_max>df_all$bio6_max), "bio6_max"]
+
+df_all[which(df_all$range_bio6_sd_min<df_all$bio6_min), "range_bio6_sd_min"]<-
+  df_all[which(df_all$range_bio6_sd_min<df_all$bio6_min), "bio6_min"]
+
+df_all[which(df_all$range_bio13_sd_max>df_all$bio13_max), "range_bio13_sd_max"]<-
+  df_all[which(df_all$range_bio13_sd_max>df_all$bio13_max), "bio13_max"]
+
+df_all[which(df_all$range_bio13_sd_min<df_all$bio13_min), "range_bio13_sd_min"]<-
+  df_all[which(df_all$range_bio13_sd_min<df_all$bio13_min), "bio13_min"]
+
+df_all[which(df_all$range_bio14_sd_max>df_all$bio14_max), "range_bio14_sd_max"]<-
+  df_all[which(df_all$range_bio14_sd_max>df_all$bio14_max), "bio14_max"]
+
+df_all[which(df_all$range_bio14_sd_min<df_all$bio14_min), "range_bio14_sd_min"]<-
+  df_all[which(df_all$range_bio14_sd_min<df_all$bio14_min), "bio14_min"]
+
 df_all[which(df_all$range_bio12_sd_max>df_all$bio12_max), "range_bio12_sd_max"]<-
   df_all[which(df_all$range_bio12_sd_max>df_all$bio12_max), "bio12_max"]
 
 df_all[which(df_all$range_bio12_sd_min<df_all$bio12_min), "range_bio12_sd_min"]<-
   df_all[which(df_all$range_bio12_sd_min<df_all$bio12_min), "bio12_min"]
-df_all$diff_t_max<-df_all$range_bio1_sd_max-df_all$bio1_max
-df_all$diff_t_min<-df_all$range_bio1_sd_min-df_all$bio1_min
+
+df_all$diff_bio1_max<-df_all$range_bio1_sd_max-df_all$bio1_max
+df_all$diff_bio1_min<-df_all$range_bio1_sd_min-df_all$bio1_min
+df_all$diff_bio5_max<-df_all$range_bio5_sd_max-df_all$bio5_max
+df_all$diff_bio5_min<-df_all$range_bio5_sd_min-df_all$bio5_min
+df_all$diff_bio6_max<-df_all$range_bio6_sd_max-df_all$bio6_max
+df_all$diff_bio6_min<-df_all$range_bio6_sd_min-df_all$bio6_min
+df_all$diff_bio13_max<-df_all$range_bio13_sd_max-df_all$bio13_max
+df_all$diff_bio13_min<-df_all$range_bio13_sd_min-df_all$bio13_min
+df_all$diff_bio14_max<-df_all$range_bio14_sd_max-df_all$bio14_max
+df_all$diff_bio14_min<-df_all$range_bio14_sd_min-df_all$bio14_min
 df_all$diff_bio12_max<-df_all$range_bio12_sd_max-df_all$bio12_max
 df_all$diff_bio12_min<-df_all$range_bio12_sd_min-df_all$bio12_min
-df_all$nb_bio1_sd
+
+logit_1 <- glm(IS_Extinct~st_N_CELL, family = binomial,data = sp_dis_extinct)
+summary(logit_1)
+
 
 df_N_CELL<-df_all%>%select(sp, group, N_CELL)
 df_N_CELL$N_CELL<-df_N_CELL$N_CELL/100
+
 colnames(df_N_CELL)[3]<-"V"
 df_N_CELL$TYPE="Distribution range"
 

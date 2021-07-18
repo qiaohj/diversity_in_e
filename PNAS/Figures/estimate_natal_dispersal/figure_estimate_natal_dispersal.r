@@ -48,12 +48,12 @@ p1<-ggplot(predicted_birds)+
 p1
 
 labels_mammals<-c("max_dis~Diet"= "Max disp ~ Diet",
-                "max_dis~ForStrat"= "Max disp ~ Foraging strategy",
+                "max_dis~ForStrat"= "Max disp ~ Foraging stratum",
                 "max_dis~log_body_mass"= "Max disp ~ Log(body mass)",
-                "max_dis~ForStrat+log_body_mass"= "Max disp ~ Foraging strategy + Log(body mass)",
-                "max_dis~ForStrat+Diet"= "Max disp ~ Foraging strategy + Diet",
+                "max_dis~ForStrat+log_body_mass"= "Max disp ~ Foraging stratum + Log(body mass)",
+                "max_dis~ForStrat+Diet"= "Max disp ~ Foraging stratum + Diet",
                 "max_dis~log_body_mass+Diet"= "Max disp ~ Log(body mass) + Diet",
-                "max_dis~ForStrat+log_body_mass+Diet"= "Max disp ~ Foraging strategy + Log(body mass) + Diet")
+                "max_dis~ForStrat+log_body_mass+Diet"= "Max disp ~ Foraging stratum + Log(body mass) + Diet")
 color7<-rainbow(7)
 colors_mammals<-c("max_dis~Diet"= color7[1],
                   "max_dis~ForStrat"= color7[2],
@@ -107,6 +107,8 @@ p1<-ggplot(evaluated_metrics_birds)+
   theme_bw()
 
 p1
+ggsave(p1, filename="../../Figures/Estimate_Disp/RMSE_birds.png", width=8, height=5)
+ggsave(p1, filename="../../Figures/Estimate_Disp/RMSE_birds.pdf", width=8, height=5)
 
 evaluated_metrics_mammals[which(evaluated_metrics_mammals$RMSE_Full==min(evaluated_metrics_mammals$RMSE_Full)),]
 p2<-ggplot(evaluated_metrics_mammals)+
@@ -120,6 +122,8 @@ p2<-ggplot(evaluated_metrics_mammals)+
   theme_bw()
 
 p2
+ggsave(p2, filename="../../Figures/Estimate_Disp/RMSE_mammals.png", width=10, height=6)
+ggsave(p2, filename="../../Figures/Estimate_Disp/RMSE_mammals.pdf", width=10, height=6)
 
 p<-ggarrange(p1, p2, ncol=1)
 p
@@ -155,6 +159,8 @@ p1<-ggplot(new_df_birds)+
   theme_bw()
 p1
 ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_mig.png", width=8, height=6)
+ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_mig.pdf", width=8, height=6)
+
 
 p1<-ggplot(new_df_birds)+
   geom_boxplot(aes(x=Diet, y=estimated_disp))+
@@ -210,7 +216,11 @@ p2<-ggplot(new_df_mammals)+
   ggtitle("Mammals")+
   theme_bw()
 p2
+ggsave(p2, filename="../../Figures/Estimate_Disp/Predicted_mammals_mig.png", width=8, height=6)
+
 p<-ggarrange(p1, p2, ncol=1)
 p
 
 ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.png", width=8, height=8)
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.pdf", width=8, height=8)
+

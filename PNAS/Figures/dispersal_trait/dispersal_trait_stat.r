@@ -63,6 +63,23 @@ p<-ggplot(df_se_across_GCM)+
         axis.line=element_line())
 p
 ggsave(p, filename = "../../Figures/dispersal_traits/dispersal_stat.png", width=3, height=4)
+SSS<-"SSP119"
+for (SSS in unique(df_se_across_GCM$SSP)){
+  p<-ggplot(df_se_across_GCM%>%dplyr::filter(SSP==SSS))+
+    geom_errorbar(aes(x=exposure, ymin=mean_N/1000-sd_N/1000, ymax=mean_N/1000+sd_N/1000, color=label), width=0.1)+
+    geom_point(aes(x=exposure, y=mean_N/1000, color=label))+
+    facet_wrap(~status, scale="free_y", nrow=2, strip.position="right")+
+    scale_color_manual(values=color_dipsersal_type)+
+    theme_bw()+
+    ylab("Number of species (×1000)")+
+    labs(color="")+
+    xlab("")+
+    theme(legend.position="top",
+          legend.direction = "vertical",
+          axis.line=element_line())
+  p
+  ggsave(p, filename = sprintf("../../Figures/dispersal_traits/dispersal_stat_%s.png", SSS), width=3, height=4)
+}
 hist(df_se_across_GCM$mean_N, col=factor(df_se_across_GCM$status))
 write.table(df_se_across_GCM, "../../Figures/dispersal_traits/dispersal_stat.csv", sep=",", row.names = F)
 ggplot(df_se_across_GCM)+geom_point(aes(x=SSP, y=mean_N, color=factor(status), shape=factor(exposure)))+

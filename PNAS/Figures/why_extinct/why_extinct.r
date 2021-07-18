@@ -13,22 +13,43 @@ df$da<-ifelse(df$dispersal==0, "no dispersal", "with dispersal")
 
 #factor by year
 df_se_temp<-df%>%dplyr::filter((!is_bio1)|(!is_bio5)|(!is_bio6))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_temp$causation<-"Temperature"
 df_se_prec<-df%>%dplyr::filter((!is_bio12)|(!is_bio13)|(!is_bio14))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_prec$causation<-"Precipitation"
 
 df_se<-bind_rows(df_se_prec, df_se_temp)
 
+
 df_se_prec%>%ungroup()%>%dplyr::filter((N>1000))
-p1<-ggplot(df_se)+geom_line(aes(x=extinct_year, y=N, color=causation, linetype=SSP))+
+df_se_2<-df_se%>%dplyr::group_by(SSP, extinct_year, da, exposure, causation)%>%
+  dplyr::summarise(mean_N=mean(N),
+                   sd_N=sd(N))
+df_se_2[which(is.na(df_se_2$sd_N)), "sd_N"]<-0
+df_se_2$ymax<-df_se_2$mean_N+df_se_2$sd_N
+df_se_2$ymin<-df_se_2$mean_N-df_se_2$sd_N
+df_se_2[which(df_se_2$ymin<0), "ymin"]<-0
+p1<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, color=causation, linetype=SSP))+
+  geom_errorbar(aes(x=extinct_year, ymin=ymin, ymax=ymax,
+                    color=causation, group=SSP))+
   scale_color_manual(values=color_causation)+
   facet_grid(exposure~da, scale="free")+
   xlab("Year")+
-  ylab("Number of extinction events")+
+  ylab("Mean number of extinction events")+
+  labs(color="Causation")+
+  scale_y_sqrt(labels=seq(0, 45, by=5)^2, breaks=seq(0, 45, by=5)^2)+
+  theme_bw()
+p1
+ggsave(p1, filename="../../Figures/why_extinct/by_year_with_errorbar.pdf")
+
+p1<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, color=causation, linetype=SSP))+
+  scale_color_manual(values=color_causation)+
+  facet_grid(exposure~da, scale="free")+
+  xlab("Year")+
+  ylab("Mean number of extinction events")+
   labs(color="Causation")+
   scale_y_sqrt(labels=seq(0, 45, by=5)^2, breaks=seq(0, 45, by=5)^2)+
   theme_bw()
@@ -133,43 +154,78 @@ df$da<-ifelse(df$dispersal==0, "no dispersal", "with dispersal")
 
 #factor by year
 df_se_temp_upper<-df%>%dplyr::filter((upper_bio1)|(upper_bio5)|(upper_bio6))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_temp_upper$causation<-"Temperature (upper limit)"
 
 df_se_temp_lower<-df%>%dplyr::filter((lower_bio1)|(lower_bio5)|(lower_bio6))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_temp_lower$causation<-"Temperature (lower limit)"
 
 df_se_prec_upper<-df%>%dplyr::filter((upper_bio12)|(upper_bio13)|(upper_bio14))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_prec_upper$causation<-"Precipitation (upper limit)"
 df_se_prec_lower<-df%>%dplyr::filter((lower_bio12)|(lower_bio13)|(lower_bio14))%>%
-  dplyr::group_by(SSP, extinct_year, da, exposure)%>%
+  dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
   dplyr::summarise(N=n())
 df_se_prec_lower$causation<-"Precipitation (lower limit)"
 
 df_se<-bind_rows(bind_rows(df_se_temp_upper, df_se_temp_lower), 
                  bind_rows(df_se_prec_upper, df_se_prec_lower))
 
-p1<-ggplot(df_se)+geom_line(aes(x=extinct_year, y=N, color=causation, linetype=SSP))+
+df_se_2<-df_se%>%ungroup()%>%dplyr::group_by(SSP, extinct_year, da, exposure, causation)%>%
+  dplyr::summarise(mean_N=mean(N),
+                  sd_N=sd(N))
+df_se_2[which(is.na(df_se_2$sd_N)), "sd_N"]<-0
+df_se_2$ymax<-df_se_2$mean_N+df_se_2$sd_N
+df_se_2$ymin<-df_se_2$mean_N-df_se_2$sd_N
+df_se_2[which(df_se_2$ymin<0), "ymin"]<-0
+
+p1<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, color=causation, linetype=SSP))+
   scale_color_manual(values=color_causation_ul)+
   facet_grid(exposure~da, scale="free")+
   xlab("Year")+
-  ylab("Number of extinction events")+
+  ylab("Mean number of extinction events")+
   labs(color="Causation")+
   scale_y_sqrt(labels=seq(0, 45, by=5)^2, breaks=seq(0, 45, by=5)^2)+
   theme_bw()
 p1
 ggsave(p1, filename="../../Figures/why_extinct/by_year_ul.pdf")
 
-p1_2<-ggplot(df_se)+geom_line(aes(x=extinct_year, y=N, linetype=SSP))+
+p1<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, color=causation, linetype=SSP))+
+  scale_color_manual(values=color_causation_ul)+
+  geom_errorbar(aes(x=extinct_year, ymin=ymin, ymax=ymax,
+                    color=causation, group=SSP))+
+  facet_grid(exposure~da, scale="free")+
+  xlab("Year")+
+  ylab("Mean number of extinction events")+
+  labs(color="Causation")+
+  scale_y_sqrt(labels=seq(0, 45, by=5)^2, breaks=seq(0, 45, by=5)^2)+
+  theme_bw()
+p1
+ggsave(p1, filename="../../Figures/why_extinct/by_year_ul_with_errorbar.pdf")
+
+p1_2<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, linetype=SSP))+
+  #scale_color_manual(values=color_causation_ul)+
+  geom_errorbar(aes(x=extinct_year, ymin=ymin, ymax=ymax,
+                    group=SSP),color="grey")+
+  facet_grid(exposure+causation~da, scale="free")+
+  xlab("Year")+
+  ylab("Mean number of extinction events")+
+  labs(color="Causation")+
+  scale_y_sqrt(labels=seq(0, 45, by=2)^2, breaks=seq(0, 45, by=2)^2)+
+  theme_bw()
+p1_2
+ggsave(p1_2, filename="../../Figures/why_extinct/by_year_ul_splitted_with_errorbar.pdf", width=10, height=15)
+ggsave(p1_2, filename="../../Figures/why_extinct/by_year_ul_splitted_with_errorbar.png", width=10, height=15)
+
+p1_2<-ggplot(df_se_2)+geom_line(aes(x=extinct_year, y=mean_N, linetype=SSP))+
   #scale_color_manual(values=color_causation_ul)+
   facet_grid(exposure+causation~da, scale="free")+
   xlab("Year")+
-  ylab("Number of extinction events")+
+  ylab("Mean number of extinction events")+
   labs(color="Causation")+
   scale_y_sqrt(labels=seq(0, 45, by=2)^2, breaks=seq(0, 45, by=2)^2)+
   theme_bw()

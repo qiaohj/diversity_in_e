@@ -111,10 +111,11 @@ p2<-ggplot()+
   
   xlab("Year")+
   scale_linetype_manual(values=linetype_label)+
-  labs(linetype="")+
+  scale_linetype_manual(values=linetype_label)+
+  labs(linetype="", color="", fill="")+
   theme_bw()+
-  theme(legend.position = "bottom")
-  #theme(legend.position = "bottom", legend.box="vertical")
+  #theme(legend.position = "bottom")
+  theme(legend.position = "bottom", legend.box="vertical")
 p2
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year.pdf", width=10, height=6)
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year.png", width=10, height=6)
@@ -151,10 +152,10 @@ p2<-ggplot()+
   
   xlab("Year")+
   scale_linetype_manual(values=linetype_label)+
-  labs(linetype="")+
+  labs(linetype="", color="", fill="")+
   theme_bw()+
   theme(legend.position = "bottom")
-#theme(legend.position = "bottom", legend.box="vertical")
+  #theme(legend.position = "bottom", legend.box="vertical")
 p2
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.pdf", width=10, height=6)
 ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.png", width=10, height=6)

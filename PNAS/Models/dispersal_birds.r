@@ -80,7 +80,7 @@ if (is.na(dispersal)){
 
 if (F){
   bird_full_sum_area<-bird_full[, .(sum_are=sum(Shape_Area)), 
-                                by=list(SCINAME, HWI, log_body_mass, Diet, Migration_3, estimated_disp)]
+                                by=list(SCINAME, HWI, log_body_mass, Diet, Migration_3, estimated_disp, family)]
   i=1
   final_df<-NULL
   for (i in 1:length(bird_full_sum_area$SCINAME)) {
@@ -93,7 +93,7 @@ if (F){
       next()
     }
     N_file<-length(list.files(target_folder))
-    if (N_file==41){
+    if (N_file==42){
       item<-bird_full_sum_area[i,]
       
       fit<-readRDS(fit_str)

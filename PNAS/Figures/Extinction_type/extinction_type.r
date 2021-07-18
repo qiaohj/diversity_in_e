@@ -97,7 +97,15 @@ df_sp_list$sp<-gsub(" ", "_", df_sp_list$SP)
 
 
 result<-readRDS("../../Objects/Extinction_type/Extinction_type.rda")
-result<-result%>%dplyr::filter(sp %in% df_sp_list$sp)
+#result<-result%>%dplyr::filter(sp %in% df_sp_list$sp)
+result_count_y_year<-result%>%dplyr::group_by(type, dispersal, exposure, SSP, GCM, extinct_year)%>%
+  dplyr::summarise(N=n())
+result_count_y_year<-inner_join(result_count_y_year, result_count_extinct, by=c("dispersal", "exposure", "SSP", "GCM"))
+result_count_y_year$proportion<-result_count_y_year$N/result_count_y_year$N_all_extinction
+ggplot(result_count_y_year)+geom_point(aes(x=extinct_year, y=N, color=SSP, shape=GCM))+
+  facet_grid(dispersal+type~exposure)
+
+
 result_count<-result%>%dplyr::group_by(type, dispersal, exposure, SSP, GCM)%>%
   dplyr::summarise(N=n())
 
@@ -106,6 +114,11 @@ result_count_extinct<-result%>%dplyr::group_by(dispersal, exposure, SSP, GCM)%>%
 
 result_count<-inner_join(result_count, result_count_extinct, by=c("dispersal", "exposure", "SSP", "GCM"))
 result_count$proportion<-result_count$N/result_count$N_all_extinction
+
+ggplot(result_count)+geom_point(aes(x=SSP, y=N, color=GCM))+
+  facet_grid(dispersal~exposure)
+  
+View(result_count%>%dplyr::filter((dispersal==1)&exposure==5))
 result_count_se<-result_count%>%dplyr::group_by(type, dispersal, exposure, SSP)%>%
   dplyr::summarise(mean_N=mean(N),
                    sd_N=sd(N),
@@ -116,6 +129,9 @@ result_count_se$dispersal<-ifelse(result_count_se$dispersal==0, "no dispersal", 
 result_count_se$exposure<-ifelse(result_count_se$exposure==0, " no exposure", "5-year exposure")
 result_count_se$label<-sprintf("%.1f%% ± %.1f%%", result_count_se$mean_proportion*100,
                                result_count_se$sd_proportion*100)
+result_count_se$label2<-sprintf("%.1f ± %.1f", result_count_se$mean_N,
+                               result_count_se$sd_N)
+
 write.table(result_count_se, "../../Objects/Extinction_type/Extinction_type.csv", row.names = F, sep=",")
 result_unreachable<-result%>%filter((type=="Unreachable")&(dispersal==1))%>%
   dplyr::group_by(SSP, dispersal)%>%

@@ -56,8 +56,9 @@ for (SSP_i in c(1:length(SSPs))){
       df_all[[GCM]]<-df
     }
     df_all<-rbindlist(df_all)
-    df_all_all_year<-df_all[, .(mean_count=mean(count)), by=list(x, y, mask_100km, SSP, exposure)]
+    df_all_all_year<-df_all[, .(count=sum(count)), by=list(x, y, mask_100km, SSP, exposure, GCM)]
     df_all_all_year<-df_all_all_year[mask_100km %in% mask_p$mask_100km]
+    df_all_all_year<-df_all_all_year[, .(mean_count=mean(count)), by=list(x, y, mask_100km, SSP, exposure)]
     df_all_all_year$SSP<-SSP
     df_final<-bind(df_final, df_all_all_year)
   }

@@ -38,6 +38,7 @@ if (T){
   cord.dec = SpatialPoints(keyspots[, c("lon", "lat")], proj4string=CRS("+proj=longlat"))
   cord.eck4 <- spTransform(cord.dec, crs(mask))
   plot(mask)
+  ppp<-data.frame(rasterToPoints(mask))
   plot(cord.eck4, add=T)
   keyspots$x<-cord.eck4@coords[,1]
   keyspots$y<-cord.eck4@coords[,2]
@@ -99,10 +100,18 @@ if (T){
   n_ext_final_with_keyspots<-left_join(n_ext_final, 
                                        mask_p_sp_df[, c("mask_100km", "keysport")], 
                                        by="mask_100km")
+  
+  n_ext_final_with_keyspotsxxx<-full_join(n_ext_final, 
+                                       mask_p_sp_df[, c("mask_100km", "keysport")], 
+                                       by="mask_100km")
+  table(n_ext_final_with_keyspotsxxx$exposure, n_ext_final_with_keyspotsxxx$dispersal)
+  dim(mask_p_sp_df)
   N_keys<-unique(n_ext_final_with_keyspots$keysport)
   N_keys<-N_keys[!is.na(N_keys)]
   N_keys<-as.character(N_keys)
   table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure)
+  table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure, n_ext_final_with_keyspots$keysport)
+  
   p2<-list()
   ll<- unique(n_ext_final_with_keyspots$label)[1]
   for (ll in unique(n_ext_final_with_keyspots$label)){

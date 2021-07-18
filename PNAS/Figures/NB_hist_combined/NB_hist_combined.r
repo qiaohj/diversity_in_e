@@ -38,6 +38,20 @@ disp_dist_hist<-disp_dist_hist+theme(axis.title.x = element_blank(),
 
 list_p<-list(nb_range_size, nb_range_size_hist, nb_temp, nb_temp_hist, 
              nb_prec, nb_prec_hist, disp_dist, disp_dist_hist)
+
+ggsave(nb_range_size, filename="../../Figures/NB_hist_combined/nb_range_size.pdf", width=10, height=3)
+ggsave(nb_temp, filename="../../Figures/NB_hist_combined/nb_temp.pdf", width=10, height=3)
+ggsave(nb_prec, filename="../../Figures/NB_hist_combined/nb_prec.pdf", width=10, height=3)
+ggsave(disp_dist, filename="../../Figures/NB_hist_combined/disp_dist.pdf", width=10, height=3)
+
+ggsave(nb_range_size_hist, filename="../../Figures/NB_hist_combined/nb_range_size_hist.pdf", width=4, height=3)
+ggsave(nb_temp_hist, filename="../../Figures/NB_hist_combined/nb_temp_hist.pdf", width=4, height=3)
+ggsave(nb_prec_hist, filename="../../Figures/NB_hist_combined/nb_prec_hist.pdf", width=4, height=3)
+ggsave(disp_dist_hist, filename="../../Figures/NB_hist_combined/disp_dist_hist.pdf", width=4, height=3)
+
+
+
+
 pp<-ggarrange(plotlist=list_p, nrow=4, ncol=2, widths = c(2.5,1),
           common.legend = T, legend.grob = legends, legend="right")
 ggsave(pp, filename="../../Figures/NB_hist_combined/NB_hist_combined.png", width=15, height=12)

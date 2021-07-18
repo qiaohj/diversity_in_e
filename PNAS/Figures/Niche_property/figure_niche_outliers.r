@@ -62,6 +62,7 @@ df_all<-df_all[(!is.infinite(bio1_max))&
 df_all$scaled_bio1_max<-scale(c(df_all$bio1_max, df_all$bio1_min, 
                                  df_all$range_bio1_sd_max, 
                                 df_all$range_bio1_sd_min))[1:length(df_all$bio1_max)]
+
 df_all$scaled_bio1_min<-scale(c(df_all$bio1_min, df_all$bio1_max, 
                                  df_all$range_TEMP_sd_max, df_all$range_TEMP_sd_min))[1:length(df_all$bio1_max)]
 df_all$scaled_range_bio1_sd_max<-scale(c(df_all$range_bio1_sd_max, df_all$bio1_max, df_all$bio1_min, 

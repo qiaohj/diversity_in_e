@@ -6,6 +6,8 @@ library(data.table)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(pROC)
+
 
 rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
@@ -253,6 +255,12 @@ saveRDS(p, "../../Figures/NB_hist_combined/nb_range_size.rda")
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.pdf"), width=12, height=6)
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.png"), width=12, height=6)
 
+table(sp_dis_extinct$N_type)
+sp_dis_extinct$IS_Extinct<-as.factor(ifelse(sp_dis_extinct$N_type=="EXTINCT", "EXTINCT", "EXTANT"))
+
+
+
+roc(IS_Extinct~logit_1$fitted.values, data = sp_dis_extinct, plot = TRUE, main = "ROC CURVE", col= "blue")
 
 
 for (g in c("Birds", "Mammals")){
@@ -275,3 +283,10 @@ for (g in c("Birds", "Mammals")){
   
 }
 
+
+
+sp_dis_extinct_df<-data.table(sp_dis_extinct)
+sp_dis_extinct_df[sp=="Abeillia_abeillei"]
+
+logit_1 <- glm(IS_Extinct~st_N_CELL, family = binomial,data = sp_dis_extinct)
+summary(logit_1)

@@ -51,7 +51,8 @@ mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), by="binomial"]
 mammal_full_sum_area<-mammal_full_sum_area[order(-1 * sum_are),]
 if (F){
   mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), 
-                                    by=list(binomial, ForStrat, log_body_mass, Diet, estimated_disp)]
+                                    by=list(binomial, ForStrat, log_body_mass, 
+                                            Diet, estimated_disp, family, class, order_)]
   i=1
   final_df<-NULL
   for (i in 1:length(mammal_full_sum_area$binomial)) {
@@ -65,7 +66,7 @@ if (F){
       next()
     }
     N_file<-length(list.files(target_folder))
-    if (N_file==41){
+    if (N_file==42){
       item<-mammal_full_sum_area[i,]
       
       fit<-readRDS(fit_str)
@@ -79,7 +80,7 @@ if (F){
       }
     }
   }
-  saveRDS(final_df, "../../Objects/IUCN_List/Mammals_df.rda")
+  saveRDS(final_df, "../../Objects/IUCN_List/Mammals_df_with_family.rda")
   
 }
 bi<-mammal_full_sum_area[mammal_full_sum_area$sum_are<=1.5*min(mammal_full_sum_area$sum_are)]$binomial[1]
