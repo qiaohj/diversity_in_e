@@ -127,10 +127,11 @@ table(model_df_mammals$sp)
 table(model_df_mammals$ForStrat.Value)
 table(model_df_mammals$diet_type)
 
-cols<-c("sp", "max_dis", "ForStrat.Value", "diet_type", "log_body_mass")
+cols<-c("sp", "max_dis", "ForStrat.Value", "diet_type", "log_body_mass", "MSWFamilyLatin")
 model_df_mammals<-model_df_mammals[, ..cols]
-colnames(model_df_mammals)<-c("sp", "max_dis", "ForStrat", "Diet", "log_body_mass")
+colnames(model_df_mammals)<-c("sp", "max_dis", "ForStrat", "Diet", "log_body_mass", "Family")
 model_df_mammals<-unique(model_df_mammals)
+saveRDS(model_df_mammals, "../../Data/Dispersal_distance/mammal.rda")
 formulas<-c("max_dis~Diet",
             "max_dis~ForStrat",
             "max_dis~log_body_mass",

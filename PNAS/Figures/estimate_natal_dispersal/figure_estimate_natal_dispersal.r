@@ -1,6 +1,7 @@
 
 library(ggplot2)
 library(ggpubr)
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 predicted_birds<-readRDS("../../Objects/estimate_disp_dist/models/predicted_birds.rda")
 predicted_mammals<-readRDS("../../Objects/estimate_disp_dist/models/predicted_mammals.rda")
 
@@ -223,4 +224,37 @@ p
 
 ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.png", width=8, height=8)
 ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.pdf", width=8, height=8)
+
+
+
+cor_v<-cor(predicted_birds[(model=="RF")&(formulas=="max_dis~HWI+log_body_mass+Diet")]$max_dis,
+           predicted_birds[(model=="RF")&(formulas=="max_dis~HWI+log_body_mass+Diet")]$pred)
+
+p1<-ggplot(predicted_birds[(model=="RF")&(formulas=="max_dis~HWI+log_body_mass+Diet")])+
+  geom_smooth(aes(x=max_dis, y=pred), method=lm, alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  ggtitle(sprintf("Birds, cor=%.2f", cor_v))+
+  theme_bw()
+p1
+
+cor_v<-cor(predicted_mammals[(model=="RF")&(formulas=="max_dis~log_body_mass+Diet")]$max_dis,
+           predicted_mammals[(model=="RF")&(formulas=="max_dis~log_body_mass+Diet")]$pred)
+
+p2<-ggplot(predicted_mammals[(model=="RF")&(formulas=="max_dis~log_body_mass+Diet")])+
+  geom_smooth(aes(x=max_dis, y=pred), method=lm, alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  ggtitle(sprintf("Mammals, cor=%.2f", cor_v))+
+  theme_bw()
+p2
+
+p<-ggarrange(p1, p2, ncol=2)
+p
+
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_vs_emperical.png", width=10, height=4)
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_vs_emperical.pdf", width=10, height=4)
+
 

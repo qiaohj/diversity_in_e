@@ -7,7 +7,7 @@ library(data.table)
 library(sf)
 library(fasterize)
 library(rmapshaper)
-
+ 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 setDTthreads(3)
 print(sprintf("Current core number is %d", getDTthreads()))

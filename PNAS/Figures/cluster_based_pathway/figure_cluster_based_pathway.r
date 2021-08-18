@@ -14,7 +14,7 @@ source("commonFuns/functions.r")
 
 mask<-raster("../../Raster/mask_10km.tif")
 mask_p<-data.frame(rasterToPoints(mask))
-
+ 
 p_bak<-ggplot() + 
   geom_tile(data = mask_p, aes(x = x, y = y), fill="grey50", alpha=0.2)+
   map_theme

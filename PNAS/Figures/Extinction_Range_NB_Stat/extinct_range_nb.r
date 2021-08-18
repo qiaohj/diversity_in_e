@@ -297,20 +297,41 @@ ggplot(df_bio12)+
 cols<-c("sp", "range_bio12_sd_min", "range_bio12_sd_max", "group")
 df_bio12<-unique(df[, ..cols])
 table(df_bio12[range_bio12_sd_min<0]$group)
+
+
+mean_disp_dist<-readRDS("../../Objects/Dispersal_distances/all_mean_disp_dist.rda")
+mean_disp_dist$exposure<-ifelse(mean_disp_dist$exposure==0, " no exposure", "5-year exposure")
+colnames(mean_disp_dist)[1]<-"sp"
+mean_disp_dist$sp<-gsub(" ", "_", mean_disp_dist$sp)
+mean_disp_dist[sp=="Abditomys_latidens"]
+df_with_mean<-merge(df, mean_disp_dist, by=c("sp", "SSP", "GCM", "exposure", "group"))
+df_with_mean<-df_with_mean[mean_dist!=estimated_disp]
+df_with_mean$mean_dist<-df_with_mean$mean_dist/1000
+df_with_mean$scaled_nb_volume<-scale(df_with_mean$nb_volume)
+df_with_mean$scaled_mean_dist<-scale(df_with_mean$mean_dist)*-1
+df_with_mean$scaled_estimated_disp<-scale(df_with_mean$estimated_disp)
+df_with_mean$scaled_N_CELL<-scale(df_with_mean$N_CELL)
 all_result<-NULL
 for (SSPx in SSPs){
   for (GCMx in GCMs){
     for (dda in unique(df$da)){
       for (exp in unique(df$exposure)){
         for (g in unique(df$group)){
-          item<-df[(SSP==SSPx)&(GCM==GCMx)&(da==dda)&(exposure==exp)&(group==g)]
+          item<-df_with_mean[(SSP==SSPx)&(GCM==GCMx)&(da==dda)&(exposure==exp)&(group==g)]
           item<-item[!is.na(family)]
 
-          m_glmer <- glmer(is_extinct ~ nb_volume+N_CELL+estimated_disp +
-                       (1 | family), data = item, family = binomial)
+          #m_glmer <- glmer(is_extinct ~ nb_volume+N_CELL+estimated_disp +
+          #             (1 | family), data = item, family = binomial)
+          #m_glmer <- glmer(is_extinct ~ nb_volume+N_CELL+estimated_disp+mean_dist+
+          #                                (1 | family), data = item, family = binomial)
+          m_glmer <- glmer(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp+scaled_mean_dist+
+                             (1 | family), data = item, family = binomial)
           
-          #m_glm_family <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp+family, data = item, family = binomial)
-          m_glm <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp, data = item, family = binomial)
+          #m_glm <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp, data = item, family = binomial)
+          #m_glm <- glm(is_extinct ~ nb_volume+N_CELL+estimated_disp+mean_dist, data = item, family = binomial)
+          m_glm <- glm(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp+scaled_mean_dist, 
+                       data = item, family = binomial)
+          #logistic.display(m_glm)
           
           ano<-anova(m_glmer, m_glm)
           
@@ -342,6 +363,10 @@ for (SSPx in SSPs){
           result_item$estimated_disp_z_value<-ccc3[4,3]
           result_item$estimated_disp_Pr<-ccc3[4,4]
           
+          result_item$mean_disp_Estimate<-ccc3[5,1]
+          result_item$mean_disp_Std_Error<-ccc3[5,2]
+          result_item$mean_disp_z_value<-ccc3[5,3]
+          result_item$mean_disp_Pr<-ccc3[5,4]
           
           
           ccc<-summ$coefficients[,4]
@@ -377,6 +402,18 @@ for (SSPx in SSPs){
           }
           if (result_item$p_value_estimated_disp<0.001){
             result_item$p_value_estimated_disp_label<-"p<0.001***"
+          }
+          
+          result_item$p_value_mean_disp<-ccc[5]
+          result_item$p_value_mean_disp_label<-""
+          if (result_item$p_value_mean_disp<0.05){
+            result_item$p_value_mean_disp_label<-"p<0.05*"
+          }
+          if (result_item$p_value_mean_disp<0.01){
+            result_item$p_value_mean_disp_label<-"p<0.01**"
+          }
+          if (result_item$p_value_mean_disp<0.001){
+            result_item$p_value_mean_disp_label<-"p<0.001***"
           }
           
           all_result<-bind_dplyr(all_result, result_item)
@@ -436,4 +473,45 @@ for (SSPx in SSPs){
   }
 }
 
-write.csv(all_result, "../../Figures/NB_hist_combined/p_values.csv", row.names=F)
+#write.csv(all_result, "../../Figures/NB_hist_combined/p_values.csv", row.names=F)
+#write.csv(all_result, "../../Figures/NB_hist_combined/p_values_with_mean_disp_dist.csv", row.names=F)
+write.csv(all_result, "../../Figures/NB_hist_combined/p_values_with_scaled_mean_disp_dist.csv", row.names=F)
+
+all_result_raw<-read.csv("../../Figures/NB_hist_combined/p_values_with_mean_disp_dist.csv")
+all_result_raw<-data.table(all_result_raw)
+all_result_raw<-all_result_raw[da=="with dispersal"]
+all_result_raw<-all_result_raw[exposure==" no exposure"]
+
+
+all_result<-read.csv("../../Figures/NB_hist_combined/p_values_with_scaled_mean_disp_dist.csv")
+all_result<-data.table(all_result)
+all_result<-all_result[da=="with dispersal"]
+all_result<-all_result[exposure==" no exposure"]
+
+vars<-c("nb_volume", "N_CELL", "estimated_disp", "mean_disp")
+df_g<-list()
+v<-vars[1]
+for (v in vars){
+  cols<-c("SSP", "GCM", "da", "exposure", "group", "aic", "anova_pr", "anova_Chisq", 
+          "Intercept_Estimate", "Intercept_Std_Error", "Intercept_z_value" , "Intercept_Pr",                
+          sprintf("%s_Estimate", v), sprintf("%s_Std_Error", v), sprintf("%s_z_value", v),
+          sprintf("%s_Pr", v), sprintf("p_value_%s", v), sprintf("p_value_%s_label", v))
+  item<-all_result[, ..cols]
+  colnames(item)<-c("SSP", "GCM", "da", "exposure", "group", "aic", "anova_pr", "anova_Chisq", 
+                    "Intercept_Estimate", "Intercept_Std_Error", "Intercept_z_value" , "Intercept_Pr",                
+                    sprintf("%s_Estimate", "v"), sprintf("%s_Std_Error", "v"), sprintf("%s_z_value", "v"),
+                    sprintf("%s_Pr", "v"), sprintf("p_value_%s", "v"), sprintf("p_value_%s_label", "v"))
+  item$predictor<-v
+  df_g[[v]]<-item
+}
+df_g<-rbindlist(df_g)
+
+p<-ggplot(df_g)+
+  geom_errorbar(data=df_g, aes(x=GCM, ymin=v_Estimate-v_Std_Error, 
+                               ymax=v_Estimate+v_Std_Error, color=predictor), width=0.1)+
+  geom_point(data=df_g, aes(x=GCM, y=v_Estimate, color=predictor, 
+                            shape=factor(p_value_v_label)), size=3)+
+  
+  facet_grid(SSP~group, scale="free")+theme_bw()
+p
+ggsave(p, filename="../../Figures/NB_hist_combined/Estimate.pdf")

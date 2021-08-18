@@ -114,7 +114,7 @@ length(unique(df_with_family$sp))
 df_with_family<-data.table(df_with_family)
 
 df_with_family_table<-merge(df_with_family, birds_trait, by.x="sp", by.y="iucn_name", all.x=T, all.y=F)
-write.csv(df_with_family_table, "../../Data/Dispersal_distance/bird.csv")
+
 
 df_with_family<-df_with_family[, .(max_dis = max(max_dis)), 
                                by=list(sp, Order, Family.name)]
@@ -122,6 +122,7 @@ df_with_family<-merge(df_with_family, birds_trait, by.x="sp", by.y="iucn_name", 
 df_with_family<-df_with_family[!is.na(df_with_family$HWI)]
 
 df_with_family$Diet<-as.factor(df_with_family$Diet)
+write.csv(df_with_family, "../../Data/Dispersal_distance/bird.csv")
 
 formulas<-c("max_dis~Diet",
             "max_dis~HWI",

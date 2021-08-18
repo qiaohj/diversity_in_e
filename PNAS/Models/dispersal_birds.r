@@ -37,12 +37,14 @@ is_edge<-function(index, all_index, xsize){
   }
 }
 get_disp_dist<-function(n, max_disp){
-  disp_seed<-rexp(n = n, rate = 0.1)
-  disp_seed/max(disp_seed) * max_disp
+  m<-ifelse(n<100, 100, n)
+  disp_seed<-rexp(n = m, rate = 0.1)
+  v<-disp_seed/max(disp_seed) * max_disp
+  v[sample(m, n)]
 }
 
 test<-100
-y<-get_disp_dist(1000, 100)
+get_disp_dist(1, 100)
 hist(y)
 saveRDS(y, "../../Figures/exponential_distribution/data.rda")
 
