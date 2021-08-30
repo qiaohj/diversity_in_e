@@ -63,7 +63,7 @@ env_se_mean<-env_se%>%dplyr::group_by(SSP, VAR)%>%
 
 #type                          direction mean_speed sd_speed
 #<chr>                             <dbl>      <dbl>    <dbl>
-#  1 Maximum Monthly Precipitation        -1    0.00651  0.00422
+#1 Maximum Monthly Precipitation        -1    0.00651  0.00422
 #2 Maximum Monthly Precipitation         1    0.00561  0.00271
 #3 Maximum Monthly Temperature          -1    0.0302   0.0228 
 #4 Maximum Monthly Temperature           1    0.0202   0.00956

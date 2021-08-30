@@ -83,7 +83,7 @@ df_se<-df%>%dplyr::group_by(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd,
 
   
 
-df_se$exposure<-ifelse(df_se$exposure==0, " no exposure", "5-year exposure")
+df_se$exposure<-ifelse(df_se$exposure==0, " no climate reslience", "climate reslience")
 df_se$da<-ifelse(df_se$dispersal==1, "with dispersal", "no dispersal")
 labels<-c("Distribution range", "Range of temperature", "Range of precipitation")
 vars<-c("N_CELL", "nb_bio1_sd", "nb_bio12_sd")
@@ -185,7 +185,7 @@ for (g in c("Birds", "Mammals")){
 
 
 df$is_extinct<-ifelse(is.na(df$extinct_year), "NO", "YES")
-df$exposure<-ifelse(df$exposure==0, " no exposure", "5-year exposure")
+df$exposure<-ifelse(df$exposure==0, " no climate reslience", "climate reslience")
 df$da<-ifelse(df$dispersal==1, "with dispersal", "no dispersal")
 df$Label<-paste(df$SSP, df$da)
 p1<-ggplot(df)+
@@ -300,7 +300,7 @@ table(df_bio12[range_bio12_sd_min<0]$group)
 
 
 mean_disp_dist<-readRDS("../../Objects/Dispersal_distances/all_mean_disp_dist.rda")
-mean_disp_dist$exposure<-ifelse(mean_disp_dist$exposure==0, " no exposure", "5-year exposure")
+mean_disp_dist$exposure<-ifelse(mean_disp_dist$exposure==0, " no climate reslience", "climate reslience")
 colnames(mean_disp_dist)[1]<-"sp"
 mean_disp_dist$sp<-gsub(" ", "_", mean_disp_dist$sp)
 mean_disp_dist[sp=="Abditomys_latidens"]
@@ -480,13 +480,13 @@ write.csv(all_result, "../../Figures/NB_hist_combined/p_values_with_scaled_mean_
 all_result_raw<-read.csv("../../Figures/NB_hist_combined/p_values_with_mean_disp_dist.csv")
 all_result_raw<-data.table(all_result_raw)
 all_result_raw<-all_result_raw[da=="with dispersal"]
-all_result_raw<-all_result_raw[exposure==" no exposure"]
+all_result_raw<-all_result_raw[exposure==" no climate reslience"]
 
 
 all_result<-read.csv("../../Figures/NB_hist_combined/p_values_with_scaled_mean_disp_dist.csv")
 all_result<-data.table(all_result)
 all_result<-all_result[da=="with dispersal"]
-all_result<-all_result[exposure==" no exposure"]
+all_result<-all_result[exposure==" no climate reslience"]
 
 vars<-c("nb_volume", "N_CELL", "estimated_disp", "mean_disp")
 df_g<-list()

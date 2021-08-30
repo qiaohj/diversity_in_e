@@ -122,20 +122,20 @@ for (exposure in c(0, 5)){
   sp_dis_all_se$persentile<-sp_dis_all_se$N_SP_EXTINCT/sp_dis_all_se$N_SP
   
   if (exposure==0){
-    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no exposure)", sep="")
-    sp_dis_all_sub_N$exposure<-" no exposure"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (no exposure)", sep="")
-    sp_dis_all_sub_1$exposure<-" no exposure"
-    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (no exposure)", sep="")
-    sp_dis_all_se$exposure<-" no exposure"
+    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no climate reslience)", sep="")
+    sp_dis_all_sub_N$exposure<-" no climate reslience"
+    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (no climate reslience)", sep="")
+    sp_dis_all_sub_1$exposure<-" no climate reslience"
+    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (no climate reslience)", sep="")
+    sp_dis_all_se$exposure<-" no climate reslience"
     
   }else{
-    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (5-year exposure)", sep="")
-    sp_dis_all_sub_N$exposure<-"5-year exposure"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (5-year exposure)", sep="")
-    sp_dis_all_sub_1$exposure<-"5-year exposure"
-    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (5-year exposure)", sep="")
-    sp_dis_all_se$exposure<-"5-year exposure"
+    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (climate resilience)", sep="")
+    sp_dis_all_sub_N$exposure<-"climate resilience"
+    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (climate resilience)", sep="")
+    sp_dis_all_sub_1$exposure<-"climate resilience"
+    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (climate resilience)", sep="")
+    sp_dis_all_se$exposure<-"climate resilience"
   }
   sp_dis_extinct<-bind_dplyr(sp_dis_extinct, sp_dis_all_sub_1)
   sp_dis_all_sub_N_all<-bind_dplyr(sp_dis_all_sub_N_all, sp_dis_all_sub_N)
@@ -233,6 +233,44 @@ p
 
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction.pdf"), width=10, height=6)
 ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction.png"), width=10, height=6)
+
+sp_mean_2<-sp_mean%>%dplyr::filter(N_type=="EXTINCT")
+p<-ggplot()+
+  geom_bar(data=sp_mean_2%>%dplyr::filter(M==0), 
+           stat="identity", position="stack", 
+           aes(y=persentile_MEAN, x=x_label-0.23, fill=factor(M), group=N_type), width=0.45, color="grey")+
+  geom_bar(data=sp_mean_2%>%dplyr::filter(M==1), 
+           stat="identity", position="stack", 
+           aes(y=persentile_MEAN, x=x_label+0.23, fill=factor(M), group=N_type), width=0.45, color="grey")+
+  geom_errorbar(data=sp_mean_2%>%dplyr::filter(M==0), 
+                position=position_dodge(0.1), width=0.1,
+                aes(ymin=persentile_MEAN2-persentile_SD, 
+                    ymax=persentile_MEAN2+persentile_SD,
+                    y=persentile_MEAN2, x=x_label-0.24,
+                    group=N_type)) +
+  geom_errorbar(data=sp_mean_2%>%dplyr::filter(M==1), 
+                position=position_dodge(0.1), width=0.1,
+                aes(ymin=persentile_MEAN2-persentile_SD, 
+                    ymax=persentile_MEAN2+persentile_SD,
+                    y=persentile_MEAN2, x=x_label+0.24,
+                    group=N_type)) +
+  xlab("SSP scenario")+
+  scale_x_continuous(breaks=c(1:3), labels=SSPs)+
+  #ggtitle(sprintf("Distribution>%d", ttt))+
+  #ylim(c(0, 1))+
+  theme_bw()+
+  #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
+  facet_grid(exposure~group)+
+  scale_fill_manual(values=color_dispersal, breaks=c(0:1), 
+                    labels = c("no dispersal", "with dispersal"))+
+  labs(fill = "Dispersal")+
+  ylab("Mean extinction proportion")
+p
+
+
+
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_extinct_only.pdf"), width=10, height=6)
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_extinct_only.png"), width=10, height=6)
 
 sp_dis_extinct<-data.frame(sp_dis_extinct)
 sp_dis_extinct[which(sp_dis_extinct$M==0), "Label"]<-

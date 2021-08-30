@@ -43,7 +43,7 @@ if (F){
         item$N_st_Cell<-N_st_Cell
         item$N_extinct_Cell<-N_extinct_Cell
         item$Max_N_Cell<-Max_N_Cell
-        item$exposure<-ifelse(exposure==0, " no exposure", "5-year exposure")
+        item$exposure<-ifelse(exposure==0, " no climate reslience", "climate reslience")
         result<-bind_dplyr(result, item)
       }
     }
@@ -52,8 +52,8 @@ if (F){
 }
 
 cliff<-readRDS("../../Figures/Extinction_cliff/Extinction_cliff.rda")
-
-
+cliff[exposure==" no exposure"]$exposure<-" no climate reslience"
+cliff[exposure=="5-year exposure"]$exposure<-"climate reslience"
 
 range(cliff$N_extinct_Cell)
 hist(cliff$N_extinct_Cell)
@@ -73,8 +73,8 @@ cliff_se_all<-cliff%>%dplyr::group_by(SSP, dispersal, exposure)%>%
                    CI_extinct_Cell=CI(N_extinct_Cell)[1]-CI(N_extinct_Cell)[2])
 cliff_se_all$da=ifelse(cliff_se_all$dispersal==0, "no dispersal", "with dispersal")
 cliff$da=ifelse(cliff$dispersal==0, "no dispersal", "with dispersal")
-cliff[which(cliff$exposure=="no exposure"), "exposure"]<-" no exposure"
-cliff[which(cliff$exposure==" 5-year exposure"), "exposure"]<-"5-year exposure"
+cliff[which(cliff$exposure=="no exposure"), "exposure"]<-" no climate reslience"
+cliff[which(cliff$exposure==" 5-year exposure"), "exposure"]<-"climate reslience"
 
 p<-ggplot(cliff)+geom_density(aes(x=N_extinct_Cell, color=da))+
   facet_grid(exposure~SSP)+
@@ -171,4 +171,5 @@ ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_y
        width=12, height=6)
 ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell.png"), 
        width=12, height=6)
-
+p
+ 

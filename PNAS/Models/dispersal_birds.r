@@ -198,6 +198,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
     prev_dis$exposure<-0
     prev_dis$suitable<-1
     prev_dis$accumulative_disp<-0
+    prev_dis$disp<-0
     year_i = 2021
     for (year_i in predict_range){
       print(paste(i, length(unique), 
@@ -219,6 +220,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
       
       if (dispersal==0){
         prev_dis$accumulative_disp<-0
+        prev_dis$disp<-0
         prev_dis$suitable<-0
         prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
         prev_dis[suitable==1]$exposure<-0
@@ -227,15 +229,15 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
         if (nrow(prev_dis)>0){
           prev_dis$YEAR<-year_i
           dispersal_log[[as.character(year_i)]]<-prev_dis
-          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp")
+          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp", "disp")
           prev_dis<-unique(prev_dis[, ..selected_cols])
         }
       }else{
         prev_dis$suitable<-0
         prev_dis[mask_100km %in% env_item$mask_100km]$suitable<-1
         prev_dis[suitable==1]$exposure<-0
-        
-        prev_dis$accumulative_disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000) + prev_dis$accumulative_disp
+        prev_dis$disp<-get_disp_dist(nrow(prev_dis), max_dispersal * 1000)
+        prev_dis$accumulative_disp<-prev_dis$disp + prev_dis$accumulative_disp
         
         moveable_dis<-prev_dis[suitable==1]
         if (nrow(moveable_dis)>0){
@@ -278,6 +280,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
           new_item$exposure<-0
           new_item$suitable<-1
           new_item$accumulative_disp<-0
+          new_item$disp<-0
           new_item<-new_item[mask_100km %in% env_item$mask_100km]
         }else{
           new_item<-NULL
@@ -297,7 +300,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
         if (nrow(prev_dis)>0){
           prev_dis$YEAR<-year_i
           dispersal_log[[as.character(year_i)]]<-prev_dis
-          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp")
+          selected_cols<-c("x", "y", "mask_100km", "exposure", "suitable", "accumulative_disp", "disp")
           prev_dis<-unique(prev_dis[, ..selected_cols])
         }
         #prev_dis<-prev_dis[exposure==0]

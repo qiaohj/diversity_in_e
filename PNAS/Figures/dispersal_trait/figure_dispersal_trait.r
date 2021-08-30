@@ -25,7 +25,7 @@ if (F){
 df_all<-readRDS("../../Objects/dispersal_trait/all.rda")
 
 df_all$status<-ifelse(df_all$extinct_year==2101, "extant", "extinct")
-df_all$exposure<-ifelse(df_all$exposure==0, " no exposure", "5-year exposure")
+df_all$exposure<-ifelse(df_all$exposure==0, " no climate reslience", "climate reslience")
 df_all$da<-ifelse(df_all$dispersal==0, "no dispersal", "with dispersal")
 
 df_se<-df_all%>%dplyr::group_by(type, SSP, da, exposure, status, group)%>%
@@ -44,7 +44,7 @@ p1<-ggplot(df_se%>%dplyr::filter(da=="with dispersal"))+
   geom_line(aes(x=as.numeric(type), y=alt, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Elevation (m)", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Elevation (m)", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -62,7 +62,7 @@ p2<-ggplot(df_se%>%dplyr::filter(da=="with dispersal"))+
   geom_line(aes(x=as.numeric(type), y=y, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Latitude (km)", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Latitude (km)", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank())
 
@@ -100,13 +100,11 @@ for (SSP_l in SSPs){
     geom_line(aes(x=as.numeric(type), y=alt, color=group, linetype=factor(exposure)))+
     scale_color_manual(values=color_groups)+
     #facet_wrap(~SSP, scale="free", strip.position="right", nrow=2)+
-    labs(x="Time spots", y="Elevation (m)", color="Group", linetype="Exposure")+
+    labs(x="Time spots", y="Elevation (m)", color="Group", linetype="Climate resilience")+
     theme_bw()+
     scale_x_discrete(expand=c(0.1,0), drop=FALSE)+
     guides(color = guide_legend(nrow = 2, byrow = T)) +
     theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
           panel.spacing = unit(0, "lines"),
           legend.direction = "vertical", legend.box = "horizontal")
   legend<-g_legend(p1)
@@ -119,12 +117,10 @@ for (SSP_l in SSPs){
     geom_line(aes(x=as.numeric(type), y=y, color=group, linetype=factor(exposure)))+
     scale_color_manual(values=color_groups)+
     #facet_wrap(~SSP, scale="free", strip.position="right", nrow=2)+
-    labs(x="Time spots", y="Latitude (km)", color="Group", linetype="Exposure")+
+    labs(x="Time spots", y="Latitude (km)", color="Group", linetype="Climate resilience")+
     theme_bw()+
     scale_x_discrete(expand=c(0.1,0), drop=FALSE)+
     theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank(),
           panel.spacing = unit(0, "lines"))
   
   pp<-ggarrange(p1, p2, nrow=1, ncol=2, common.legend=T, legend.grob=legend, legend="top")
@@ -240,7 +236,7 @@ p1<-ggplot(df_se%>%filter((is_tropic=="tropics")&(da=="with dispersal")))+
   geom_line(aes(x=as.numeric(type), y=y, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Latitude (km) in tropics", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Latitude (km) in tropics", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -254,7 +250,7 @@ p2<-ggplot(df_se%>%filter((is_tropic=="north temperate")&(da=="with dispersal"))
   geom_line(aes(x=as.numeric(type), y=y, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Latitude (km) in north temperate", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Latitude (km) in north temperate", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -267,7 +263,7 @@ p3<-ggplot(df_se%>%filter((is_tropic=="south temperate")&(da=="with dispersal"))
   geom_line(aes(x=as.numeric(type), y=y, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Latitude (km) in south temperate", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Latitude (km) in south temperate", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme()
 
@@ -291,7 +287,7 @@ p1<-ggplot(df_se%>%filter((is_tropic=="tropics")&(da=="with dispersal")))+
   geom_line(aes(x=as.numeric(type), y=alt, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Elevation (m) in tropics", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Elevation (m) in tropics", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -305,7 +301,7 @@ p2<-ggplot(df_se%>%filter((is_tropic=="north temperate")&(da=="with dispersal"))
   geom_line(aes(x=as.numeric(type), y=alt, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Elevation (m) in north temperate", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Elevation (m) in north temperate", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -318,7 +314,7 @@ p3<-ggplot(df_se%>%filter((is_tropic=="south temperate")&(da=="with dispersal"))
   geom_line(aes(x=as.numeric(type), y=alt, color=group, linetype=factor(exposure)))+
   scale_color_manual(values=color_groups)+
   facet_grid(status~SSP, scale="free")+
-  labs(x="Time spots", y="Elevation (m) in south temperate", color="Group", linetype="Exposure")+
+  labs(x="Time spots", y="Elevation (m) in south temperate", color="Group", linetype="Climate resilience")+
   theme_bw()+
   theme()
 

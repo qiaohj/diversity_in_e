@@ -54,5 +54,5 @@ ggsave(disp_dist_hist, filename="../../Figures/NB_hist_combined/disp_dist_hist.p
 
 pp<-ggarrange(plotlist=list_p, nrow=4, ncol=2, widths = c(2.5,1),
           common.legend = T, legend.grob = legends, legend="right")
-ggsave(pp, filename="../../Figures/NB_hist_combined/NB_hist_combined.png", width=15, height=12)
-ggsave(pp, filename="../../Figures/NB_hist_combined/NB_hist_combined.pdf", width=15, height=12)
+ggsave(pp, filename="../../Figures/NB_hist_combined/NB_hist_combined.png", width=15, height=15)
+ggsave(pp, filename="../../Figures/NB_hist_combined/NB_hist_combined.pdf", width=15, height=15)

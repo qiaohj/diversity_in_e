@@ -8,7 +8,7 @@ source("commonFuns/colors.r")
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 df<-readRDS("../../Objects/why_extinct/why_extinct.rda")
 head(df)
-df$exposure<-ifelse(df$exposure==0, " no exposure", "5-year exposure")
+df$exposure<-ifelse(df$exposure==0, " no climate reslience", "climate resilience")
 df$da<-ifelse(df$dispersal==0, "no dispersal", "with dispersal")
 
 #factor by year
@@ -149,7 +149,7 @@ ggsave(pp, filename="../../Figures/why_extinct/combined_why_extinct.pdf", width=
 
 df<-readRDS("../../Objects/why_extinct/why_extinct.rda")
 head(df)
-df$exposure<-ifelse(df$exposure==0, " no exposure", "5-year exposure")
+df$exposure<-ifelse(df$exposure==0, " no climate reslience", "climate resilience")
 df$da<-ifelse(df$dispersal==0, "no dispersal", "with dispersal")
 
 #factor by year

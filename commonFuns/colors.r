@@ -47,6 +47,10 @@ color_groups<-c("Amphibians"=colors_green[7],
              "Birds"=colors_blue[7],
              "Reptiles"=colors_purple[7],
              "Mammals"=colors_red[7])
+
+color_groups<-c("Birds"=colors_blue[7],
+                "Mammals"=colors_red[7])
+
 #display.brewer.all(n=NULL, type="all", select=NULL, exact.n=TRUE, colorblindFriendly=T)
 color_keyspots<-brewer.pal(n = 6, name = 'Dark2')
 
@@ -55,8 +59,8 @@ names(color_keyspots)<-c("Amazon Basin", "central North America", "Congo Basin",
 
 
 
-color_da<-c("with dispersal"=colors_blue[7],
-             "no dispersal"=colors_red[7])
+color_da<-c("no dispersal"=colors_red[7],
+             "with dispersal"=colors_blue[7])
 
 map_theme<-theme(
   axis.line = element_blank(),
@@ -74,7 +78,7 @@ map_theme<-theme(
   legend.position="none"
 )
 
-linetype_label<-c(" no exposure, no dispersal"=1,
-                  "5-year exposure, no dispersal"=6,
-                  " no exposure, with dispersal"=2,
-                  "5-year exposure, with dispersal"=3)
+linetype_label<-c(" no climate reslience, no dispersal"=1,
+                  "climate reslience, no dispersal"=6,
+                  " no climate reslience, with dispersal"=2,
+                  "climate reslience, with dispersal"=3)

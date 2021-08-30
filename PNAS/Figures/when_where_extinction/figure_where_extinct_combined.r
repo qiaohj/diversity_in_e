@@ -30,14 +30,14 @@ if (T){
     ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final.rda")
     
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
-    ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$exposure)
+    ratio_final$label<-paste(ratio_final$SSP, "Climate reslience year:", ratio_final$exposure)
     ratio_final<-ratio_final%>%dplyr::filter(mean_V>0)
     ratio_final<-data.frame(ratio_final)
-    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no exposure", "5-year exposure")
+    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no climate reslience", "climate reslience")
     ratio_final[which(ratio_final$exposure==0), "label"]<-
-      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     ratio_final[which(ratio_final$exposure==5), "label"]<-
-      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "climate reslience", sep=", ")
     
     ratio_final_persentile<-ratio_final%>%dplyr::group_by(SSP, exposure, dispersal, label)%>%
       dplyr::summarise(highest_v=quantile(mean_V, 0.75))
@@ -49,14 +49,14 @@ if (T){
     
     n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
-    n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$exposure)
+    n_ext_final$label<-paste(n_ext_final$SSP, "Climate reslience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
-    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no exposure", "5-year exposure")
+    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no climate reslience", "climate reslience")
     n_ext_final<-data.frame(n_ext_final)
     n_ext_final[which(n_ext_final$exposure==0), "label"]<-
-      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     n_ext_final[which(n_ext_final$exposure==5), "label"]<-
-      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "climate reslience", sep=", ")
     
     n_ext_final_persentile<-n_ext_final%>%dplyr::group_by(SSP, exposure, dispersal, label)%>%
       dplyr::summarise(highest_v=quantile(sum_V, 0.75))
@@ -131,7 +131,7 @@ if (T){
       )
     p_n_ext_no_da
 
-    fp_df_highest<-ggplot(df_highest)+
+    p_df_highest<-ggplot(df_highest)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
       geom_tile(aes(x=x, y=y, fill=type))+
       facet_grid(exposure~SSP)+
@@ -164,7 +164,7 @@ if (T){
     ggsave(p_df_highest, 
            filename=sprintf("../../Figures/when_where_extinction_all/highest_combined_final_without_da.png"), 
            width=8, height=4)
-    da=1
+    #da=1
     if (da==0){
       title1<-"Extinct proportion (no dispersal)"
       title2<-"Number of extinct species (no dispersal)"
@@ -177,14 +177,14 @@ if (T){
     ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final.rda")
     
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
-    ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$exposure)
+    ratio_final$label<-paste(ratio_final$SSP, "Climate reslience year:", ratio_final$exposure)
     ratio_final<-ratio_final%>%dplyr::filter(mean_V>0)
     ratio_final<-data.frame(ratio_final)
-    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no exposure", "5-year exposure")
+    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no climate reslience", "climate reslience")
     ratio_final[which(ratio_final$exposure==0), "label"]<-
-      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     ratio_final[which(ratio_final$exposure==5), "label"]<-
-      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "climate reslience", sep=", ")
     
     ratio_final_persentile<-ratio_final%>%dplyr::group_by(SSP, exposure, dispersal, label)%>%
       dplyr::summarise(highest_v=quantile(mean_V, 0.75))
@@ -197,14 +197,14 @@ if (T){
     
     n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
-    n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$exposure)
+    n_ext_final$label<-paste(n_ext_final$SSP, "Climate reslience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
-    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no exposure", "5-year exposure")
+    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no climate reslience", "climate reslience")
     n_ext_final<-data.frame(n_ext_final)
     n_ext_final[which(n_ext_final$exposure==0), "label"]<-
-      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     n_ext_final[which(n_ext_final$exposure==5), "label"]<-
-      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "climate reslience", sep=", ")
     
     n_ext_final_persentile<-n_ext_final%>%dplyr::group_by(SSP, exposure, dispersal, label)%>%
       dplyr::summarise(highest_v=quantile(sum_V, 0.75))
@@ -327,11 +327,11 @@ if (T){
     
     ggsave(pp, 
            filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all.png"), 
-           width=7, height=13)
+           width=7, height=14)
     
     ggsave(pp, 
            filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all.pdf"), 
-           width=7, height=13)
+           width=7, height=14)
   }
 }   
 
@@ -339,26 +339,26 @@ all_p_list<-list()
 for (da in c(0, 1)){
     ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final_group.rda")
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
-    ratio_final$label<-paste(ratio_final$SSP, "Exposure year:", ratio_final$exposure)
+    ratio_final$label<-paste(ratio_final$SSP, "Climate reslience year:", ratio_final$exposure)
     ratio_final<-ratio_final%>%dplyr::filter(mean_V>0)
     ratio_final<-data.frame(ratio_final)
-    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no exposure", "5-year exposure")
+    ratio_final$exposure<-ifelse(ratio_final$exposure==0, " no climate reslience", "climate reslience")
     ratio_final[which(ratio_final$exposure==0), "label"]<-
-      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(ratio_final[which(ratio_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     ratio_final[which(ratio_final$exposure==5), "label"]<-
-      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "climate reslience", sep=", ")
     
     
     n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final_group.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
-    n_ext_final$label<-paste(n_ext_final$SSP, "Exposure year:", n_ext_final$exposure)
+    n_ext_final$label<-paste(n_ext_final$SSP, "Climate reslience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
-    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no exposure", "5-year exposure")
+    n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no climate reslience", "climate reslience")
     n_ext_final<-data.frame(n_ext_final)
     n_ext_final[which(n_ext_final$exposure==0), "label"]<-
-      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no exposure", sep=", ")
+      paste(as.vector(n_ext_final[which(n_ext_final$exposure==0), "SSP"]), " no climate reslience", sep=", ")
     n_ext_final[which(n_ext_final$exposure==5), "label"]<-
-      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "5-year exposure", sep=", ")
+      paste(n_ext_final[which(n_ext_final$exposure==5), "SSP"], "climate reslience", sep=", ")
    
     
     for (g in c("Birds", "Mammals")){
