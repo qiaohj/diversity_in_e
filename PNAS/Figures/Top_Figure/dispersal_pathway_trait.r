@@ -133,8 +133,8 @@ raw_path_final_se_2$year="End"
 
 raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
 raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
-raw_path_final_se_g$exposure<-ifelse(raw_path_final_se_g$exposure==0, " no climate reslience", "climate reslience")
-raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c(" no climate reslience", "climate reslience"))
+raw_path_final_se_g$exposure<-ifelse(raw_path_final_se_g$exposure==0, " no climate resilience", "climate resilience")
+raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c(" no climate resilience", "climate resilience"))
 
 p1<-ggplot(raw_path_final_se_g)+
   geom_point(aes(x=year, y=mean_alt, color=group), size=2)+
@@ -241,8 +241,8 @@ raw_path_continent_se_2$year="End"
 
 raw_path_continent_se_g<-rbind(raw_path_continent_se_1, raw_path_continent_se_2)
 raw_path_continent_se_g$year<-factor(raw_path_continent_se_g$year, levels = c("Start", "End"))
-raw_path_continent_se_g$exposure<-" no climate reslience"
-raw_path_continent_se_g[which(raw_path_continent_se_g$exposure==5),]$exposure<-"climate reslience"
+raw_path_continent_se_g$exposure<-" no climate resilience"
+raw_path_continent_se_g[which(raw_path_continent_se_g$exposure==5),]$exposure<-"climate resilience"
 write.csv(raw_path_continent_se_g, sprintf("../../Figures/Top_Figure_all/gradient_%s_ttt_%d.csv", "continent", ttt), row.names=F)
 
 
@@ -421,9 +421,9 @@ raw_path_final_se_2$year="End"
 
 raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
 raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
-raw_path_final_se_g$exposure<-" no climate reslience"
-raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate reslience"
-#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate reslience"))
+raw_path_final_se_g$exposure<-" no climate resilience"
+raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate resilience"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate resilience"))
 raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
 raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
 
@@ -519,9 +519,9 @@ raw_path_final_se_2$year="End"
 
 raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
 raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
-raw_path_final_se_g$exposure<-" no climate reslience"
-raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate reslience"
-#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate reslience"))
+raw_path_final_se_g$exposure<-" no climate resilience"
+raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate resilience"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate resilience"))
 raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
 raw_path_final_se_g$CI_y<-raw_path_final_se_g$CI_y/1000
 raw_path_final_se_g[which(raw_path_final_se_g$survive=="SURVIVE"), "survive"]<-"extant"
@@ -626,9 +626,9 @@ raw_path_final_se_2$year="End"
 
 raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
 raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
-raw_path_final_se_g$exposure<-" no climate reslience"
-raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate reslience"
-#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate reslience"))
+raw_path_final_se_g$exposure<-" no climate resilience"
+raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate resilience"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate resilience"))
 
 
 raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000
@@ -733,9 +733,9 @@ raw_path_final_se_2$year="End"
 
 raw_path_final_se_g<-rbind(raw_path_final_se_1, raw_path_final_se_2)
 raw_path_final_se_g$year<-factor(raw_path_final_se_g$year, levels = c("Start", "End"))
-raw_path_final_se_g$exposure<-" no climate reslience"
-raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate reslience"
-#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate reslience"))
+raw_path_final_se_g$exposure<-" no climate resilience"
+raw_path_final_se_g[which(raw_path_final_se_g$exposure==5),]$exposure<-"climate resilience"
+#raw_path_final_se_g$exposure<-factor(raw_path_final_se_g$exposure, levels=c("no exposure", "climate resilience"))
 
 
 raw_path_final_se_g$mean_y<-raw_path_final_se_g$mean_y/1000

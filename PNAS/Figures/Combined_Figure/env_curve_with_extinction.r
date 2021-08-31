@@ -111,7 +111,7 @@ p2<-ggplot()+
   
   xlab("Year")+
   scale_linetype_manual(values=linetype_label)+
-  scale_linetype_manual(values=linetype_label)+
+  #scale_linetype_manual(values=linetype_label)+
   labs(linetype="", color="", fill="")+
   theme_bw()+
   #theme(legend.position = "bottom")
@@ -157,7 +157,7 @@ p2<-ggplot()+
   theme(legend.position = "bottom")
   #theme(legend.position = "bottom", legend.box="vertical")
 p2
-ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.pdf", width=10, height=6)
-ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.png", width=10, height=6)
+ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.pdf", width=12, height=6)
+ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year_few.png", width=12, height=6)
 
 write.csv(extinct_propotion_with_sp, "../../Figures/Combined_Figure/extinct_propotion_with_sp.csv")

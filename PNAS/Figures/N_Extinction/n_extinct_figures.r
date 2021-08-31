@@ -122,12 +122,12 @@ for (exposure in c(0, 5)){
   sp_dis_all_se$persentile<-sp_dis_all_se$N_SP_EXTINCT/sp_dis_all_se$N_SP
   
   if (exposure==0){
-    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no climate reslience)", sep="")
-    sp_dis_all_sub_N$exposure<-" no climate reslience"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (no climate reslience)", sep="")
-    sp_dis_all_sub_1$exposure<-" no climate reslience"
-    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (no climate reslience)", sep="")
-    sp_dis_all_se$exposure<-" no climate reslience"
+    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no climate resilience)", sep="")
+    sp_dis_all_sub_N$exposure<-" no climate resilience"
+    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (no climate resilience)", sep="")
+    sp_dis_all_sub_1$exposure<-" no climate resilience"
+    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (no climate resilience)", sep="")
+    sp_dis_all_se$exposure<-" no climate resilience"
     
   }else{
     sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (climate resilience)", sep="")

@@ -42,7 +42,16 @@ get_disp_dist<-function(n, max_disp){
   v<-disp_seed/max(disp_seed) * max_disp
   v[sample(m, n)]
 }
-
+if (F){
+  n=10000
+  max_disp=1
+  distances<-get_disp_dist(n, max_disp)
+  df<-data.frame(distance=distances+0.01)
+  p<-ggplot(df,aes(x=distance))+geom_histogram(binwidth=0.02, fill=colors_blue[6])+theme_bw()
+  p
+  ggsave(p,filename = "../../Figures/dispersal_density_curve/dispersal_density_curve.png", width=6, height=4)
+  ggsave(p,filename = "../../Figures/dispersal_density_curve/dispersal_density_curve.pdf", width=6, height=4)
+}
 test<-100
 get_disp_dist(1, 100)
 hist(y)

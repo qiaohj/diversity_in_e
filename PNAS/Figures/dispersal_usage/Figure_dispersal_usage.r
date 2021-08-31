@@ -68,7 +68,7 @@ if (F){
 }
 
 df1<-readRDS(sprintf("../../Figures/dispersal_usage_all/data_%d.rda", 1))
-df1$exposure<-" no climate reslience"
+df1$exposure<-" no climate resilience"
 
 df5<-readRDS(sprintf("../../Figures/dispersal_usage_all/data_%d.rda", 5))
 df5$exposure<-"climate resilience"

@@ -63,7 +63,7 @@ for (SSP_i in c(1:length(SSPs))){
     df_final<-bind(df_final, df_all_all_year)
   }
 }
-df_final$exposure_label<-ifelse(df_final$exposure==0, " no climate reslience", "climate reslience")
+df_final$exposure_label<-ifelse(df_final$exposure==0, " no climate resilience", "climate resilience")
 df_final$SSP<-as.character(df_final$SSP)
 p<-ggplot()+
   geom_tile(data=mask_p, aes(x=x, y=y), fill="#e5f5f9")+
@@ -184,7 +184,7 @@ if (F){
 
 df_all_by_year<-readRDS("../../Figures/density_based_pathway/df_all_by_year.rda")
 df_all_by_year<-df_all_by_year[mask_100km %in% mask_p$mask_100km]
-df_all_by_year$exposure<-ifelse(df_all_by_year$exposure==0, " no climate reslience", "climate reslience")
+df_all_by_year$exposure<-ifelse(df_all_by_year$exposure==0, " no climate resilience", "climate resilience")
 df_all_by_year$SSP<-as.character(df_all_by_year$SSP)
 yyy=2021
 max_count<-max(df_all_by_year$mean_count)

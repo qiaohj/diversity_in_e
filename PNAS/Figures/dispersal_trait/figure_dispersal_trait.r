@@ -25,7 +25,7 @@ if (F){
 df_all<-readRDS("../../Objects/dispersal_trait/all.rda")
 
 df_all$status<-ifelse(df_all$extinct_year==2101, "extant", "extinct")
-df_all$exposure<-ifelse(df_all$exposure==0, " no climate reslience", "climate reslience")
+df_all$exposure<-ifelse(df_all$exposure==0, " no climate resilience", "climate resilience")
 df_all$da<-ifelse(df_all$dispersal==0, "no dispersal", "with dispersal")
 
 df_se<-df_all%>%dplyr::group_by(type, SSP, da, exposure, status, group)%>%

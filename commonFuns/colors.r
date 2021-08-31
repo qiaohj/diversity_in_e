@@ -52,10 +52,10 @@ color_groups<-c("Birds"=colors_blue[7],
                 "Mammals"=colors_red[7])
 
 #display.brewer.all(n=NULL, type="all", select=NULL, exact.n=TRUE, colorblindFriendly=T)
-color_keyspots<-brewer.pal(n = 6, name = 'Dark2')
+color_keyspots<-brewer.pal(n = 5, name = 'Dark2')
 
 names(color_keyspots)<-c("Amazon Basin", "central North America", "Congo Basin",
-                         "Qinghai-Tibet Plateau", "", "Southeast Asia")
+                         "Qinghai-Tibet Plateau", "Southeast Asia")
 
 
 
@@ -78,7 +78,7 @@ map_theme<-theme(
   legend.position="none"
 )
 
-linetype_label<-c(" no climate reslience, no dispersal"=1,
-                  "climate reslience, no dispersal"=6,
-                  " no climate reslience, with dispersal"=2,
-                  "climate reslience, with dispersal"=3)
+linetype_label<-c(" no climate resilience, no dispersal"=1,
+                  "climate resilience, no dispersal"=6,
+                  " no climate resilience, with dispersal"=2,
+                  "climate resilience, with dispersal"=3)

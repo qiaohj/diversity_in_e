@@ -22,7 +22,7 @@ n_ext_final_2<-n_ext_final%>%dplyr::filter((dispersal==1)&
                                              (exposure==5))
 n_ext_final<-bind_rows(n_ext_final_1, n_ext_final_2)
 n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
-n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no exposure", "5-year exposure")
+n_ext_final$exposure<-ifelse(n_ext_final$exposure==0, " no climate resilience", "climate resilience")
 n_ext_final$da<-ifelse(n_ext_final$dispersal==0, "no dispersal", "with dispersal")
 mask<-raster("../../Raster/mask_100km_plot.tif")
 
@@ -30,8 +30,8 @@ mask_p<-data.frame(rasterToPoints(mask))
 colnames(mask_p)[3]<-"mask_100km"
 n_ext_final$label<-paste(n_ext_final$SSP, n_ext_final$exposure, n_ext_final$da, sep=", ")
 n_ext_final$label<-factor(n_ext_final$label, 
-                          levels = c(sprintf("%s,  no exposure, no dispersal", SSPi),
-                                     sprintf("%s, 5-year exposure, with dispersal", SSPi)))
+                          levels = c(sprintf("%s,  no climate resilience, no dispersal", SSPi),
+                                     sprintf("%s, climate resilience, with dispersal", SSPi)))
 
 if (T){
   keyspots<-read.csv("../../Objects/keyspots/keyspots.csv", stringsAsFactors = F)
