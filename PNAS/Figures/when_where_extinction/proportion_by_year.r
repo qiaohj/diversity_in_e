@@ -4,6 +4,9 @@ th=0.3
 result<-NULL
 
 sp_mean<-read.csv(sprintf("../../Figures/when_where_extinction_all/when_extinct.csv"))
+sp_mean[which(sp_mean$exposure==" no exposure"), ]$exposure<-" no climate resilience"
+sp_mean[which(sp_mean$exposure=="5-year exposure"), ]$exposure<-"climate resilience"
+
 sp_mean_all<-sp_mean%>%dplyr::group_by(SSP, extinct_year, dispersal, label, exposure, da)%>%
   dplyr::summarise(extinct_ratio=sum(mean_extinct_ratio*all_sp)/sum(all_sp),
                    extinct_ratio2=mean(mean_extinct_ratio))

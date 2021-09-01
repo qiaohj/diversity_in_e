@@ -31,9 +31,9 @@ df_se_se<-df_se%>%dplyr::group_by(Y, VAR, SSP)%>%
 when_extinct_1<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/when_extinct_final.rda", 0))
 names(when_extinct_1)[1]<-"Group"
 when_extinct_1$label<-ifelse((when_extinct_1$dispersal==0), 
-                             " no dispersal, no exposure",
-                             "with dispersal, no exposure")
-when_extinct_1$exposure<-" no exposure"
+                             " no dispersal, no climate resilience",
+                             "with dispersal, no climate resilience")
+when_extinct_1$exposure<-" no climate resilience"
 when_extinct_1$da<-ifelse((when_extinct_1$dispersal==0), 
                           "no dispersal",
                           "with dispersal")
@@ -41,9 +41,9 @@ when_extinct_1$da<-ifelse((when_extinct_1$dispersal==0),
 when_extinct_5<-readRDS(sprintf("../../Objects/when_where_extinction_exposure_%d/when_extinct_final.rda", 5))
 names(when_extinct_5)[1]<-"Group"
 when_extinct_5$label<-ifelse((when_extinct_5$dispersal==0), 
-                             " no dispersal, 5-year exposure",
-                             "with dispersal, 5-year exposure")
-when_extinct_5$exposure<-"5-year exposure"
+                             " no dispersal, climate resilience",
+                             "with dispersal, climate resilience")
+when_extinct_5$exposure<-"climate resilience"
 when_extinct_5$da<-ifelse((when_extinct_5$dispersal==0), 
                           "no dispersal",
                           "with dispersal")
@@ -58,7 +58,7 @@ when_extinct_se$label<-paste(when_extinct_se$exposure, ", ", when_extinct_se$da,
 
 dataset1<-df_se_se%>%filter((VAR=="tasmax")&(between(Y, 2021, 2100)))
 #dataset2<-when_extinct_se%>%
-#  dplyr:: filter(label %in% c(" no exposure, no dispersal", "5-year exposure, with dispersal"))
+#  dplyr:: filter(label %in% c(" no climate resilience, no dispersal", "climate resilience, with dispersal"))
 dataset2<-when_extinct_se
 max_y1<-max(dataset1$max_v)
 min_y1<-min(dataset1$min_v)
@@ -77,7 +77,7 @@ extinct_propotion_with_sp<-inner_join(extinct_propotion, dataset2,
                               by=c("SSP", "exposure", "da", "extinct_year"))
 labels<-extinct_propotion_with_sp%>%dplyr::filter(SSP=="SSP585")
 #extinct_propotion_with_sp<-extinct_propotion_with_sp%>%filter(extinct_threshold>0.2)
-dataset2%>%dplyr::filter((SSP=="SSP585")&(exposure=="5-year exposure")&(extinct_year==2095))
+dataset2%>%dplyr::filter((SSP=="SSP585")&(exposure=="climate resilience")&(extinct_year==2095))
 p2<-ggplot()+
   geom_ribbon(data=dataset1, aes(x=Y, ymin=min_v, ymax=max_v, fill=SSP), alpha=0.2)+
   #geom_line(data=dataset1, aes(x=Y, y=mean_v, color=SSP))+
@@ -103,7 +103,7 @@ p2<-ggplot()+
                         breaks=waiver(),
                         labels=waiver())
   )+
-  geom_text(data=labels%>%dplyr::filter(label==" no exposure, no dispersal"), aes(x=2020, y=n_sp_scale, 
+  geom_text(data=labels%>%dplyr::filter(label==" no climate resilience, no dispersal"), aes(x=2020, y=n_sp_scale, 
                              label=sprintf(">%d%%", extinct_threshold*100)),
             hjust=0.1, vjust=-0.8)+
   geom_text(data=extinct_propotion_with_sp, 
@@ -123,13 +123,13 @@ ggsave(p2, filename="../../Figures/Combined_Figure/Figure_env_year.png", width=1
 p2<-ggplot()+
   geom_ribbon(data=dataset1, aes(x=Y, ymin=min_v, ymax=max_v, fill=SSP), alpha=0.2)+
   #geom_line(data=dataset1, aes(x=Y, y=mean_v, color=SSP))+
-  geom_line(data=dataset2%>%dplyr::filter(label %in% c(" no exposure, no dispersal", "5-year exposure, with dispersal")), 
+  geom_line(data=dataset2%>%dplyr::filter(label %in% c(" no climate resilience, no dispersal", "climate resilience, with dispersal")), 
             aes(x=extinct_year, y=n_sp/scale+intercept, color=SSP, linetype=label), size=1)+
-  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no exposure, no dispersal", "5-year exposure, with dispersal")), 
+  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no climate resilience, no dispersal", "climate resilience, with dispersal")), 
                aes(x = extinct_year, y=min_y1, 
                    xend = extinct_year, yend=n_sp_scale, 
                    color=SSP), linetype=2)+
-  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no exposure, no dispersal", "5-year exposure, with dispersal")), 
+  geom_segment(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no climate resilience, no dispersal", "climate resilience, with dispersal")), 
                aes(x = extinct_year, y=n_sp_scale, 
                    xend = 2020, yend=n_sp_scale, 
                    color=SSP), linetype=2)+
@@ -144,10 +144,10 @@ p2<-ggplot()+
                         breaks=waiver(),
                         labels=waiver())
   )+
-  geom_text(data=labels%>%dplyr::filter(label==" no exposure, no dispersal"), aes(x=2020, y=n_sp_scale, 
+  geom_text(data=labels%>%dplyr::filter(label==" no climate resilience, no dispersal"), aes(x=2020, y=n_sp_scale, 
                                                                                  label=sprintf(">%d%%", extinct_threshold*100)),
             hjust=0.1, vjust=-0.8)+
-  geom_text(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no exposure, no dispersal", "5-year exposure, with dispersal")),
+  geom_text(data=extinct_propotion_with_sp%>%dplyr::filter(label %in% c(" no climate resilience, no dispersal", "climate resilience, with dispersal")),
             aes(x=extinct_year-1.1, y=n_sp_scale+0.12, label=extinct_year), size=3)+
   
   xlab("Year")+

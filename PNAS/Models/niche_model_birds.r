@@ -153,10 +153,7 @@ is_edge<-function(index, all_index, xsize){
     T
   }
 }
-get_disp_dist<-function(n, max_disp){
-  disp_seed<-rexp(n = n, rate = .1)
-  disp_seed/max(disp_seed) * max_disp
-}
+
 
 predict_range<-c(2021:2100)
 exposure_threshold<-0

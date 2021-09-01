@@ -85,6 +85,8 @@ range(plain_species$estimated_disp)
 
 cuts<-seq(0, 350, by=50)
 disp_cuts<-seq(0, 120, by=10)
+
+
 colnames<-c("sp", "N_CELL_cuts", "disp_cuts", "type", "group")
 
 island_species$N_CELL_cuts<-cut2(island_species$N_CELL, cuts)
@@ -397,6 +399,11 @@ mean_disp_all$estimated_disp_cut<-cut2(mean_disp_all$estimated_disp, cuts=quanti
                                                                                    seq(0, 1, 0.2)))
 mean_disp_all$nb_volume_cut<-cut2(mean_disp_all$nb_volume, cuts=quantile(mean_disp_all$nb_volume, 
                                                                          seq(0, 1, 0.2)))
+
+mean_disp_all$N_CELL_cut<-cut2(mean_disp_all$N_CELL, cuts=quantile(mean_disp_all$N_CELL, 
+                                                                         seq(0, 1, 0.2)))
+
+
 mean_disp_all$split<-sprintf("nb:%d da:%d", mean_disp_all$nb_volume_cut, mean_disp_all$estimated_disp_cut)
 
 extinct_sp<-readRDS("../../Figures/N_Extinction/sp_dis_all_0.rda")
@@ -454,6 +461,49 @@ for (S in c("SSP585", "SSP245", "SSP119")){
   ggsave(p, filename=sprintf("../../Figures/Mountain_island/%s_ectinction_heatmap.png", S), width=10, height=6)
   ggsave(p, filename=sprintf("../../Figures/Mountain_island/%s_ectinction_heatmap.pdf", S), width=10, height=6)
 }
+
+#Cell and dispersal distance
+
+
+n_extinct<-mean_disp_all_with_extinct[, .(N_Extinct=.N),
+                                      by=c("GCM", "SSP", "exposure", "type", "group", 
+                                           "estimated_disp_cut", "N_CELL_cut")]
+n_species<-mean_disp_all[, .(N_Species=.N),
+                         by=c("GCM", "SSP", "exposure", "type", "group", "N_CELL_cut", 
+                              "estimated_disp_cut")]
+
+n_species<-merge(n_species, n_extinct, by=c("GCM", "SSP", "exposure", "type", "group", 
+                                            "N_CELL_cut", "estimated_disp_cut"))
+n_species$extinct_proportion<-n_species$N_Extinct/n_species$N_Species
+n_species[type=="mountain"]$type<-"Mountains"
+n_species[type=="plain"]$type<-"Plain"
+n_species[type=="island"]$type<-"Islands"
+n_species[type=="continent"]$type<-"Continent"
+n_species[type=="mixed"]$type<-"Mixed"
+
+n_species_se<-n_species[, .(extinct_proportion=mean(extinct_proportion),
+                            sd_extinct_proportion=sd(extinct_proportion)),
+                        by=c("SSP", "exposure", "type", "estimated_disp_cut", "N_CELL_cut")]
+
+S<-"SSP245"
+
+
+n_species_se$type_factor<-factor(n_species_se$type, levels = c("Mountains", "Islands", "Continent", "Mixed", "Plain"))
+for (S in c("SSP585", "SSP245", "SSP119")){
+  p<-ggplot(n_species_se[(SSP==S)&(type %in% c("Islands", "Mountains", "Continent", "Mixed"))])+
+    geom_tile(aes(x=estimated_disp_cut, y=N_CELL_cut, fill=extinct_proportion))+
+    labs(fill="extinction proportion")+
+    xlab("estimated max natal dispersal (km)")+ylab("niche breadth volume")+
+    scale_fill_gradient(low=colors_blue[5], high=colors_red[5])+
+    facet_grid(exposure~type_factor, scale="free")+theme_bw()+
+    ggtitle(S)+
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  p
+  ggsave(p, filename=sprintf("../../Figures/Mountain_island/%s_ectinction_heatmap_N_Cell.png", S), width=10, height=6)
+  ggsave(p, filename=sprintf("../../Figures/Mountain_island/%s_ectinction_heatmap_N_Cell.pdf", S), width=10, height=6)
+}
+
+
 n_species_se$split_number<-as.numeric(factor(n_species_se$split))
 ggplot(n_species_se[type %in% c("island", "mountain", "continent", "mixed")])+
   geom_line(aes(x=split_number, y=extinct_proportion, color=type))+

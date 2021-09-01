@@ -9,9 +9,9 @@ library(fasterize)
 library(rmapshaper)
 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-setDTthreads(3)
+setDTthreads(10)
 print(sprintf("Current core number is %d", getDTthreads()))
-#for MAMMALS
+#for BIRDS
 
 mask_10km<-raster("../../Raster/mask_10km.tif")
 #mask_1km<-raster("../../Raster/mask_1km.tif")
@@ -24,12 +24,11 @@ PRESENCE<-c(1,2,3,4,5)
 ORIGIN<-c(1,2,3,5,6)
 SEASONAL<-c(1,2)
 
+bird_df<-readRDS("../../Data/Birds/bird_df.rda")
+bird_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+bird_full<-merge(bird_df, bird_disp, by.x="SCINAME", by.y="iucn_name", all=F)
 
-mammal_df<-readRDS("../../Data/Mammals/mammal_df.rda")
-mammal_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
-mammal_full<-merge(mammal_df, mammal_disp, by.x="binomial", by.y="Scientific", all=F)
-
-unique <- unique(mammal_full$binomial)
+unique <- unique(bird_full$SCINAME)
 unique<-as.character(unique)
 PRESENCE<-c(1,2,3,4,5)
 ORIGIN<-c(1,2,3,5,6)
@@ -51,33 +50,38 @@ is_edge<-function(index, all_index, xsize){
   }
 }
 
-
 predict_range<-c(2021:2100)
 exposure_threshold<-0
 i=2
 unique<-unique[sample(length(unique), length(unique))]
 x_size<-dim(mask_10km)[2]
-
-mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), by="binomial"]
-mammal_full_sum_area<-mammal_full_sum_area[order(sum_are),]
-bi<-mammal_full_sum_area[mammal_full_sum_area$sum_are<=1.5*min(mammal_full_sum_area$sum_are)]$binomial[1]
-mammal_full_sum_area<-mammal_full_sum_area[sample(nrow(mammal_full_sum_area), nrow(mammal_full_sum_area))]
-for (i in 1:length(mammal_full_sum_area$binomial)) {
+bi<-"Tangara rufigenis"
+bird_full_sum_area<-bird_full[, .(sum_are=sum(Shape_Area)), by="SCINAME"]
+bird_full_sum_area<-bird_full_sum_area[order(sum_are),]
+bi<-bird_full_sum_area[bird_full_sum_area$sum_are<=1.5*min(bird_full_sum_area$sum_are)]$SCINAME[1]
+bird_full_sum_area<-bird_full_sum_area[sample(nrow(bird_full_sum_area), nrow(bird_full_sum_area))]
+for (i in 1:length(bird_full_sum_area$SCINAME)) {
   
-  bi<-mammal_full_sum_area$binomial[i]
+  bi<-bird_full_sum_area$SCINAME[i]
   #bi="Pseudophryne occidentalis"
   print(paste(i, length(unique), bi))
-  target_folder<-sprintf("../../Objects/Mammals/%s", gsub(" ", "_", bi))
-  if (dir.exists(target_folder)){
+  target_folder<-sprintf("../../Objects/Dispersal/Birds/%s/fit_pnas.rda", gsub(" ", "_", bi))
+  if (file.exists(target_folder)){
     next()
+    xx<-readRDS(target_folder)
+    if (!is.null(xx)){
+      next()  
+    }
+    
   }
-  dir.create(target_folder)
+  
+  saveRDS(NULL, target_folder)
   tmp_sf<-NULL
   print("extracting the matched polygons")
-  if (file.exists(sprintf("../../Objects/IUCN_Distribution/Mammals/st_simplify/%s.rda", gsub(" ", "_", bi)))){
-    tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Mammals/st_simplify/%s.rda", gsub(" ", "_", bi)))
+  if (file.exists(sprintf("../../Objects/IUCN_Distribution/Birds/st_simplify/%s.rda", gsub(" ", "_", bi)))){
+    tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Birds/st_simplify/%s.rda", gsub(" ", "_", bi)))
   }else{
-    tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Mammals/RAW/%s.rda", gsub(" ", "_", bi)))
+    tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Birds/RAW/%s.rda", gsub(" ", "_", bi)))
   }
   
   if ((class(tmp_sf$Shape)[1]=="sfc_GEOMETRY")|(class(tmp_sf$Shape)[1]=="sfc_MULTISURFACE")){
@@ -104,6 +108,7 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   cols<-c("x", "y", "mask_10km")
   first_disp<-unique(initial_disp[, ..cols])
   mean_bio1<-mean(nb_v$bio1, na.rm=T)
+  
   sd_bio1<-sd(nb_v$bio1, na.rm=T)
   quantile_bio1<-quantile(nb_v$bio1, c(0.25, 0.75), na.rm=T)
   IQR_bio1<-quantile_bio1[2]-quantile_bio1[1]
@@ -156,6 +161,24 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   range_bio14_sd_max<-mean_bio14+3*sd_bio14
   range_bio14_IQR_min<-mean_bio14-1.5*IQR_bio14
   range_bio14_IQR_max<-mean_bio14+1.5*IQR_bio14
+  
+  min_bio1<-min(nb_v$bio1[between(nb_v$bio1, range_bio1_sd_min, range_bio1_sd_max)], na.rm=T)
+  max_bio1<-max(nb_v$bio1[between(nb_v$bio1, range_bio1_sd_min, range_bio1_sd_max)], na.rm=T)
+  
+  min_bio5<-min(nb_v$bio5[between(nb_v$bio5, range_bio5_sd_min, range_bio5_sd_max)], na.rm=T)
+  max_bio5<-max(nb_v$bio5[between(nb_v$bio5, range_bio5_sd_min, range_bio5_sd_max)], na.rm=T)
+  
+  min_bio6<-min(nb_v$bio6[between(nb_v$bio6, range_bio6_sd_min, range_bio6_sd_max)], na.rm=T)
+  max_bio6<-max(nb_v$bio6[between(nb_v$bio6, range_bio6_sd_min, range_bio6_sd_max)], na.rm=T)
+  
+  min_bio12<-min(nb_v$bio12[between(nb_v$bio12, range_bio12_sd_min, range_bio12_sd_max)], na.rm=T)
+  max_bio12<-max(nb_v$bio12[between(nb_v$bio12, range_bio12_sd_min, range_bio12_sd_max)], na.rm=T)
+  
+  min_bio13<-min(nb_v$bio13[between(nb_v$bio13, range_bio13_sd_min, range_bio13_sd_max)], na.rm=T)
+  max_bio13<-max(nb_v$bio13[between(nb_v$bio13, range_bio13_sd_min, range_bio13_sd_max)], na.rm=T)
+  
+  min_bio14<-min(nb_v$bio14[between(nb_v$bio14, range_bio14_sd_min, range_bio14_sd_max)], na.rm=T)
+  max_bio14<-max(nb_v$bio14[between(nb_v$bio14, range_bio14_sd_min, range_bio14_sd_max)], na.rm=T)
   
   min_x<-min(nb_v$x, na.rm=T)
   max_x<-max(nb_v$x, na.rm=T)
@@ -235,30 +258,69 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
     max_y=max_y,
     mean_y=mean_y,
     max_abs_y=max_abs_y,
-    N_CELL=N_CELL
+    N_CELL=N_CELL,
+    
+    min_bio1=min_bio1,
+    max_bio1=max_bio1,
+    min_bio5=min_bio5,
+    max_bio5=max_bio5,
+    min_bio6=min_bio6,
+    max_bio6=max_bio6,
+    min_bio12=min_bio12,
+    max_bio12=max_bio12,
+    min_bio13=min_bio13,
+    max_bio13=max_bio13,
+    min_bio14=min_bio14,
+    max_bio14=max_bio14
+    
   )
   
   
   print("saving result")
-  saveRDS(fit, sprintf("%s/fit.rda", target_folder))
+  saveRDS(fit, target_folder)
   
   
   
   #saveRDS(p_buffer, sprintf("%s/p_buffer.rda", target_folder))
 }
 
-if (F){
-  #plot(st_geometry(tmp_sf), col="red")
-  plot(st_geometry(tmp_sf_buff))
-  plot(st_geometry(tmp_sf), add=T, col="red")
-  plot(mask_buffer, add=T)
+
+bird_df<-readRDS("../../Data/Birds/bird_df.rda")
+bird_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+bird_full<-merge(bird_df, bird_disp, by.x="SCINAME", by.y="iucn_name", all=F)
+
+unique <- unique(bird_full$SCINAME)
+unique<-as.character(unique)
+
+predict_range<-c(2021:2100)
+exposure_threshold<-0
+i=2
+unique<-unique[sample(length(unique), length(unique))]
+bi<-"Tangara rufigenis"
+bird_full_sum_area<-bird_full[, .(sum_are=sum(Shape_Area)), by="SCINAME"]
+bird_full_sum_area<-bird_full_sum_area[order(sum_are),]
+bi<-bird_full_sum_area[bird_full_sum_area$sum_are<=1.5*min(bird_full_sum_area$sum_are)]$SCINAME[1]
+bird_full_sum_area<-bird_full_sum_area[sample(nrow(bird_full_sum_area), nrow(bird_full_sum_area))]
+
+all_fit<-list()
+for (i in 1:length(bird_full_sum_area$SCINAME)) {
   
-  points(env_item$x, env_item$y, pch=".", col="blue")
-  points(prev_dis$x, prev_dis$y, pch=".", col="red")
-  plot(mask_nb, col="red", add=T)
-  
-  plot(dispersal_log$`2021`$x, dispersal_log$`2021`$y, pch=".")
-  points(dispersal_log$`2022`$x, dispersal_log$`2022`$y, col="red", pch=".")
-  points(dispersal_log$`2021`$x, dispersal_log$`2021`$y, pch=".")
-  
+  bi<-bird_full_sum_area$SCINAME[i]
+  #bi="Pseudophryne occidentalis"
+  print(paste(i, length(unique), bi))
+  target_folder<-sprintf("../../Objects/Dispersal/Birds/%s/fit_pnas.rda", gsub(" ", "_", bi))
+  if (!file.exists(target_folder)){
+    next()
+  }
+  fit<-readRDS(target_folder)
+  if (is.null(fit)){
+    #asdf
+    next()
+  }
+  sp<-gsub(" ", "_", bi)
+  fit$sp<-sp
+  fit$group<-"Birds"
+  all_fit[[sp]]<-fit
 }
+all_fit<-rbindlist(all_fit)
+saveRDS(all_fit, "../../Figures/niche_breadth_compare/niche_birds.rda")
