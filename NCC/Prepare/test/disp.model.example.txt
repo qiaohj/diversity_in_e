@@ -1,0 +1,67 @@
+model
+{
+
+# Model parameters
+# Specify prior distributions
+  
+for (i in 1:2)
+  {
+bs[i] ~ dnorm(0, 1.0E-6)			# Uninformative normal prior, mean = 0, precision = 1 x 10-6 
+	b[i] ~dnorm(0, 1.0E-6)
+  }
+
+
+bs[3] <- 0						# Variable coefficients for reference categories = 0
+prec ~ dgamma(0.001, 0.001)	# Uninformative gamma prior for precision of median 
+# natal dispersal distance
+
+# Specify priors for guild random effect (as shown in Gelman (2006))
+for (g in 1:4)
+  {  
+   	a_G[g] <- gm + xi*eta[g]			#models for the regression coefficents for guilds
+  }
+	
+xi ~dnorm(0,tau.xi)
+tau.xi <- pow(prior.scale,-2) 				 #set prior.scale to 25 in data, so tau.xi =1/625
+
+for (g in 1:4)
+  {
+  	eta[g] ~ dnorm(0, tau.eta)
+  }		
+			
+tau.eta ~ dgamma(0.5,0.5)  				#chi^2 with 1 df
+sd_g <- abs(xi)/sqrt(tau.eta)  				# each of the sd (monitor this)
+gm ~ dnorm (0, 1.0E-6)
+prior.scale <- 25  					# as suggested by Gelman (2006)
+
+# Specify priors for species random effect
+sd_sp ~ dunif(0, 100)				# Uninformative prior for the standard deviation of the 
+						# species random effect
+prec_sp <- 1 / (sd_sp * sd_sp)				# Precision = 1 / variance
+
+for (i in 1:84)
+  {
+    	resp[i] ~ dnorm(0, prec_sp)			# Species random effect normally distributed with mean 
+						# = 0 and precision as above.
+  }
+
+
+# Model median dispersal distance  
+
+  for (i in 1:117)					# 117 observations
+  {
+# Med. dispersal distance distributed lognormally with mean, m, and precision as above	    	
+meddisp[i] ~ dlnorm(m[i], prec)		
+m[i] <- a_G[guild[i]] + bs[sex[i]] + b[1] * log(mass[i]/1000) + b[2] * log(shape[i]) + resp[sp[i]]
+  }
+
+
+}
+
+# Specify initial values
+list(prec=1, a=0, bs=c(0,0,NA), sd_sp=1, bg = c(NA,0,0,0), bw=c(0,0,0,0), bm = c(0,0,0,0))
+list(prec=0.5, a=10, bs=c(1,1,NA), sd_sp=4, bg = c(NA,1,1,1), bw=c(5,2,5,2), bm = c(5,2,5,2))
+
+
+#  Specify data
+meddisp[]	sex[]	guild[]	mass[]	shape[]	sp[]

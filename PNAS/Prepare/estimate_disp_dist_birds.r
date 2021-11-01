@@ -22,7 +22,8 @@ Sutherland_se<-Sutherland[, .(median_dis=max(median_float, na.rm=T),
 Sutherland_se$source<-"Sutherland, G. D., et. al., 2000"
 Sutherland_se[!is.infinite(Sutherland_se$max_dis),]
 Sutherland_se$ratio<-Sutherland_se$max_dis/Sutherland_se$median_dis
-
+ggplot(Sutherland_se)+geom_histogram(aes(x=ratio), bins=100)+
+  scale_x_log10()
 #summary(Sutherland_se$ratio)
 #Sutherland_se<-Sutherland_se[!is.infinite(Sutherland_se$ratio),]
 #Sutherland_se<-Sutherland_se[(Sutherland_se$ratio>0),]
@@ -78,6 +79,9 @@ df_item_2[which(is.infinite(df_item_2$max_dis)), "max_dis"]<-NA
 #PARADIS
 Paradis<-read.table("../../Data/Dispersal_distance/Bird-1998/Data0608.csv", head=T,
                     sep=",", stringsAsFactors = F)
+hist(Paradis$median_dis)
+hist(Sutherland_se$median_dis)
+hist(Sutherland_se$max_dis)
 
 Paradis$max_dis<-NA
 
@@ -132,7 +136,7 @@ formulas<-c("max_dis~Diet",
             "max_dis~log_body_mass+Diet",
             "max_dis~HWI+log_body_mass+Diet")
 #formulas<-formulas[7]
-cols<-c("max_dis", "HWI", "log_body_mass", "Diet")
+cols<-c("max_dis", "HWI", "log_body_mass", "Diet", "sp", "Order.x", "Family.name")
 model_df_birds<-df_with_family[, ..cols]
 dim(model_df_birds)
 table(model_df_birds$Diet)

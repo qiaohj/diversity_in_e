@@ -131,14 +131,39 @@ cols<-c("sp", "max_dis", "ForStrat.Value", "diet_type", "log_body_mass", "MSWFam
 model_df_mammals<-model_df_mammals[, ..cols]
 colnames(model_df_mammals)<-c("sp", "max_dis", "ForStrat", "Diet", "log_body_mass", "Family")
 model_df_mammals<-unique(model_df_mammals)
+model_df_mammals$log_max_dis<-log(model_df_mammals$max_dis)
+model_df_mammals$body_mass<-exp(1)^model_df_mammals$log_body_mass
+
+
 saveRDS(model_df_mammals, "../../Data/Dispersal_distance/mammal.rda")
-formulas<-c("max_dis~Diet",
-            "max_dis~ForStrat",
-            "max_dis~log_body_mass",
-            "max_dis~ForStrat+log_body_mass",
-            "max_dis~ForStrat+Diet",
-            "max_dis~log_body_mass+Diet",
-            "max_dis~ForStrat+log_body_mass+Diet")
+
+model_df<-model_df_mammals
+model<-randomForest(log_max_dis~ForStrat+body_mass+Diet, model_df, ntree=1000, mtry=3)
+model_df$pred_values = exp(1)^predict(model, model_df)
+model_df$time<-model_df$max_dis/model_df$pred_values
+ratio<-mean(model_df[(max_dis>dis_threshold)&(Diet!="vertebrates")]$max_dis/
+              model_df[(max_dis>dis_threshold)&(Diet!="vertebrates")]$pred_values)
+model_df[(max_dis>dis_threshold)&(Diet!="vertebrates")]$pred_values<-
+  model_df[(max_dis>dis_threshold)&(Diet!="vertebrates")]$pred_values*ratio
+
+mean((model_df$pred_values-model_df$max_dis)^2)^0.5
+p4.2<-ggplot(model_df)+geom_point(aes(x=max_dis, y=pred_values, color=Diet))+
+  xlim(min(c(model_df$max_dis, model_df$pred_values)), max(c(model_df$max_dis, model_df$pred_values)))+
+  ylim(min(c(model_df$max_dis, model_df$pred_values)), max(c(model_df$max_dis, model_df$pred_values)))+
+  geom_abline()+theme_bw()
+p4.2
+
+formulas<-c("log_max_dis~Diet",
+            "log_max_dis~ForStrat",
+            "log_max_dis~log_body_mass",
+            "log_max_dis~ForStrat+log_body_mass",
+            "log_max_dis~ForStrat+Diet",
+            "log_max_dis~log_body_mass+Diet",
+            "log_max_dis~ForStrat+body_mass+Diet",
+            "log_max_dis~body_mass",
+            "log_max_dis~ForStrat+body_mass",
+            "log_max_dis~body_mass+Diet",
+            "log_max_dis~ForStrat+body_mass+Diet")
 
 empirical_disp_list<-rbind(Santini_se, Sutherland_se)
 empirical_disp_list[which(empirical_disp_list$sp=="Aotus azarai"), "sp"]<-"Aotus azarae"
@@ -206,11 +231,13 @@ if (F){
   evtree_no_rank_list<-list()
   
   for (i in c(1:length(formulas))){
+    dis_threshold<-200
+    ratio<-2.5
     f<-formulas[i]
     print(f)
     # train the model
     #df_with_family$Migration_3<-as.factor(df_with_family$Migration_3)
-    tunegrid <- expand.grid(.mtry=c(1:5))
+    tunegrid <- expand.grid(.mtry=c(3:5))
     set.seed(seeds_index)
     seeds <- setSeeds("repeatedcv", numbers=10, repeats=10, tunes=5, seed=seeds_index)
     train_control <- trainControl(method="repeatedcv", number=10, repeats=10, 
@@ -227,7 +254,9 @@ if (F){
     predicted$formulas<-f
     predicted$clade<-"Mammal"
     predicted$pred<-predict(rf_no_rank, model_df_mammals)
-    cor<-cor(model_df_mammals$max_dis, predicted$pred)
+    predicted$pred_max_dis<-exp(1)^predicted$pred
+    predicted[max_dis>200]$pred_max_dis<-predicted[max_dis>200]$pred_max_dis*ratio
+    cor<-cor(model_df_mammals$max_dis, predicted$pred_max_dis)
     
     evaluated_metrics<-rf_no_rank$results[which(rf_no_rank$results$RMSE==min(rf_no_rank$results$RMSE)),]
     evaluated_metrics$model<-"RF"
@@ -268,7 +297,9 @@ if (F){
     predicted$formulas<-f
     predicted$clade<-"Mammal"
     predicted$pred<-predict(glm_no_rank, model_df_mammals)
-    cor<-cor(model_df_mammals$max_dis, predicted$pred)
+    predicted$pred_max_dis<-exp(1)^predicted$pred
+    predicted[max_dis>200]$pred_max_dis<-predicted[max_dis>200]$pred_max_dis*ratio
+    cor<-cor(model_df_mammals$max_dis, predicted$pred_max_dis)
     
     evaluated_metrics<-glm_no_rank$results[which(glm_no_rank$results$RMSE==min(glm_no_rank$results$RMSE)),]
     evaluated_metrics$model<-"GLM"
@@ -301,7 +332,9 @@ if (F){
     predicted$formulas<-f
     predicted$clade<-"Mammal"
     predicted$pred<-predict(svm_no_rank, model_df_mammals)
-    cor<-cor(model_df_mammals$max_dis, predicted$pred)
+    predicted$pred_max_dis<-exp(1)^predicted$pred
+    predicted[max_dis>200]$pred_max_dis<-predicted[max_dis>200]$pred_max_dis*ratio
+    cor<-cor(model_df_mammals$max_dis, predicted$pred_max_dis)
     
     evaluated_metrics<-svm_no_rank$results[which(svm_no_rank$results$RMSE==min(svm_no_rank$results$RMSE)),]
     evaluated_metrics$model<-"SVM"
@@ -336,7 +369,9 @@ if (F){
     predicted$formulas<-f
     predicted$clade<-"Mammal"
     predicted$pred<-predict(brnn_no_rank, model_df_mammals)
-    cor<-cor(model_df_mammals$max_dis, predicted$pred)
+    predicted$pred_max_dis<-exp(1)^predicted$pred
+    predicted[max_dis>200]$pred_max_dis<-predicted[max_dis>200]$pred_max_dis*ratio
+    cor<-cor(model_df_mammals$max_dis, predicted$pred_max_dis)
     
     evaluated_metrics<-brnn_no_rank$results[which(brnn_no_rank$results$RMSE==min(brnn_no_rank$results$RMSE)),]
     evaluated_metrics$model<-"BRNN"
@@ -369,7 +404,9 @@ if (F){
     predicted$formulas<-f
     predicted$clade<-"Mammal"
     predicted$pred<-predict(rpart_no_rank, model_df_mammals)
-    cor<-cor(model_df_mammals$max_dis, predicted$pred)
+    predicted$pred_max_dis<-exp(1)^predicted$pred
+    predicted[max_dis>200]$pred_max_dis<-predicted[max_dis>200]$pred_max_dis*ratio
+    cor<-cor(model_df_mammals$max_dis, predicted$pred_max_dis)
     
     evaluated_metrics<-rpart_no_rank$results[which(rpart_no_rank$results$RMSE==min(rpart_no_rank$results$RMSE)),]
     evaluated_metrics$model<-"CART"
@@ -411,13 +448,16 @@ library(ggplot2)
 predicted_all<-readRDS("../../Objects/estimate_disp_dist/models/predicted_mammals.rda")
 
 evaluated_metrics_all<-readRDS("../../Objects/estimate_disp_dist/models/evaluated_metrics_mammals.rda")
-evaluated_metrics_all[evaluated_metrics_all$RMSE==min(evaluated_metrics_all$RMSE), ]
+evaluated_metrics_all[evaluated_metrics_all$RMSE_Full==min(evaluated_metrics_all$RMSE_Full), ]
+predicted_all$pred_max_dis<-exp(1)^predicted_all$pred * ratio
 p<-ggplot(predicted_all)+
-  geom_smooth(aes(x=max_dis, y=pred, 
+  geom_smooth(aes(x=max_dis, y=pred_max_dis, 
                   color=factor(model), linetype=factor(formulas)),
               alpha=0.2)+
-  geom_point(aes(x=max_dis, y=pred, 
+  geom_point(aes(x=max_dis, y=pred_max_dis, 
                  color=factor(model), shape=factor(formulas)))+
+  geom_abline()+
+  xlim(0, 1100)+ylim(0, 1100)+
   theme_bw()
 p
 ggsave(p, filename="../../Figures/Estimate_Disp/Model_Results_mammals.png", width=8, height=6)
@@ -466,7 +506,8 @@ new_df_mammals<-data.table(mammals_trait)[,..cols]
 colnames(new_df_mammals)<-c("Scientific", "ForStrat", "log_body_mass", "Diet")
 new_df_mammals<-new_df_mammals[(!is.na(ForStrat))&(!is.na(log_body_mass))&(!is.na(Diet))]
 new_df_mammals<-new_df_mammals[!(ForStrat %in% c("A", "M"))]
-new_df_mammals$estimated_disp<-predict(best_model, new_df_mammals)
+new_df_mammals$body_mass<-exp(1)^new_df_mammals$log_body_mass
+new_df_mammals$estimated_disp<-exp(1)^predict(best_model, new_df_mammals)*ratio
 new_df_mammals$Diet
 model_df_mammals$ForStrat
 unique(new_df_mammals$Diet)

@@ -7,13 +7,14 @@ library(data.table)
 library(sf)
 library(fasterize)
 library(rmapshaper)
+library(ggplot2)
 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 setDTthreads(1)
 print(sprintf("Current core number is %d", getDTthreads()))
 
 bird_df<-readRDS("../../Data/Birds/bird_df.rda")
-bird_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+bird_disp<-readRDS("../../Objects_PNAS/estimate_disp_dist/estimate_disp_dist_bird.rda")
 bird_full<-merge(bird_df, bird_disp, by.x="SCINAME", by.y="iucn_name", all=F)
 
 unique <- unique(bird_full$SCINAME)
@@ -36,11 +37,14 @@ is_edge<-function(index, all_index, xsize){
     T
   }
 }
-get_disp_dist<-function(n, max_disp){
-  m<-ifelse(n<100, 100, n)
-  disp_seed<-rexp(n = m, rate = 0.1)
-  v<-disp_seed/max(disp_seed) * max_disp
-  v[sample(m, n)]
+
+density<-get_disp_dist(10000, 1)
+density<-density[density<=0.5]
+density<-density*2
+hist(density)
+get_disp_dist<-function(n, max_disp, density){
+  v<-density * max_disp
+  v[sample(length(density), n)]
 }
 if (F){
   n=10000
@@ -53,11 +57,13 @@ if (F){
   ggsave(p,filename = "../../Figures/dispersal_density_curve/dispersal_density_curve.pdf", width=6, height=4)
 }
 test<-100
-get_disp_dist(1, 100)
-hist(y)
-saveRDS(y, "../../Figures/exponential_distribution/data.rda")
+get_disp_dist(1, 100, density)
 
-y<-get_disp_dist(10000, 100)
+#saveRDS(y, "../../Figures/exponential_distribution/data.rda")
+
+y<-get_disp_dist(1000, 100, density)
+hist(y)
+
 png(filename = "../../Figures/exponential_distribution/exponential_distribution.png",
     width = 1000, height = 800, units = "px")
 

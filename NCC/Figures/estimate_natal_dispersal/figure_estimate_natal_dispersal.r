@@ -1,0 +1,318 @@
+
+library(ggplot2)
+library(ggpubr)
+rm(list=ls())
+setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
+predicted_birds<-readRDS("../../Objects/estimate_disp_dist/models/predicted_birds.rda")
+predicted_mammals<-readRDS("../../Objects/estimate_disp_dist/models/predicted_mammals.rda")
+
+evaluated_metrics_birds<-readRDS("../../Objects/estimate_disp_dist/models/evaluated_metrics_birds.rda")
+evaluated_metrics_mammals<-readRDS("../../Objects/estimate_disp_dist/models/evaluated_metrics_mammals.rda")
+
+labels_birds<-c("log_max_dis~Diet"="Max disp ~ Diet",
+                "log_max_dis~HWI"="Max disp ~ HWI",
+                "log_max_dis~log_body_mass"="Max disp ~ Log(body mass)",
+                "log_max_dis~HWI+log_body_mass"="Max disp ~ HWI + Log(body mass)",
+                "log_max_dis~HWI+Diet"="Max disp ~ HWI + Diet",
+                "log_max_dis~log_body_mass+Diet"="Max disp ~ Log(body mass) + Diet",
+                "log_max_dis~HWI+log_body_mass+Diet"="Max disp ~ HWI + Log(body mass) + Diet",
+                "log_max_dis~body_mass"="Max disp ~ Body mass",
+                "log_max_dis~HWI+body_mass"="Max disp ~ HWI + Body mass",
+                "log_max_dis~body_mass+Diet"="Max disp ~ Body mass + Diet",
+                "log_max_dis~HWI+body_mass+Diet"="Max disp ~ HWI + Body mass + Diet")
+color7<-rainbow(11)
+colors_birds<-c("log_max_dis~Diet"= color7[1],
+                  "log_max_dis~HWI"= color7[2],
+                  "log_max_dis~log_body_mass"= color7[3],
+                  "log_max_dis~HWI+log_body_mass"= color7[4],
+                  "log_max_dis~HWI+Diet"= color7[5],
+                  "log_max_dis~log_body_mass+Diet"= color7[6],
+                  "log_max_dis~HWI+log_body_mass+Diet"= color7[7],
+                "log_max_dis~body_mass"=color7[8],
+                "log_max_dis~HWI+body_mass"=color7[9],
+                "log_max_dis~body_mass+Diet"=color7[10],
+                "log_max_dis~HWI+body_mass+Diet"=color7[11])
+
+linetype_birds<-c("log_max_dis~Diet"= 1,
+                "log_max_dis~HWI"= 2,
+                "log_max_dis~log_body_mass"= 3,
+                "log_max_dis~HWI+log_body_mass"= 4,
+                "log_max_dis~HWI+Diet"= 5,
+                "log_max_dis~log_body_mass+Diet"= 6,
+                "log_max_dis~HWI+log_body_mass+Diet"= 7,
+                "log_max_dis~body_mass"=8,
+                "log_max_dis~HWI+body_mass"=9,
+                "log_max_dis~body_mass+Diet"=10,
+                "log_max_dis~HWI+body_mass+Diet"=11)
+predicted_birds$formulas
+p1<-ggplot(predicted_birds)+
+  geom_smooth(aes(x=max_dis, y=pred_max_dis, 
+                  color=factor(model), linetype=factor(formulas)),
+              alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred_max_dis, color=factor(model),shape=factor(formulas)))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  labs(linetype="Model formulas", shape="Model formulas", color="Model algorithms")+
+  scale_shape_manual(values=linetype_birds,
+    labels=labels_birds)+
+  scale_linetype_manual(values=linetype_birds, labels=labels_birds)+
+  ggtitle("Birds")+
+  xlim(0, 1300)+ylim(0, 1300)+
+  geom_abline()+
+  theme_bw()
+p1
+
+labels_mammals<-c("log_max_dis~Diet"= "Max disp ~ Diet",
+                "log_max_dis~ForStrat"= "Max disp ~ Foraging stratum",
+                "log_max_dis~log_body_mass"= "Max disp ~ Log(body mass)",
+                "log_max_dis~ForStrat+log_body_mass"= "Max disp ~ Foraging stratum + Log(body mass)",
+                "log_max_dis~ForStrat+Diet"= "Max disp ~ Foraging stratum + Diet",
+                "log_max_dis~log_body_mass+Diet"= "Max disp ~ Log(body mass) + Diet",
+                "log_max_dis~body_mass"= "Max disp ~ Body mass",
+                "log_max_dis~ForStrat+body_mass"= "Max disp ~ Foraging stratum + Body mass",
+                "log_max_dis~body_mass+Diet"= "Max disp ~ Body mass + Diet",
+                "log_max_dis~ForStrat+body_mass+Diet"= "Max disp ~ Foraging stratum + Body mass + Diet")
+color7<-rainbow(11)
+colors_mammals<-c("log_max_dis~Diet"= color7[1],
+                  "log_max_dis~ForStrat"= color7[2],
+                  "log_max_dis~log_body_mass"= color7[3],
+                  "log_max_dis~ForStrat+log_body_mass"= color7[4],
+                  "log_max_dis~ForStrat+Diet"= color7[5],
+                  "log_max_dis~log_body_mass+Diet"= color7[6],
+                  "log_max_dis~ForStrat+log_body_mass+Diet"= color7[7],
+                  "log_max_dis~body_mass"= color7[8],
+                  "log_max_dis~ForStrat+body_mass"= color7[9],
+                  "log_max_dis~body_mass+Diet"= color7[10],
+                  "log_max_dis~ForStrat+body_mass+Diet"= color7[11])
+
+linetype_mammals<-c("log_max_dis~Diet"= 1,
+                  "log_max_dis~ForStrat"= 2,
+                  "log_max_dis~log_body_mass"= 3,
+                  "log_max_dis~ForStrat+log_body_mass"=4,
+                  "log_max_dis~ForStrat+Diet"= 5,
+                  "log_max_dis~log_body_mass+Diet"= 6,
+                  "log_max_dis~ForStrat+log_body_mass+Diet"= 7,
+                  "log_max_dis~body_mass"= 8,
+                  "log_max_dis~ForStrat+body_mass"= 9,
+                  "log_max_dis~body_mass+Diet"= 10,
+                  "log_max_dis~ForStrat+body_mass+Diet"= 11)
+
+
+p2<-ggplot(predicted_mammals)+
+  geom_smooth(aes(x=max_dis, y=pred_max_dis, 
+                  color=factor(model), linetype=factor(formulas)),
+              alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred_max_dis, 
+                 color=factor(model), shape=factor(formulas)))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  labs(linetype="Model formulas", shape="Model formulas", color="Model algorithms")+
+  scale_shape_manual(values=linetype_mammals,
+                     labels=labels_birds)+
+  scale_linetype_manual(values=linetype_mammals,
+                        labels=labels_birds)+
+  #scale_color_discrete(guide=FALSE)+
+  ggtitle("Mammals")+
+  xlim(0, 1100)+ylim(0, 1100)+
+  geom_abline()+
+  theme_bw()
+p2
+
+p<-ggarrange(p1, p2, ncol=1)
+p
+ggsave(p, filename="../../Figures/Estimate_Disp/Model_Results.png", width=10, height=12)
+
+evaluated_metrics_birds[which(evaluated_metrics_birds$RMSE_Full==min(evaluated_metrics_birds$RMSE_Full)),]
+
+p1<-ggplot(evaluated_metrics_birds)+
+  geom_point(aes(x=factor(model), y=RMSE_Full, color=factor(formulas), size=cor))+
+  xlab("Model algorithms")+
+  ylab("RMSE")+
+  labs(color="Model formulas", size="Correlation")+
+  scale_color_manual(values=colors_birds,
+                        labels=labels_birds)+
+  ggtitle("Birds")+
+  theme_bw()
+
+p1
+ggsave(p1, filename="../../Figures/Estimate_Disp/RMSE_birds.png", width=8, height=5)
+ggsave(p1, filename="../../Figures/Estimate_Disp/RMSE_birds.pdf", width=8, height=5)
+
+p1.1<-ggplot(evaluated_metrics_birds[which(evaluated_metrics_birds$RMSE_Full<=275.41),])+
+  geom_point(aes(x=factor(model), y=RMSE_Full, color=factor(formulas), size=cor))+
+  xlab("Model algorithms")+
+  ylab("RMSE")+
+  labs(color="Model formulas", size="Correlation")+
+  scale_color_manual(values=colors_birds,
+                     labels=labels_birds)+
+  ggtitle("Birds")+
+  theme_bw()
+
+p1.1
+ggsave(p1.1, filename="../../Figures/Estimate_Disp/RMSE_birds_details.png", width=8, height=5)
+ggsave(p1.1, filename="../../Figures/Estimate_Disp/RMSE_birds_details.pdf", width=8, height=5)
+
+
+evaluated_metrics_mammals[which(evaluated_metrics_mammals$RMSE_Full==min(evaluated_metrics_mammals$RMSE_Full)),]
+p2<-ggplot(evaluated_metrics_mammals)+
+  geom_point(aes(x=model, y=RMSE_Full, color=formulas, size=cor))+
+  xlab("Model algorithms")+
+  ylab("RMSE")+
+  labs(color="Model formulas", size="Correlation")+
+  scale_color_manual(values=colors_mammals,
+                     labels=labels_mammals)+
+  ggtitle("Mammals")+
+  theme_bw()
+
+p2
+ggsave(p2, filename="../../Figures/Estimate_Disp/RMSE_mammals.png", width=10, height=6)
+ggsave(p2, filename="../../Figures/Estimate_Disp/RMSE_mammals.pdf", width=10, height=6)
+
+p<-ggarrange(p1, p2, ncol=1)
+p
+
+ggsave(p, filename="../../Figures/Estimate_Disp/RMSE.png", width=8, height=10)
+
+
+best_model_info<-evaluated_metrics_birds[which(evaluated_metrics_birds$RMSE_Full==min(evaluated_metrics_birds$RMSE_Full)),]
+best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank_birds.rda", tolower(best_model_info$model)))
+best_model<-best_model[[best_model_info$formulas]]
+birds_trait<-read.table("../../Data/Dispersal_distance/EltonTraits/Dataset_HWI.csv", sep=",", head=T, stringsAsFactors = F)
+birds_trait[which(birds_trait$Diet=="fruit"), "Diet"]<-"plants"
+birds_trait[which(birds_trait$Diet=="seeds"), "Diet"]<-"plants"
+birds_trait[which(birds_trait$Diet=="nectar"), "Diet"]<-"plants"
+birds_trait[which(birds_trait$Diet=="scav"), "Diet"]<-"omnivore"
+birds_trait[which(is.na(birds_trait$Diet)), "Diet"]<-"omnivore"
+
+birds_trait[which(is.na(birds_trait$Migration_3)), "Migration_3"]<-"unknown"
+birds_trait<-data.table(birds_trait)
+cols<-c("HWI", "log_body_mass", "Diet", "Migration_3", "iucn_name")
+new_df_birds<-birds_trait[,..cols]
+new_df_birds[is.na(Migration_3)]
+new_df_birds<-new_df_birds[(!is.na(HWI))&(!is.na(log_body_mass))&(!is.na(Diet))]
+new_df_birds$body_mass<-exp(1)^new_df_birds$log_body_mass
+ratio_bird<-3.5
+new_df_birds$estimated_disp<-exp(1)^predict(best_model, new_df_birds)*ratio_bird
+
+unique(new_df_birds$Diet)
+table(new_df_birds$Migration_3)
+p1<-ggplot(new_df_birds)+
+  geom_boxplot(aes(x=Migration_3, y=estimated_disp))+
+  xlab("Migration type")+
+  ylab("Estimated dispersal distance")+
+  ggtitle("Birds")+
+  scale_y_log10()+
+  theme_bw()
+p1
+ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_mig.png", width=8, height=6)
+ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_mig.pdf", width=8, height=6)
+
+
+p1<-ggplot(new_df_birds)+
+  geom_boxplot(aes(x=Diet, y=estimated_disp))+
+  xlab("Diet type")+
+  ylab("Estimated dispersal distance")+
+  ggtitle("Birds")+
+  scale_y_log10()+
+  theme_bw()
+p1
+ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_Diet.png", width=8, height=6)
+ggsave(p1, filename="../../Figures/Estimate_Disp/Predicted_birds_Diet.pdf", width=8, height=6)
+
+
+
+
+best_model_info<-evaluated_metrics_mammals[which(evaluated_metrics_mammals$RMSE_Full==min(evaluated_metrics_mammals$RMSE_Full)),]
+best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank_mammals.rda", tolower(best_model_info$model)))
+best_model<-best_model[[best_model_info$formulas]]
+
+mammals_trait<-read.table("../../Data/Dispersal_distance/EltonTraits/MamFuncDat.txt", sep="\t", head=T, stringsAsFactors = F)
+mammals_trait_bak<-mammals_trait
+DietType<-c("omnivore", "herbivore", "carnivore")
+herbivore<-c("Diet.Scav", "Diet.Fruit", "Diet.Nect", "Diet.Seed", "Diet.PlantO")
+carnivore<-c("Diet.Inv", "Diet.Vend", "Diet.Vect", "Diet.Vfish", "Diet.Vunk")
+for (col in c(herbivore, carnivore)){
+  mammals_trait[, col]<-as.numeric(mammals_trait[, col])
+}
+#mammals_trait<-data.table(mammals_trait)
+mammals_trait$herbivore_score<-rowSums(mammals_trait[, herbivore], na.rm = T)
+mammals_trait$carnivore_score<-rowSums(mammals_trait[, carnivore], na.rm = T)
+mammals_trait$diet_type<-"omnivore"
+mammals_trait[which(mammals_trait$herbivore_score==100), "diet_type"]<-"herbivore"
+mammals_trait[which(mammals_trait$carnivore_score==100), "diet_type"]<-"carnivore"
+mammals_trait$BodyMass.Value<-as.numeric(mammals_trait$BodyMass.Value)
+mammals_trait$log_body_mass<-log(mammals_trait$BodyMass.Value)
+
+
+
+cols<-c("Scientific", "ForStrat.Value", "log_body_mass", "diet_type")
+
+new_df_mammals<-data.table(mammals_trait)[,..cols]
+colnames(new_df_mammals)<-c("Scientific", "ForStrat", "log_body_mass", "Diet")
+new_df_mammals<-new_df_mammals[(!is.na(ForStrat))&(!is.na(log_body_mass))&(!is.na(Diet))]
+new_df_mammals<-new_df_mammals[!(ForStrat %in% c("A", "M"))]
+new_df_mammals$body_mass<-exp(1)^new_df_mammals$log_body_mass
+ratio_mammals<-2.5
+new_df_mammals$estimated_disp<-exp(1)^predict(best_model, new_df_mammals)*ratio_mammals
+new_df_mammals$Diet
+model_df_mammals$ForStrat
+unique(new_df_mammals$Diet)
+summary(new_df_mammals$estimated_disp)
+
+
+
+p2<-ggplot(new_df_mammals)+
+  geom_boxplot(aes(x=Diet, y=estimated_disp))+
+  xlab("Diet type")+
+  ylab("Estimated dispersal distance")+
+  ggtitle("Mammals")+
+  scale_y_log10()+
+  theme_bw()
+p2
+ggsave(p2, filename="../../Figures/Estimate_Disp/Predicted_mammals_diet.png", width=8, height=6)
+
+p<-ggarrange(p1, p2, ncol=1)
+p
+
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.png", width=8, height=8)
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_diet.pdf", width=8, height=8)
+
+
+best_model_info_mammals<-evaluated_metrics_mammals[which(evaluated_metrics_mammals$RMSE_Full==min(evaluated_metrics_mammals$RMSE_Full)),]
+best_model_info_bird<-evaluated_metrics_birds[which(evaluated_metrics_birds$RMSE_Full==min(evaluated_metrics_birds$RMSE_Full)),]
+
+
+cor_v<-cor(predicted_birds[(model=="RF")&(formulas==best_model_info_bird$formulas)]$max_dis,
+           predicted_birds[(model=="RF")&(formulas==best_model_info_bird$formulas)]$pred_max_dis)
+
+p1<-ggplot(predicted_birds[(model=="RF")&(formulas==best_model_info_bird$formulas)])+
+  geom_smooth(aes(x=max_dis, y=pred_max_dis), method=lm, alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred_max_dis))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  ggtitle(sprintf("Birds, cor=%.2f", cor_v))+
+  #geom_abline()+
+  xlim(0, 1300)+ylim(0, 1300)+
+  theme_bw()
+p1
+
+cor_v<-cor(predicted_mammals[(model=="RF")&(formulas==best_model_info_mammals$formulas)]$max_dis,
+           predicted_mammals[(model=="RF")&(formulas==best_model_info_mammals$formulas)]$pred_max_dis)
+
+p2<-ggplot(predicted_mammals[(model=="RF")&(formulas==best_model_info_mammals$formulas)])+
+  geom_smooth(aes(x=max_dis, y=pred_max_dis), method=lm, alpha=0.2)+
+  geom_point(aes(x=max_dis, y=pred_max_dis))+
+  xlab("Empirical max natal dispersal distance")+
+  ylab("Estimated max natal dispersal distance")+
+  ggtitle(sprintf("Mammals, cor=%.2f", cor_v))+
+  xlim(0, 1100)+ylim(0, 1100)+
+  theme_bw()
+p2
+
+p<-ggarrange(p1, p2, ncol=2)
+p
+
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_vs_emperical.png", width=10, height=4)
+ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_vs_emperical.pdf", width=10, height=4)
+
+
