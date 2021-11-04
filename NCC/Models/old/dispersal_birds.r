@@ -43,7 +43,7 @@ density<-rexp(n = 10000, rate = 0.1)
 density<-density/max(density)
 density<-density[density<=0.5]
 density<-density*2
-hist(density)
+#hist(density)
 get_disp_dist<-function(n, max_disp, density){
   v<-density * max_disp
   v[sample(length(density), n)]
@@ -346,7 +346,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
           prev_dis<-unique(prev_dis[, ..selected_cols])
         }
         #prev_dis<-prev_dis[exposure==0]
-        prev_dis[prev_dis$accumulative_disp>100000]$accumulative_disp<-0
+        prev_dis[prev_dis$accumulative_disp>100000]$accumulative_disp<-100000
       }
       
     }

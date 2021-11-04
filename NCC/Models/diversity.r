@@ -17,7 +17,15 @@ if (is.na(exposure)){
 
 dispersal<-as.numeric(args[3])
 if (is.na(dispersal)){
-  dispersal<-0
+  dispersal<-1
+}
+
+if (group=="Birds"){
+  group_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+  
+}else{
+  group_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
+  colnames(group_disp)[1]<-"iucn_name"
 }
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
@@ -59,9 +67,28 @@ for (j in c(1:nrow(layer_df))){
     }
     #print(paste(Sys.time(), 1))
     source_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$SP)
-    start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", source_folder, exposure, dispersal))
+    start_dis_str<-sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", source_folder, exposure, dispersal)
+    if (!file.exists(start_dis_str)){
+      next()
+    }
+    start_dis<-readRDS(start_dis_str)
+    
     #print(sprintf("%s/%s_%s_%d.rda", enm_folder, layer$GCM, layer$SSP, layer$M))
-    all_dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda", source_folder, layer$GCM, layer$SSP, exposure, dispersal))
+    item_str<-sprintf("%s/%s_%s_%d_dispersal_%d.rda", source_folder, layer$GCM, layer$SSP, exposure, dispersal)
+    
+    if (!file.exists(item_str)){
+      item_str<-sprintf("%s/%s_%s_%d_dispersal_%d.rda", 
+                        sprintf("../../Objects_PNAS/Dispersal/%s/%s", group, item$SP), 
+                        layer$GCM, layer$SSP, exposure, dispersal)
+      all_dis<-readRDS(item_str)
+      xxxx<-names(all_dis)[1]
+      for (xxxx in names(all_dis)){
+        all_dis[[xxxx]]$disp<--1
+      }
+    }else{
+      all_dis<-readRDS(item_str)
+    }
+    
     all_dis[["2020"]]<-start_dis
     
     YYYY=2021
