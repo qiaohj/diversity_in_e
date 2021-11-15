@@ -98,6 +98,9 @@ i=1
 bi="Poicephalus rufiventris"
 for (i in 1:length(group_full_sum_area$SCINAME)) {
   bi<-group_full_sum_area$SCINAME[i]
+  if (bi=="Aratinga maculata"){
+    asdf
+  }
   print(paste(i, length(group_full_sum_area$SCINAME), bi, 
               "exposure", exposure_threshold, "dispersal", dispersal))
   

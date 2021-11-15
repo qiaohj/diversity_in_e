@@ -44,13 +44,16 @@ if (T){
         y1<-year-1
         y2<-year  
         item1<-item[[as.character(y1)]]
+        if (!("disp" %in% colnames(item1))){
+          next()
+        }
         item2<-item[[as.character(y2)]]
         if (is.null(item2)){
           break()
         }
         me_item<-merge(item1, item2, by=c("x", "y", "mask_100km"))
-        me_item$dispersal_dist<-me_item$accumulative_disp.y-me_item$accumulative_disp.x
-        me_item[accumulative_disp.x>50000]$dispersal_dist<-me_item[accumulative_disp.x>50000]$accumulative_disp.y
+        me_item$dispersal_dist<-me_item$disp.x
+        #me_item[accumulative_disp.x>50000]$dispersal_dist<-me_item[accumulative_disp.x>50000]$accumulative_disp.y
         N_Reset_Cell<-nrow(me_item[accumulative_disp.x>50000])
         N_New_Cell<-nrow(item2[!(mask_100km %in% item1$mask_100km)])
         #me_item<-me_item[dispersal_dist>0]
@@ -116,13 +119,19 @@ if (T){
         y1<-year-1
         y2<-year  
         item1<-item[[as.character(y1)]]
+        if (!("disp" %in% colnames(item1))){
+          next()
+        }
         item2<-item[[as.character(y2)]]
+        
         if (is.null(item2)){
           break()
         }
         me_item<-merge(item1, item2, by=c("x", "y", "mask_100km"))
-        me_item$dispersal_dist<-me_item$accumulative_disp.y-me_item$accumulative_disp.x
-        me_item[accumulative_disp.x>50000]$dispersal_dist<-me_item[accumulative_disp.x>50000]$accumulative_disp.y
+        me_item$dispersal_dist<-me_item$disp.x
+        
+        #me_item$dispersal_dist<-me_item$accumulative_disp.y-me_item$accumulative_disp.x
+        #me_item[accumulative_disp.x>50000]$dispersal_dist<-me_item[accumulative_disp.x>50000]$accumulative_disp.y
         N_Reset_Cell<-nrow(me_item[accumulative_disp.x>50000])
         N_New_Cell<-nrow(item2[!(mask_100km %in% item1$mask_100km)])
         #me_item<-me_item[dispersal_dist>0]

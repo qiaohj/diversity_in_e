@@ -43,11 +43,11 @@ euc.dist <- function(x1, y1, x2, y2) {
   sqrt((x1 - x2) ^ 2+(y1-y2)^2)
 }
 exposure=5
-#for (j in c(1:nrow(layer_df))){
-#  for (exposure in c(1, 5)){
-persent<-0.2
-for (j in c(3, 9)){
-  for (exposure in c(5)){
+for (j in c(1:nrow(layer_df))){
+  for (exposure in c(0, 5)){
+    persent<-0.2
+    #for (j in c(3, 9)){
+    #  for (exposure in c(5)){
     layer_item<-layer_df[j,]
     for (group in c("Birds", "Mammals")){
       if (group=="Birds"){
@@ -92,7 +92,6 @@ for (j in c(3, 9)){
     }
   }
 }
-asdf
 
 library(magick)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
@@ -101,39 +100,40 @@ label<-"UKESM1_SSP585"
 g<-"Birds"
 year<-2021
 persent<-0.2
-
-for (year in c(2021:2100)){
-  print(year)
-  png(sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/Combined/%s/%d.png", 
-              exposure, label, year), 
-      width=1920, height=540, units = "px")
-  par(mfrow=c(1,2),
-      oma = c(0,0,0,0),
-      mar = c(0,0,0,0),
-      mgp = c(0, 0, 0),    # axis label at 2 rows distance, tick labels at 1 row
-      xpd = NA,
-      tcl=-1
-  )
-  for (g in c("Birds", "Mammals")){
-    persent<-ifelse(g=="Birds", 0.2, 0.5)
-    folder<-sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/%s/%s/per_%d", 
-                    exposure, g, label, round(persent * 100))
+for (label in c("UKESM1_SSP119", "UKESM1_SSP245", "UKESM1_SSP585")){
+  for (year in c(2021:2100)){
+    print(year)
+    png(sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/Combined/%s/%d.png", 
+                exposure, label, year), 
+        width=1920, height=540, units = "px")
+    par(mfrow=c(1,2),
+        oma = c(0,0,0,0),
+        mar = c(0,0,0,0),
+        mgp = c(0, 0, 0),    # axis label at 2 rows distance, tick labels at 1 row
+        xpd = NA,
+        tcl=-1
+    )
+    for (g in c("Birds", "Mammals")){
+      persent<-ifelse(g=="Birds", 0.2, 0.5)
+      folder<-sprintf("../../Figures/cluster_based_pathway_movies/Movies/exposure_%d/%s/%s/per_%d", 
+                      exposure, g, label, round(persent * 100))
+      
+      
+      path<-image_read(sprintf("%s/%d.png", folder, year))
+      path<-image_crop(path, "3000x1650+600+50")
+      
+      path<-image_annotate(path, g, gravity = "south", 
+                           size = 120,  color = "#000000",
+                           strokecolor = NULL, boxcolor = NULL)
+      #path<-image_resize(path, "960x580")
+      
+      plot(path)
+      
+    }
+    text(0,100,year,cex=5,font=2)
     
-    
-    path<-image_read(sprintf("%s/%d.png", folder, year))
-    path<-image_crop(path, "3000x1650+600+50")
-    
-    path<-image_annotate(path, g, gravity = "south", 
-                         size = 120,  color = "#000000",
-                         strokecolor = NULL, boxcolor = NULL)
-    #path<-image_resize(path, "960x580")
-    
-    plot(path)
-    
+    dev.off()
   }
-  text(0,100,year,cex=5,font=2)
-  
-  dev.off()
 }
 
 cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/cluster_based_pathway_movies/Movies/exposure_5/Combined/UKESM1_SSP119

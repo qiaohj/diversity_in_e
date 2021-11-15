@@ -71,9 +71,16 @@ for (l_i in c(1:nrow(layer_df))){
                     sp_test$SP, sp_test$group))
       
       source_folder<-sprintf("../../Objects/Dispersal/%s/%s", sp_test$group, sp_test$SP)
+      if (!file.exists(sprintf("%s/initial_disp_exposure_%d_dispersal_1.rda", 
+                               source_folder,  exposure))){
+        next()
+      }
       start_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_1.rda", 
                                    source_folder,  exposure))
-      
+      if (!file.exists(sprintf("%s/%s_%d_dispersal_1.rda", 
+                               source_folder, layer_item$LABEL, exposure))){
+        next()
+      }
       dis_details<-readRDS(sprintf("%s/%s_%d_dispersal_1.rda", 
                                    source_folder, layer_item$LABEL, exposure))
       dis_details<-rbindlist(dis_details)

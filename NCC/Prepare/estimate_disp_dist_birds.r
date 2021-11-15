@@ -538,6 +538,8 @@ ggsave(p, filename="../../Figures/Estimate_Disp/Predicted_birds.png", width=8, h
 new_df_birds
 
 saveRDS(new_df_birds, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+write.csv(new_df_birds, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.csv", row.names=F)
+
 
 model_df_birds$estimated_disp<-predict(best_model, model_df_birds)
 
@@ -555,10 +557,11 @@ min_mass<-min(model_df_birds$log_body_mass)
 max_mass<-max(model_df_birds$log_body_mass)
 
 
-p2<-ggplot(new_df_birds)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(Diet)))+
+p2<-ggplot(new_df_birds)+geom_point(aes(x=body_mass, y=estimated_disp, color=factor(Diet)))+
   geom_vline(xintercept = min_mass, color="black", linetype=2)+
   geom_vline(xintercept = max_mass, color="black", linetype=2)+
-  xlab("Body mass")+
+  scale_x_log10()+
+  xlab("Body mass (log transferred)")+
   ylab("Estimated natal dispersal distance")+
   labs(color="Diet")+
   theme_bw()

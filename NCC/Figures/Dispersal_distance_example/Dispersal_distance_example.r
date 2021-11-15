@@ -11,6 +11,8 @@ species_list<-c("Clibanornis rubiginosus", "Dysithamnus mentalis",
                 "Myrmotherula schisticolor", "Myiobius sulphureipygius",
                  "Microcerculus marginatus"
                 )
+
+species_list<-c("Baryphthengus martii", "Mergellus albellus")
 bird_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
 sp<-species_list[5]
 
@@ -67,7 +69,7 @@ for (i in c(1:nrow(sub_bird_disp))){
 all_item<-rbindlist(all_item)
 all_item_se<-all_item[, .(mean_dist=mean(dispersal_dist), sd_dist=sd(dispersal_dist)), 
                       by=c("iucn_name", "year", "exposure", "label")]
-
+all_item$exposure<-ifelse(all_item$exposure==0, "No climate resilience", "Climate resilience")
 p1<-ggplot(all_item)+
   geom_histogram(aes(x=dispersal_dist/1000, fill=factor(exposure)), bins=50)+
   theme_bw()+
@@ -75,6 +77,7 @@ p1<-ggplot(all_item)+
   labs(x="Mean dispersal distance (km)", y="count", fill="Exposure")
 
 p1
+all_item_se$exposure<-ifelse(all_item_se$exposure==0, "No climate resilience", "Climate resilience")
 p2<-ggplot(all_item_se)+
   geom_line(aes(x=year,  y=mean_dist/1000, color=factor(exposure)))+
   #geom_errorbar(aes(x=year, ymin=mean_dist-sd_dist, ymax=mean_dist+sd_dist))+
@@ -84,8 +87,8 @@ p2<-ggplot(all_item_se)+
 
 p<-ggarrange(p1, p2, nrow=2)
 p
-ggsave(p, filename="../../Figures/Dispersal_distance_example/Dispersal_distance_example.png", width=15, height=6)
-ggsave(p, filename="../../Figures/Dispersal_distance_example/Dispersal_distance_example.pdf", width=15, height=6)
+ggsave(p, filename="../../Figures/Dispersal_distance_example/Dispersal_distance_example.png", width=10, height=6)
+ggsave(p, filename="../../Figures/Dispersal_distance_example/Dispersal_distance_example.pdf", width=10, height=6)
 
 
 

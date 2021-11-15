@@ -25,7 +25,14 @@ for (exposure in c(0,5)){
       item<-when_extinct[i,]
       
       target_folder<-sprintf("../../Objects/Dispersal/%s/%s", g, item$sp)
+      if (!file.exists(sprintf("%s/fit.rda", target_folder))){
+        next()
+      }
       fit<-readRDS(sprintf("%s/fit.rda", target_folder))
+      if (!file.exists(sprintf("%s/%s_%s_%d_dispersal_%d.rda", 
+                               target_folder, item$GCM, item$SSP, exposure, item$dispersal))){
+        next()
+      }
       dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda", 
                            target_folder, item$GCM, item$SSP, exposure, item$dispersal))
       dis<-rbindlist(dis)

@@ -4,7 +4,7 @@ library(ggpubr)
 
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 fit_mammals<-readRDS("../../Figures/niche_breadth_compare/niche_mammals.rda")
-fit_birds<-readRDS("../../Figures/niche_breadth_compare/niche_mammals.rda")
+fit_birds<-readRDS("../../Figures/niche_breadth_compare/niche_birds.rda")
 fits<-fit_mammals
 fits<-rbindlist(list(fit_mammals, fit_birds))
 fits[range_bio12_sd_min<0]$range_bio12_sd_min<-0

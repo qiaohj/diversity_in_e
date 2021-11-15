@@ -8,7 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 if (is.na(group)){
-  group<-"Birds"
+  group<-"Mammals"
 }
 
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
@@ -44,6 +44,9 @@ for (target in c("1850", "1970")){
     
     
     source_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$sp)
+    if (!file.exists(sprintf("%s/initial_disp_exposure_0_dispersal_0.rda", source_folder))){
+      next()
+    }
     start_dis<-readRDS(sprintf("%s/initial_disp_exposure_0_dispersal_0.rda", source_folder))
     start_dis<-merge(start_dis, env_layers, by=c("x", "y", "mask_100km"))
     if (target=="1850"){
@@ -80,3 +83,10 @@ for (target in c("1850", "1970")){
   }
 }
 saveRDS(nb, sprintf("../../Objects/Species_property/%s_property_compared.rda", group))
+
+if (F){
+  group<-"Mammals"
+  nb<-readRDS(sprintf("../../Objects/Species_property/%s_property_compared.rda", group))
+  nb<-nb[which(target==1850)]
+  saveRDS(nb, sprintf("../../Objects/Species_property/%s_property.rda", group))
+}

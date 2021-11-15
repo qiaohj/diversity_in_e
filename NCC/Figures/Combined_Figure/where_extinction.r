@@ -109,8 +109,10 @@ if (T){
   N_keys<-unique(n_ext_final_with_keyspots$keysport)
   N_keys<-N_keys[!is.na(N_keys)]
   N_keys<-as.character(N_keys)
-  table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure)
-  table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure, n_ext_final_with_keyspots$keysport)
+  nrow(mask_p)-table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure)
+  
+  table(n_ext_final_with_keyspots$dispersal, n_ext_final_with_keyspots$exposure, 
+        n_ext_final_with_keyspots$keysport)
   
   p2<-list()
   ll<- unique(n_ext_final_with_keyspots$label)[1]

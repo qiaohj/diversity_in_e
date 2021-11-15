@@ -110,6 +110,7 @@ for (exposure in c(0, 5)){
   rda<-sprintf("../../Figures/N_Extinction/sp_dis_all_%d.rda", exposure)
   print(paste("Reading", rda))
   sp_dis_all<-readRDS(rda)
+  colnames(sp_dis_all)[which(colnames(sp_dis_all)=="N_SP.x")]<-"N_SP"
   sp_dis_all_sub_1<-sp_dis_all%>%dplyr::filter(year==2100)
   sp_dis_all_sub<-sp_dis_all_sub_1%>%dplyr::filter((Extinct_Type!="")|(N_type=="EXTINCT"))
   sp_dis_all_sub[which(sp_dis_all_sub$N_type!="EXTINCT"), "N_type"]<-"ENDANGERED"

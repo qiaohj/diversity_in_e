@@ -39,8 +39,11 @@ for (YYYY in predict_range){
     item<-df_list[i,]
     item$SP<-gsub(" ", "_", item$SP)
     
-    target_folder<-sprintf("../../Objects/%s/%s", group, item$SP)
-    start_dis<-readRDS(sprintf("%s/initial_disp_exposure_0.rda", target_folder))
+    target_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, item$SP)
+    if (!file.exists(sprintf("%s/initial_disp_exposure_0_dispersal_0.rda", target_folder))){
+      next()
+    }
+    start_dis<-readRDS(sprintf("%s/initial_disp_exposure_0_dispersal_0.rda", target_folder))
     start_dis<-start_dis%>%ungroup()%>%dplyr::distinct(x, y)
     colnames(start_dis)<-c("x", "y")
     target<-sprintf("%s/dispersal", target_folder)

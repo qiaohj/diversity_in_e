@@ -45,6 +45,10 @@ for (dispersal in (c(0:1))){
     
     #item$sp<-"Bunomys_fratrorum"
     #item$group<-"Mammals"
+    if (!file.exists(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", 
+                             target_folder, exposure, dispersal))){
+      next()
+    }
     st_dis<-readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", 
                                target_folder, exposure, dispersal))
     #start_dis<-start_dis%>%dplyr::filter(in_out==1)

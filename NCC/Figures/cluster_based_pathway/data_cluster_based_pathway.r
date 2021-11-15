@@ -60,7 +60,7 @@ r_continent<-raster("../../Raster/Continent_ect4.tif")
 sp_i<-412
 exposure<-5
 l_i<-1
-for (l_i in c(1:nrow(layer_df))){
+for (l_i in c(7:nrow(layer_df))){
   layer_item<-layer_df[l_i,]
   for (exposure in c(0, 5)){
     for (sp_i in c(1:nrow(df_sp_list))){
@@ -78,6 +78,10 @@ for (l_i in c(1:nrow(layer_df))){
       }
       dir.create(target_folder, showWarnings = F, recursive = T)
       source_folder<-sprintf("../../Objects/Dispersal/%s/%s", sp_test$group, sp_test$SP)
+      if (!file.exists(sprintf("%s/%s_%d_dispersal_1.rda", 
+                               source_folder, layer_item$LABEL, exposure))){
+        next()
+      }
       dis_details<-readRDS(sprintf("%s/%s_%d_dispersal_1.rda", 
                                    source_folder, layer_item$LABEL, exposure))
       dis_details<-rbindlist(dis_details)

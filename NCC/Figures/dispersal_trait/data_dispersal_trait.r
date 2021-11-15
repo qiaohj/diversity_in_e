@@ -3,7 +3,7 @@ library(data.table)
 library(raster)
 rm(list=ls())
 exposure<-0
-g<-"Mammals"
+g<-"Birds"
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 alt<-raster("../../Raster/ALT/alt_eck4.tif")
 source("commonFuns/functions.r")
@@ -11,10 +11,10 @@ all_result<-NULL
 GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
 SSPs<-c("SSP119", "SSP245", "SSP585")
 i=2
-for (exposure in c(5)){
+for (exposure in c(0)){
   when_extinct<-NULL
   
-  for (g in c("Mammals")){
+  for (g in c("Birds")){
     sp_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", g))
     
     sp_list$sp<-gsub(" ", "_", sp_list$SP)
@@ -30,6 +30,10 @@ for (exposure in c(5)){
             item$SSP<-SSP_i
             item$dispersal<-da
             target_folder<-sprintf("../../Objects/Dispersal/%s/%s", g, item$sp)
+            if (!file.exists(sprintf("%s/%s_%s_%d_dispersal_%d.rda",
+                                     target_folder, item$GCM, item$SSP, exposure, item$dispersal))){
+              next()
+            }
             dis<-readRDS(sprintf("%s/%s_%s_%d_dispersal_%d.rda",
                                  target_folder, item$GCM, item$SSP, exposure, item$dispersal))
             

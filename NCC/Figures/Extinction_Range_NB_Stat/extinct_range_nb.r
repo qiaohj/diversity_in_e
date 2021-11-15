@@ -2,6 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(ggpmisc)
 library(ggpubr)
+library(ggpmisc)
 library(data.table)
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
@@ -11,7 +12,8 @@ for (g in c("Birds", "Mammals")){
   print(g)
   nb<-readRDS(sprintf("../../Objects/Species_property/%s_property.rda", g))
   
-  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
+  #nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, nb_bio12_sd, nb_bio13_sd, nb_bio14_sd, N_CELL, sp)
+  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio12_sd, N_CELL, sp)
   nb<-as.data.frame(nb)
   
   for (exposure in c(0, 5)){
@@ -75,8 +77,8 @@ for (group in c("Mammals", "Birds")){
 df_sp_list<-rbindlist(df_sp_list)
 df<-merge(df, df_sp_list, by="sp")
 
-df_se<-df%>%dplyr::group_by(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd,
-                            nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
+df_se<-df%>%dplyr::group_by(nb_bio1_sd, 
+                            nb_bio12_sd, 
                             N_CELL, sp, dispersal, exposure, group)%>%
   dplyr::summarise(mean_extinct_year=mean(extinct_year))
 
@@ -156,15 +158,12 @@ for (g in c("Birds", "Mammals")){
   cols<-c("sp", "estimated_disp", "family", "Order")
   df_list<-df_list[, ..cols]
   nb<-inner_join(nb, df_list, by="sp")
-  nb<-nb%>%dplyr::select(nb_bio1_sd, nb_bio5_sd, nb_bio6_sd, 
-                         nb_bio12_sd, nb_bio13_sd, nb_bio14_sd,
+  nb<-nb%>%dplyr::select(nb_bio1_sd, 
+                         nb_bio12_sd,
                          N_CELL, estimated_disp, sp, family, Order, 
                          range_bio1_sd_min, range_bio1_sd_max,
-                         range_bio5_sd_min, range_bio5_sd_max,
-                         range_bio6_sd_min, range_bio6_sd_max,
-                         range_bio12_sd_min, range_bio12_sd_max,
-                         range_bio13_sd_min, range_bio13_sd_max,
-                         range_bio14_sd_min, range_bio14_sd_max)
+                         range_bio12_sd_min, range_bio12_sd_max
+                         )
   
   nb<-as.data.frame(nb)
   full_sp<-expand.grid(GCM=GCMs, SSP=SSPs, sp=unique(nb$sp), dispersal=dispersals, stringsAsFactors = F)
@@ -241,48 +240,51 @@ ggsave(pp, filename=sprintf("../../Figures/N_Extinction/NB_Extinct/Extinction_hi
 
 df$range_bio1_sd_min<-df$range_bio1_sd_min/100
 df$range_bio1_sd_max<-df$range_bio1_sd_max/100
-df$range_bio5_sd_min<-df$range_bio5_sd_min/100
-df$range_bio5_sd_max<-df$range_bio5_sd_max/100
-df$range_bio6_sd_min<-df$range_bio6_sd_min/100
-df$range_bio6_sd_max<-df$range_bio6_sd_max/100
+#df$range_bio5_sd_min<-df$range_bio5_sd_min/100
+#df$range_bio5_sd_max<-df$range_bio5_sd_max/100
+#df$range_bio6_sd_min<-df$range_bio6_sd_min/100
+#df$range_bio6_sd_max<-df$range_bio6_sd_max/100
 df$range_bio12_sd_min<-df$range_bio12_sd_min/100
 df$range_bio12_sd_max<-df$range_bio12_sd_max/100
-df$range_bio13_sd_min<-df$range_bio13_sd_min/100
-df$range_bio13_sd_max<-df$range_bio13_sd_max/100
-df$range_bio14_sd_min<-df$range_bio14_sd_min/100
-df$range_bio14_sd_max<-df$range_bio14_sd_max/100
+#df$range_bio13_sd_min<-df$range_bio13_sd_min/100
+#df$range_bio13_sd_max<-df$range_bio13_sd_max/100
+#df$range_bio14_sd_min<-df$range_bio14_sd_min/100
+#df$range_bio14_sd_max<-df$range_bio14_sd_max/100
 
 df$scaled_range_bio1_sd_min<-scale(c(df$range_bio1_sd_min, df$range_bio1_sd_max))[1:nrow(df)]
 df$scaled_range_bio1_sd_max<-scale(c(df$range_bio1_sd_max, df$range_bio1_sd_min))[1:nrow(df)]
-df$scaled_range_bio5_sd_min<-scale(c(df$range_bio5_sd_min, df$range_bio5_sd_max))[1:nrow(df)]
-df$scaled_range_bio5_sd_max<-scale(c(df$range_bio5_sd_max, df$range_bio5_sd_min))[1:nrow(df)]
-df$scaled_range_bio6_sd_min<-scale(c(df$range_bio6_sd_min, df$range_bio6_sd_max))[1:nrow(df)]
-df$scaled_range_bio6_sd_max<-scale(c(df$range_bio6_sd_max, df$range_bio6_sd_min))[1:nrow(df)]
+#df$scaled_range_bio5_sd_min<-scale(c(df$range_bio5_sd_min, df$range_bio5_sd_max))[1:nrow(df)]
+#df$scaled_range_bio5_sd_max<-scale(c(df$range_bio5_sd_max, df$range_bio5_sd_min))[1:nrow(df)]
+#df$scaled_range_bio6_sd_min<-scale(c(df$range_bio6_sd_min, df$range_bio6_sd_max))[1:nrow(df)]
+#df$scaled_range_bio6_sd_max<-scale(c(df$range_bio6_sd_max, df$range_bio6_sd_min))[1:nrow(df)]
 df$scaled_range_bio12_sd_min<-scale(c(df$range_bio12_sd_min, df$range_bio12_sd_max))[1:nrow(df)]
 df$scaled_range_bio12_sd_max<-scale(c(df$range_bio12_sd_max, df$range_bio12_sd_min))[1:nrow(df)]
-df$scaled_range_bio13_sd_min<-scale(c(df$range_bio13_sd_min, df$range_bio13_sd_max))[1:nrow(df)]
-df$scaled_range_bio13_sd_max<-scale(c(df$range_bio13_sd_max, df$range_bio13_sd_min))[1:nrow(df)]
-df$scaled_range_bio14_sd_min<-scale(c(df$range_bio14_sd_min, df$range_bio14_sd_max))[1:nrow(df)]
-df$scaled_range_bio14_sd_max<-scale(c(df$range_bio14_sd_max, df$range_bio14_sd_min))[1:nrow(df)]
+#df$scaled_range_bio13_sd_min<-scale(c(df$range_bio13_sd_min, df$range_bio13_sd_max))[1:nrow(df)]
+#df$scaled_range_bio13_sd_max<-scale(c(df$range_bio13_sd_max, df$range_bio13_sd_min))[1:nrow(df)]
+#df$scaled_range_bio14_sd_min<-scale(c(df$range_bio14_sd_min, df$range_bio14_sd_max))[1:nrow(df)]
+#df$scaled_range_bio14_sd_max<-scale(c(df$range_bio14_sd_max, df$range_bio14_sd_min))[1:nrow(df)]
 
 df$scaled_nb_bio1_sd<-df$scaled_range_bio1_sd_max - df$scaled_range_bio1_sd_min
-df$scaled_nb_bio5_sd<-df$scaled_range_bio5_sd_max - df$scaled_range_bio5_sd_min
-df$scaled_nb_bio6_sd<-df$scaled_range_bio6_sd_max - df$scaled_range_bio6_sd_min
+#df$scaled_nb_bio5_sd<-df$scaled_range_bio5_sd_max - df$scaled_range_bio5_sd_min
+#df$scaled_nb_bio6_sd<-df$scaled_range_bio6_sd_max - df$scaled_range_bio6_sd_min
 df$scaled_nb_bio12_sd<-df$scaled_range_bio12_sd_max - df$scaled_range_bio12_sd_min
-df$scaled_nb_bio13_sd<-df$scaled_range_bio13_sd_max - df$scaled_range_bio13_sd_min
-df$scaled_nb_bio14_sd<-df$scaled_range_bio14_sd_max - df$scaled_range_bio14_sd_min
+#df$scaled_nb_bio13_sd<-df$scaled_range_bio13_sd_max - df$scaled_range_bio13_sd_min
+#df$scaled_nb_bio14_sd<-df$scaled_range_bio14_sd_max - df$scaled_range_bio14_sd_min
 
 
 df$nb_bio1_sd<-df$nb_bio1_sd/100
-df$nb_bio5_sd<-df$nb_bio5_sd/100
-df$nb_bio6_sd<-df$nb_bio6_sd/100
+#df$nb_bio5_sd<-df$nb_bio5_sd/100
+#df$nb_bio6_sd<-df$nb_bio6_sd/100
 df$nb_bio12_sd<-df$nb_bio12_sd/100
-df$nb_bio13_sd<-df$nb_bio13_sd/100
-df$nb_bio14_sd<-df$nb_bio14_sd/100
+#df$nb_bio13_sd<-df$nb_bio13_sd/100
+#df$nb_bio14_sd<-df$nb_bio14_sd/100
 
 df$N_CELL<-ceiling(df$N_CELL/100)
-df$nb_volume<-df$scaled_nb_bio1_sd*df$scaled_nb_bio5_sd*df$scaled_nb_bio6_sd*
-  df$scaled_nb_bio12_sd*df$scaled_nb_bio13_sd*df$scaled_nb_bio14_sd
+#df$nb_volume<-df$scaled_nb_bio1_sd*df$scaled_nb_bio5_sd*df$scaled_nb_bio6_sd*
+#  df$scaled_nb_bio12_sd*df$scaled_nb_bio13_sd*df$scaled_nb_bio14_sd
+df$nb_volume<-df$scaled_nb_bio1_sd*
+  df$scaled_nb_bio12_sd
+
 write.csv(df, "../../Figures/raw_result.csv", row.names=F)
 df$is_extinct<-as.factor(df$is_extinct)
 table(df$is_extinct)
@@ -477,13 +479,13 @@ for (SSPx in SSPs){
 #write.csv(all_result, "../../Figures/NB_hist_combined/p_values_with_mean_disp_dist.csv", row.names=F)
 write.csv(all_result, "../../Figures/NB_hist_combined/p_values_with_scaled_max_disp_dist.csv", row.names=F)
 
-all_result_raw<-read.csv("../../Figures/NB_hist_combined/p_values_with_max_disp_dist.csv")
+all_result_raw<-read.csv("../../Figures/NB_hist_combined/p_values_with_scaled_max_disp_dist.csv")
 all_result_raw<-data.table(all_result_raw)
 all_result_raw<-all_result_raw[da=="with dispersal"]
 all_result_raw<-all_result_raw[exposure==" no climate resilience"]
 
 
-all_result<-read.csv("../../Figures/NB_hist_combined/p_values_with_scaled_mean_disp_dist.csv")
+all_result<-read.csv("../../Figures/NB_hist_combined/p_values_with_scaled_max_disp_dist.csv")
 all_result<-data.table(all_result)
 all_result<-all_result[da=="with dispersal"]
 all_result<-all_result[exposure==" no climate resilience"]

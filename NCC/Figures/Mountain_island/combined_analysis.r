@@ -625,3 +625,4 @@ p<-ggplot(mask_p)+geom_tile(aes(x=x, y=y, fill=type))+theme(
   scale_fill_manual(values=map_colors)
 p
 ggsave(p, filename=sprintf("../../Figures/Mountain_island/%s/lands.png", cuts_methods), width=6, height=3)
+
