@@ -40,7 +40,7 @@ birds_trait<-data.table(birds_trait)
 
 
 unique(birds_trait$Diet)
-iucn_bird<-read.csv("../../Data/Birds/HBW-BirdLife_List_of_Birds_v5.csv", head=T, stringsAsFactors = F)
+iucn_bird<-read.csv("../../Data/Dispersal_distance/Birds/HBW-BirdLife_List_of_Birds_v5.csv", head=T, stringsAsFactors = F)
 iucn_bird<-data.table(iucn_bird)
 
 df_item_2<-Sutherland_se[, c("sp", "median_dis", "max_dis")]

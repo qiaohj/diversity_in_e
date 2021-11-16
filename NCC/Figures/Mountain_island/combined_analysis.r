@@ -612,7 +612,8 @@ p<-ggplot(species_env_change_se)+
   facet_grid(var~SSP, scale="free")+theme_bw()
 p
 
-species_env_change$var<-factor(species_env_change$var, levels=c("bio1", "bio5", "bio6", "bio12", "bio13", "bio14"))
+species_env_change$var<-factor(species_env_change$var, 
+                               levels=c("bio1", "bio5", "bio6", "bio12", "bio13", "bio14"))
 species_env_change$type_factor<-factor(species_env_change$type, levels = c("Mountains", "Islands", "Continent", "Mixed"))
 p<-ggplot(species_env_change)+
   geom_boxplot(aes(x=type_factor, y=range/1000, color=group), position=position_dodge(width=0.9))+
