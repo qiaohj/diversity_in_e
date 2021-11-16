@@ -100,7 +100,10 @@ result<-readRDS("../../Objects/Extinction_type/Extinction_type.rda")
 #result<-result%>%dplyr::filter(sp %in% df_sp_list$sp)
 result_count_y_year<-result%>%dplyr::group_by(type, dispersal, exposure, SSP, GCM, extinct_year)%>%
   dplyr::summarise(N=n())
-result_count_y_year<-inner_join(result_count_y_year, result_count_extinct, by=c("dispersal", "exposure", "SSP", "GCM"))
+result_count_extinct<-result%>%dplyr::group_by(dispersal, exposure, SSP, GCM)%>%
+  dplyr::summarise(N_all_extinction=n())
+result_count_y_year<-inner_join(result_count_y_year, result_count_extinct, 
+                                by=c("dispersal", "exposure", "SSP", "GCM"))
 result_count_y_year$proportion<-result_count_y_year$N/result_count_y_year$N_all_extinction
 ggplot(result_count_y_year)+geom_point(aes(x=extinct_year, y=N, color=SSP, shape=GCM))+
   facet_grid(dispersal+type~exposure)

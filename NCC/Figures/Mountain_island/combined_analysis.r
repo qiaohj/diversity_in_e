@@ -1,14 +1,48 @@
 library(data.table)
 library(ggplot2)
 library(Hmisc)
+rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 
 islands<-readRDS("../../Objects/Island/species_island.rda")
 mountains<-readRDS("../../Objects/Island/species_mountain.rda")
-birds<-readRDS("../../Objects/IUCN_List/Birds_df_with_family.rda")
 mammals<-readRDS("../../Objects/IUCN_List/Mammals_df_with_family.rda")
+birds<-readRDS("../../Objects/IUCN_List/Birds_df_with_family.rda")
 
-colnames(mammals)[8]<-"Order"
+if (F){
+  birds<-readRDS("../../Objects/IUCN_List/Birds_df_with_family.rda")
+  
+  birds_pro<-readRDS("../../Objects/Species_property/Birds_property.rda")
+  
+  birds$sp<-gsub(" ", "_", birds$SP)
+  birds[,c("range_bio1_sd_min", "range_bio1_sd_max",
+           "range_bio5_sd_min", "range_bio5_sd_max",
+           "range_bio6_sd_min", "range_bio6_sd_max",
+           "range_bio12_sd_min", "range_bio12_sd_max",
+           "range_bio13_sd_min", "range_bio13_sd_max",
+           "range_bio14_sd_min", "range_bio14_sd_max",
+           "N_CELL"):=NULL]
+  birds<-merge(birds, birds_pro, by="sp")
+  birds<-birds[!is.infinite(bio1_min),]
+  saveRDS(birds, "../../Objects/IUCN_List/Birds_df_with_family.rda")
+  
+  mammals<-readRDS("../../Objects/IUCN_List/Mammals_df_with_family.rda")
+  mammals_pro<-readRDS("../../Objects/Species_property/Mammals_property.rda")
+  
+  mammals$sp<-gsub(" ", "_", mammals$SP)
+  mammals[,c("range_bio1_sd_min", "range_bio1_sd_max",
+           "range_bio5_sd_min", "range_bio5_sd_max",
+           "range_bio6_sd_min", "range_bio6_sd_max",
+           "range_bio12_sd_min", "range_bio12_sd_max",
+           "range_bio13_sd_min", "range_bio13_sd_max",
+           "range_bio14_sd_min", "range_bio14_sd_max",
+           "N_CELL"):=NULL]
+  mammals<-merge(mammals, mammals_pro, by="sp")
+  mammals<-mammals[!is.infinite(bio1_min),]
+  saveRDS(mammals, "../../Objects/IUCN_List/Mammals_df_with_family.rda")
+}
+
+colnames(mammals)[9]<-"Order"
 colnames<-c("Order", "family", "SP", "estimated_disp", "N_CELL", 
             "range_bio1_sd_min", "range_bio1_sd_max",
             "range_bio5_sd_min", "range_bio5_sd_max",
@@ -229,7 +263,7 @@ if (cuts_methods=="n_cell"){
   table(island_species_sampled$N_CELL_cuts)
   sampled_species<-rbindlist(list(mountain_species_sampled, plain_species_sampled, island_species_sampled))
 }
-
+cuts_methods<-"none"
 if (cuts_methods=="none"){
   sampled_species<-rbindlist(list(island_species, mountain_species, plain_species))
 }

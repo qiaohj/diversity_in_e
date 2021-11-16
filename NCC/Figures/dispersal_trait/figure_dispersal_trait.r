@@ -80,6 +80,7 @@ ggsave(pp2, filename=sprintf("../../Figures/dispersal_traits/gradient_%s.pdf", "
 
 
 #Figure XXX
+SSPs<-c("SSP119", "SSP245", "SSP585")
 for (SSP_l in SSPs){
   df_se<-df_all%>%dplyr::group_by(type, SSP, da, exposure, group)%>%
     dplyr::summarise(alt=mean(mean_alt),

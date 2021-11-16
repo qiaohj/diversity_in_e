@@ -44,14 +44,15 @@ unique(df_se$exposure)
 df_se<-df_se%>%dplyr::filter(da=="with dispersal")
 
 
-df_se_across_GCM<-df_se%>%dplyr::group_by(SSP, label, da, status, exposure)%>%
+df_se_across_GCM<-df_se%>%dplyr::group_by(SSP, label, da, status)%>%
   dplyr::summarise(mean_N=mean(N),
                    sd_N=sd(N),
                    CI_N=CI(N)[1]-CI(N)[2])
 
 
 p<-ggplot(df_se_across_GCM)+
-  geom_errorbar(aes(x=SSP, ymin=mean_N/1000-sd_N/1000, ymax=mean_N/1000+sd_N/1000, color=label), width=0.1)+
+  geom_errorbar(aes(x=SSP, ymin=mean_N/1000-sd_N/1000, ymax=mean_N/1000+sd_N/1000, 
+                    color=label), width=0.1)+
   geom_point(aes(x=SSP, y=mean_N/1000, color=label))+
   facet_wrap(~status, scale="free_y", nrow=2, strip.position="right")+
   scale_color_manual(values=color_dipsersal_type)+
