@@ -142,7 +142,7 @@ prev_dis$exposure<-0
 prev_dis$suitable<-1
 prev_dis$accumulative_disp<-0
 prev_dis$disp<-0
-year_i = 2021
+year_i = 2022
 for (year_i in predict_range){
   print(paste(i, length(unique), 
               bi, "exposure", exposure_threshold, 
@@ -218,6 +218,10 @@ for (year_i in predict_range){
       new_item<-new_item[!(mask_100km %in% prev_dis$mask_100km)]
       new_item$exposure<-0
       new_item$suitable<-1
+      new_item_st<-st_as_sf(new_item, 
+                            coords = c("x", "y"), 
+                            remove = F, crs=crs(mask_buffer))
+      #new_item$accumulative_disp<-apply(st_distance(pts_buf_union, new_item_st), 2, min)
       new_item$accumulative_disp<-0
       new_item$disp<-0
       #new_item<-new_item[mask_100km %in% env_item$mask_100km]
@@ -241,11 +245,11 @@ for (year_i in predict_range){
         plot(suitable_area, col=alpha("indianred1", 0.2), add=T, legend=FALSE)
       }
       
-      plot(st_geometry(pts), add=T, pch=".")
+      #plot(st_geometry(pts), add=T, pch=".")
       plot(st_geometry(pts_buf_union), add=T, border="blue")
-      plot(st_geometry(potential_area), add=T, col="black", pch=".")
-      points(new_item$x, new_item$y, col="red", pch=".")
-      points(new_item$x, new_item$y, col="red", pch=10)
+      #plot(st_geometry(potential_area), add=T, col="black", pch=".")
+      #points(new_item$x, new_item$y, col="red", pch=".")
+      #points(new_item$x, new_item$y, col="red", pch=10)
       #plot(st_geometry(pts_buf), add=T)
       #plot(st_geometry(pts_buf_union), add=T, col="blue")
       dev.off()
@@ -272,9 +276,29 @@ for (year_i in predict_range){
     }
     prev_dis[prev_dis$accumulative_disp>100000]$accumulative_disp<-100000
   }
-  
-  
-  
-  
-  
 }
+
+if (F){
+  library(magick)
+  year<-2021
+  for (year in c(2021:2100)){
+    print(year)
+    png(sprintf("../../Figures/Example/dispersal_movies/%d.png", year), 
+        width=960, height=480, units = "px")
+    par(mfrow=c(1,2),
+        oma = c(0,0,0,0),
+        mar = c(0,0,0,0),
+        mgp = c(0, 0, 0),    # axis label at 2 rows distance, tick labels at 1 row
+        xpd = NA,
+        tcl=-1
+    )
+    path1<-image_read(sprintf("../../Figures/Example/dispersal_no_climate/%d.png", year))
+    path2<-image_read(sprintf("../../Figures/Example/dispersal_with_climate/%d.png", year))
+    plot(path1)
+    plot(path2)
+    dev.off()
+  }
+}
+
+#cd /media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Figures/Example/dispersal_movies
+#ffmpeg -r 5 -start_number 2021 -i %04d.png -y ../dispersal_movies.mp4

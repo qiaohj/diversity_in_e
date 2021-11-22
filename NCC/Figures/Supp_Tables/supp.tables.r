@@ -62,6 +62,8 @@ for (SSP_str in SSPs){
   }  
 }
 final_df_bird<-rbindlist(final_df_bird)
+colnames(final_df_bird)[4]<-"ESM"
+colnames(final_df_bird)[8]<-"climate_resilience"
 write.csv(final_df_bird, "../../Objects/Supp.Tables/bird_extinction.csv", row.names=F)
 
 ##For mammals
@@ -128,6 +130,9 @@ for (SSP_str in SSPs){
   }  
 }
 final_df_mammal<-rbindlist(final_df_mammal)
+colnames(final_df_mammal)[4]<-"ESM"
+colnames(final_df_mammal)[8]<-"climate_resilience"
+
 write.csv(final_df_mammal, "../../Objects/Supp.Tables/mammal_extinction.csv", row.names=F)
 
 

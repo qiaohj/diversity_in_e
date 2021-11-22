@@ -306,11 +306,12 @@ p<-ggplot(df_all)+geom_point(aes(x=sd_nb_size, y=real_nb_size, color=nb_size_den
   #ylim(0, 8000)+
   geom_abline(intercept = 0, slope = 1, color="black", 
               linetype="dashed", size=1.5, alpha=0.5)+
-  geom_text(x=3, y=22, 
+  geom_text(x=4.5, y=23, 
             label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
                           cor_df$p_nb, cor_df$mean_diff_nb))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
                         midpoint = quantile(df_all$nb_size_density, 0.01))+
+  xlim(0, 23)+ylim(0, 23)+
   theme_bw()+
   labs(x="Species niche area (excluding outliers)",
        y="Species niche area (including outliers)",
@@ -323,11 +324,12 @@ p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_size_density))+
   #ylim(0, 8000)+
   geom_abline(intercept = 0, slope = 1, color="black", 
               linetype="dashed", size=1.5, alpha=0.5)+
-  geom_text(x=3, y=10, 
+  geom_text(x=2.5, y=12, 
             label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
                           p_v, mean))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
                         midpoint = quantile(df_g$nb_size_density, 0.01))+
+  xlim(0, 12)+ylim(0, 12)+
   theme_bw()+
   labs(x="Species niche area 1850 - 2020",
        y="Species niche area 1970 - 2020",
@@ -341,3 +343,4 @@ pp<-ggarrange(p, p2, nrow = 1, ncol=2, labels=c("A", "B"))
 pp
 ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.pdf",width=10, height=4)
 ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.png",width=10, height=4)
+

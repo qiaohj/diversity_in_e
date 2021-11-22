@@ -500,10 +500,11 @@ best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank_
 #best_model<-readRDS(sprintf("../../Objects/estimate_disp_dist/models/%s_no_rank.rda", "rf"))
 
 best_model<-best_model[[best_model_info$formulas]]
-cols<-c("Scientific", "ForStrat.Value", "log_body_mass", "diet_type")
+mammals_trait$BodyMass.Value
+cols<-c("Scientific", "ForStrat.Value", "log_body_mass", "diet_type", "BodyMass.Value")
 
 new_df_mammals<-data.table(mammals_trait)[,..cols]
-colnames(new_df_mammals)<-c("Scientific", "ForStrat", "log_body_mass", "Diet")
+colnames(new_df_mammals)<-c("Scientific", "ForStrat", "log_body_mass", "Diet", "BodyMass.Value")
 new_df_mammals<-new_df_mammals[(!is.na(ForStrat))&(!is.na(log_body_mass))&(!is.na(Diet))]
 new_df_mammals<-new_df_mammals[!(ForStrat %in% c("A", "M"))]
 new_df_mammals$body_mass<-exp(1)^new_df_mammals$log_body_mass
@@ -518,27 +519,31 @@ model_df_mammals$estimated_disp<-predict(best_model, model_df_mammals)
 saveRDS(new_df_mammals, "../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
 write.csv(new_df_mammals, "../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.csv", row.names = F)
 
+new_df_mammals<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
 
 min_mass<-min(model_df_mammals$body_mass)
 max_mass<-max(model_df_mammals$body_mass)
 
-
+new_df_mammals$body_mass<-new_df_mammals$body_mass
 p2<-ggplot(new_df_mammals)+geom_point(aes(x=body_mass, y=estimated_disp, color=factor(Diet)))+
   geom_vline(xintercept = min_mass, color="black", linetype=2)+
   geom_vline(xintercept = max_mass, color="black", linetype=2)+
-  xlab("Body mass (log transformed)")+
+  geom_vline(xintercept = model_df_mammals$body_mass, color="red", linetype=2)+
+  xlab("Body mass (gram, log transformed)")+
   ylab("Estimated natal dispersal distance")+
   scale_x_log10()+
+  scale_y_log10()+
   labs(color="Diet")+
   theme_bw()
 p2
 
-p1<-ggplot(new_df_mammals)+geom_point(aes(x=log_body_mass, y=estimated_disp, color=factor(ForStrat)))+
+p1<-ggplot(new_df_mammals)+geom_point(aes(x=body_mass, y=estimated_disp, color=factor(ForStrat)))+
   geom_vline(xintercept = min_mass, color="black", linetype=2)+
   geom_vline(xintercept = max_mass, color="black", linetype=2)+
-  xlab("Log body mass")+
+  xlab("Body mass (gram, log transformed)")+
   ylab("Estimated natal dispersal distance")+
   labs(color="Foraging strategy")+
+  scale_x_log10()+
   theme_bw()
 p1
 

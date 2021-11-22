@@ -540,6 +540,7 @@ new_df_birds
 saveRDS(new_df_birds, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
 write.csv(new_df_birds, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.csv", row.names=F)
 
+new_df_birds<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
 
 model_df_birds$estimated_disp<-predict(best_model, model_df_birds)
 
@@ -553,15 +554,18 @@ p1<-ggplot(new_df_birds)+geom_point(aes(x=HWI, y=estimated_disp, color=factor(Di
   labs(color="Diet")+
   theme_bw()
 p1
-min_mass<-min(model_df_birds$log_body_mass)
-max_mass<-max(model_df_birds$log_body_mass)
+model_df_birds$body_mass2<-10^model_df_birds$log_body_mass
+new_df_birds$body_mass2<-10^new_df_birds$log_body_mass
+
+min_mass<-min(model_df_birds$body_mass2)
+max_mass<-max(model_df_birds$body_mass2)
 
 
-p2<-ggplot(new_df_birds)+geom_point(aes(x=body_mass, y=estimated_disp, color=factor(Diet)))+
+p2<-ggplot(new_df_birds)+geom_point(aes(x=body_mass2, y=estimated_disp, color=factor(Diet)))+
   geom_vline(xintercept = min_mass, color="black", linetype=2)+
   geom_vline(xintercept = max_mass, color="black", linetype=2)+
   scale_x_log10()+
-  xlab("Body mass (log transferred)")+
+  xlab("Body mass (gram, log transformed)")+
   ylab("Estimated natal dispersal distance")+
   labs(color="Diet")+
   theme_bw()
@@ -572,3 +576,12 @@ ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_birds.png", 
 ggsave(p, filename="../../Figures/Estimate_Disp/emperical_predicted_birds.pdf", width=8, height=8)
 
 
+
+#check the body mass
+birds_trait<-read.table("../../Data/Dispersal_distance/EltonTraits/BirdFuncDat.txt", sep="\t", head=T, stringsAsFactors = F)
+hist(birds_trait$BodyMass.Value)
+birds_trait$log_elton<-log10(birds_trait$BodyMass.Value)
+birds_trait$Scientific
+new_df_birds$iucn_name
+item<-merge(new_df_birds, birds_trait, by.x="iucn_name", by.y="Scientific")
+plot(item$log_body_mass, item$log_elton)

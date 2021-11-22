@@ -81,6 +81,7 @@ get_disp_dist<-function(n, max_disp, density){
   v[sample(length(density), n, replace = T)]
 }
 
+mean(get_disp_dist(10, 97640, density))
 predict_range<-c(2021:2100)
 
 i=2

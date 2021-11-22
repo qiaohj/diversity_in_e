@@ -1,9 +1,9 @@
 library(dplyr)
-threshold<-seq(0.1, 0.5, by=0.1)
+threshold<-seq(0.1, 0.5, by=0.05)
 th=0.3
 result<-NULL
 
-sp_mean<-read.csv(sprintf("../../Figures/when_where_extinction_all/when_extinct.csv"))
+sp_mean<-read.csv(sprintf("../../Figures/when_where_extinction_all/when_extinct.csv"), stringsAsFactors = F)
 sp_mean[which(sp_mean$exposure==" no exposure"), ]$exposure<-" no climate resilience"
 sp_mean[which(sp_mean$exposure=="5-year exposure"), ]$exposure<-"climate resilience"
 
