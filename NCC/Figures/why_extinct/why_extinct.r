@@ -18,7 +18,8 @@ df_se_temp<-df%>%dplyr::filter((!is_bio1)|(!is_bio5)|(!is_bio6))%>%
 df_se_temp$causation<-"Temperature"
 df_se_prec<-df%>%dplyr::filter((!is_bio12)|(!is_bio13)|(!is_bio14))%>%
   dplyr::group_by(SSP, extinct_year, da, exposure, GCM)%>%
-  dplyr::summarise(N=n())
+
+    dplyr::summarise(N=n())
 df_se_prec$causation<-"Precipitation"
 
 df_se<-bind_rows(df_se_prec, df_se_temp)

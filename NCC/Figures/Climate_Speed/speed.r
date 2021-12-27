@@ -1,5 +1,5 @@
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-library(dplyr)
+library(dplyr) 
 library(ggplot2)
 if (F){
   library("DBI")
@@ -12,7 +12,7 @@ if (F){
   dbDisconnect(mydb) 
   head(max_prec)
   max_prec_se<-max_prec%>%dplyr::group_by(year)%>%
-    dplyr::summarise(mean=mean(v),
+    dplyr::summarise(mean=mean(v), 
                      sd=sd(v),
                      ci=CI(v)[2]-CI(v)[3])
   max_prec_se$year<-max_prec_se$year*-1

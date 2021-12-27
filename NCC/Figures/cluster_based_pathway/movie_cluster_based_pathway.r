@@ -5,6 +5,9 @@ library(ggnewscale)
 library(ggplot2)
 library(raster)
 library(data.table)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggspatial)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 #alt<-raster("../../Raster/ALT/alt_eck4.tif")
 #alt<-raster("../../Raster/ALT/alt_eck4_high_res.tif")
@@ -45,8 +48,9 @@ euc.dist <- function(x1, y1, x2, y2) {
 exposure=5
 #for (j in c(1:nrow(layer_df))){
 #  for (exposure in c(1, 5)){
+j=6
 persent<-0.2
-for (j in c(3, 9)){
+for (j in c(3, 6, 9)){
   for (exposure in c(5)){
     layer_item<-layer_df[j,]
     for (group in c("Birds", "Mammals")){
@@ -71,13 +75,27 @@ for (j in c(3, 9)){
         
         smooth_path_item$is_head<-ifelse(smooth_path_item$MAX_YEAR==smooth_path_item$YEAR, T, F)
         
-        
-        p<-p_bak+geom_path(data=smooth_path_item, aes(x=x, y=y, alpha=alpha, color=group,
+        if (F){
+          p<-p_bak+geom_path(data=smooth_path_item, aes(x=x, y=y, alpha=alpha, color=group,
+                                                        group=line_group))+
+            geom_point(data=smooth_path_item[smooth_path_item$is_head,], aes(x=x, y=y, color=group), size=0.05)+
+            scale_alpha_continuous()+
+            #scale_color_gradient2(low="blue", mid="green", high="red")
+            scale_color_manual(values = color_groups)+
+            scale_fill_manual(values = color_groups)
+        }
+        smooth_path_item[, indice := 1:.N, by=line_group]
+        smooth_path_item[, max_index:=max(indice), by=line_group]
+        smooth_path_item$indice<-smooth_path_item$indice/smooth_path_item$max_index
+        #smooth_path_item$alpha2<-order(smooth_path_item)
+        p<-p_bak+geom_path(data=smooth_path_item, aes(x=x, y=y, color=indice, 
                                                       group=line_group))+
-          geom_point(data=smooth_path_item[smooth_path_item$is_head,], aes(x=x, y=y, color=group), size=0.05)+
-          scale_alpha_continuous()+
-          scale_color_manual(values = color_groups)+
-          scale_fill_manual(values = color_groups)
+          #geom_point(data=smooth_path_item[smooth_path_item$is_head,], aes(x=x, y=y), size=0.05, color="#cb181d")+
+          #scale_alpha_continuous()+
+          scale_color_gradient(low="#577fb0", high="#be261b")+coord_fixed()
+        p
+          #scale_color_manual(values = color_groups)+
+          #scale_fill_manual(values = color_groups)
         
         width<-13
         height<-6
@@ -92,7 +110,7 @@ for (j in c(3, 9)){
     }
   }
 }
-asdf
+
 
 library(magick)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")

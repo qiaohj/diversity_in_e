@@ -4,6 +4,8 @@ library(dplyr)
 library(ggpubr)
 library(Rmisc)
 library(rgdal)
+library(data.table)
+
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 source("commonFuns/functions.r")
 source("commonFuns/colors.r")
@@ -65,15 +67,22 @@ if (F){
 myPalette <- colorRampPalette(c(mask_color, color_two_map[2]))
 
 for (exposure in c(0, 5)){
-  for (M_i in c(0, 1)){
+  
+  for (g in groups){
+    print(paste(g, exposure))
     p_full_all<-NULL
-    for (g in groups){
-      print(paste(g, exposure))
+    range<-1000
+    if (g=="Mammals"){
+      range<-200
+    }
+    for (M_i in c(0, 1)){
+      
       p_full<-readRDS(sprintf("../../Figures/Diversity_exposure_%d_dispersal_%d/species.richness.%s.rda", 
                               exposure, M_i, g))
       p_full$group<-g
       p_full_all<-bind_dplyr(p_full_all, p_full)
-      p_full_se<-p_full%>%dplyr::group_by(x, y, mask_100km, M, YEAR, SSP)%>%
+    }
+      p_full_se<-p_full_all%>%dplyr::group_by(x, y, mask_100km, M, YEAR, SSP)%>%
         dplyr::summarise(MEAN_V=mean(V, na.rm=T))
       
       dd_df<-p_full_se%>%dplyr::filter((YEAR %in% c(2020, 2100))&(M %in% c(0, 1)))
@@ -86,7 +95,7 @@ for (exposure in c(0, 5)){
       p1<-ggplot(d1)+
         geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
         geom_tile(aes(x=x, y=y, fill=MEAN_V))+
-        scale_fill_gradientn(colors=colors[c(1,max(d1$MEAN_V, na.rm=T))])+
+        scale_fill_gradientn(colors=colors[c(1, range)])+
         #ggtitle(paste("2020", g, exposure_label, dispersal_label, sep=", "))+
         ggtitle(g)+
         map_theme
@@ -94,11 +103,11 @@ for (exposure in c(0, 5)){
       p1
       
       
-      d2<-p_full_se%>%dplyr::filter((YEAR==2100)&(!is.na(MEAN_V)))
+      d2<-p_full_se%>%dplyr::filter((YEAR==2100)&(M==0)&(!is.na(MEAN_V)))
       p2<-ggplot(d2)+
         geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
         geom_tile(aes(x=x, y=y, fill=MEAN_V))+
-        scale_fill_gradientn(colors=colors[c(1,max(d2$MEAN_V, na.rm=T))])+
+        scale_fill_gradientn(colors=colors[c(1,range)])+
         ggtitle("Without dispersal")+
         facet_wrap(~SSP)+
         map_theme
@@ -108,7 +117,7 @@ for (exposure in c(0, 5)){
       p3<-ggplot(d3)+
         geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
         geom_tile(aes(x=x, y=y, fill=MEAN_V))+
-        scale_fill_gradientn(colors=colors[c(1,max(d3$MEAN_V, na.rm=T))])+
+        scale_fill_gradientn(colors=colors[c(1,range)])+
         labs(fill = "Richness")+
         ggtitle("With dispersal")+
         facet_wrap(~SSP)
@@ -136,9 +145,85 @@ for (exposure in c(0, 5)){
       
       ggsave(p, filename=sprintf("../../Figures/Diversity_%d/MAP.%s.species.richness.pdf", exposure, g),
              width=14, height=5)
+    
+  }
+}
+
+#For erin
+p_full_all<-list()
+for (exposure in c(0, 5)){
+  
+  for (g in groups){
+    for (M_i in c(0, 1)){
+      
+      p_full<-readRDS(sprintf("../../Figures/Diversity_exposure_%d_dispersal_%d/species.richness.%s.rda", 
+                              exposure, M_i, g))
+      p_full$group<-g
+      p_full$exposure<-exposure
+      p_full_all[[paste(exposure, g, M_i)]]<-p_full
     }
   }
 }
+p_full_all<-rbindlist(p_full_all)
+p_full_se<-p_full_all%>%dplyr::group_by(x, y, mask_100km, M, YEAR, SSP, group, exposure)%>%
+  dplyr::summarise(MEAN_V=mean(V, na.rm=T))
+p_full_se_all<-p_full_se%>%dplyr::group_by(x, y, mask_100km, M, YEAR, SSP, exposure)%>%
+  dplyr::summarise(V=sum(MEAN_V, na.rm=T))
+
+d1<-p_full_se_all%>%dplyr::filter((YEAR==2020)&(SSP=="SSP119")&(!is.na(V))&(exposure==0)&(M==0))
+range(d1$V)
+
+d2<-p_full_se_all%>%dplyr::filter((YEAR==2100)&(SSP=="SSP245")&(!is.na(V))&(exposure==0)&(M==0))
+
+d3<-p_full_se_all%>%dplyr::filter((YEAR==2100)&(SSP=="SSP245")&(!is.na(V))&(exposure==0)&(M==1))
+
+range(d1$V)
+range(d2$V)
+range(d3$V)
+
+theme_temp<-theme_bw()+theme(
+  axis.text.x = element_blank(),
+  axis.text.y = element_blank(),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  legend.position="none"
+)
+
+p1<-ggplot(d1)+
+  geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+  geom_tile(aes(x=x, y=y, fill=V))+
+  scale_fill_gradient2(low="#577fb0", high="#be261b", mid="#f8f9c0", midpoint = 400)+
+  #ggtitle(paste("2020", g, exposure_label, dispersal_label, sep=", "))+
+  ggtitle("Diversity in 2020")+coord_fixed()+
+  labs(fill="Species richness")
+
+g_legend<-get_legend(p1)
+
+p1<-p1+theme_temp
+
+p2<-ggplot(d2)+
+  geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+  geom_tile(aes(x=x, y=y, fill=V))+
+  scale_fill_gradient2(low="#577fb0", high="#be261b", mid="#f8f9c0", midpoint = 400)+
+  #ggtitle(paste("2020", g, exposure_label, dispersal_label, sep=", "))+
+  ggtitle("Diversity in 2100 without dispersal and climate resilience")+coord_fixed()+
+  theme_temp
+
+p2
+p<-ggarrange(p1, p2, nrow=1, common.legend = T, legend = "right", legend.grob = g_legend)
+ggsave(p, filename="../../Figures/Diversity/Erin_Diversity.pdf", width=12, height=5)
+p3<-ggplot(d3)+
+  geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
+  geom_tile(aes(x=x, y=y, fill=V))+
+  scale_fill_gradient2(low="#577fb0", high="#be261b", mid="#f8f9c0", midpoint = 700)+
+  #ggtitle(paste("2020", g, exposure_label, dispersal_label, sep=", "))+
+  ggtitle("Diversity in 2100 with dispersal and 5-year climate resilience")+
+  theme_temp
+
+p3
+
+
+
 
 if (F){
   
