@@ -37,7 +37,7 @@ bi<-bird_full_sum_area[bird_full_sum_area$sum_are<=1.5*min(bird_full_sum_area$su
 bird_full_sum_area<-bird_full_sum_area[sample(nrow(bird_full_sum_area), nrow(bird_full_sum_area))]
 ebird_base<-"/media/huijieqiao/SSD_Fast/ES50_eBird/Tables/Speccies_Split_202112"
 i=2
-for (i in 1:length(bird_full_sum_area$SCINAME)) {
+for (i in 5269:length(bird_full_sum_area$SCINAME)) {
   
   bi<-bird_full_sum_area$SCINAME[i]
   #bi="Pseudophryne occidentalis"
@@ -51,7 +51,7 @@ for (i in 1:length(bird_full_sum_area$SCINAME)) {
   if (file.exists(target)){
     next()
   }
-  
+  saveRDS(NULL, target)
   ff<-""
   cols_ll<-c("SCIENTIFIC_NAME", "LATITUDE", "LONGITUDE", "YEAR")
   all_items<-list()

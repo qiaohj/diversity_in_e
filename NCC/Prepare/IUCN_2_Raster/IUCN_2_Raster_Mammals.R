@@ -14,7 +14,7 @@ if (F){
   PRESENCE<-c(1,2,3,4,5)
   ORIGIN<-c(1,2,3,5,6)
   SEASONAL<-c(1,2)
-  sp_df<-sf::st_read(dsn="/home/huijieqiao/Experiments/IUCN/MAMMALS", layer="MAMMALS_TERRESTRIAL_ONLY") 
+  sp_df<-sf::st_read(dsn="../../Shape/IUCN/MAMMALS", layer="MAMMALS_TERRESTRIAL_ONLY") 
   mask_bak<-raster("../../Raster/mask_10km.tif")
   sp_df_eck4<-st_transform(sp_df, crs = st_crs(mask_bak))
   #writeOGR(sp_df_eck4, "../../Data/Raw/IUCN/MAMMALS", "MAMMALS_TERRESTRIAL_ONLY_ECK4", driver="ESRI Shapefile")

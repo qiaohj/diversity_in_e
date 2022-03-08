@@ -56,6 +56,7 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   print(paste(i, length(unique), bi))
   target<-sprintf("../../Objects/Dispersal/Mammals/%s/fit_seasonal_%d.rda", gsub(" ", "_", bi), SEASONAL)
   if (file.exists(target)){
+    asdf
     next()
   }
   tmp_sf<-NULL
@@ -78,7 +79,7 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   if (nrow(tmp_sf)==0){
     next()
   }
-  
+  asdfasdf
   print("calculating niche breadth")
   mask_nb<-crop(mask_10km, tmp_sf)
   mask_nb<-mask(mask_nb, tmp_sf)

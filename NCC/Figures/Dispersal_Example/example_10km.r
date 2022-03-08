@@ -28,7 +28,7 @@ mask_10km<-raster("../../Raster/mask_10km.tif")
 mask_points<-data.frame(rasterToPoints(mask_10km))
 mask_points = st_as_sf(mask_points, coords = c("x", "y"), crs = st_crs(mask_10km))
 
-with_climate_change<-F
+with_climate_change<-T
 is_edge<-function(index, all_index, xsize){
   #print(index)
   neighbors<-c(index-1, index+1, index-xsize, index+xsize)

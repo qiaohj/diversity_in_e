@@ -54,7 +54,7 @@ if (group=="Birds"){
 }
 PRESENCE<-c(1,2,3,4,5)
 ORIGIN<-c(1,2,3,5,6)
-SEASONAL<-c(1,2)
+SEASONAL<-c(2)
 print("reading mask layers")
 mask_10km<-raster("../../Raster/mask_10km.tif")
 mask_points<-data.frame(rasterToPoints(mask_10km))
@@ -95,7 +95,7 @@ predict_range<-c(2021:2100)
 i=2
 unique<-unique[sample(length(unique), length(unique))]
 x_size<-dim(mask_10km)[2]
-bi<-"Corapipo leucorrhoa"
+bi<-"Phylloscopus borealoides"
 
 group_full_sum_area<-group_full[, .(sum_are=sum(Shape_Area)), by="SCINAME"]
 group_full_sum_area<-group_full_sum_area[order(-1*sum_are),]
@@ -104,6 +104,7 @@ group_full_sum_area<-group_full_sum_area[order(-1*sum_are),]
 bi<-group_full_sum_area[group_full_sum_area$sum_are<=1.5*min(group_full_sum_area$sum_are)]$SCINAME[1]
 group_full_sum_area<-group_full_sum_area[sample(nrow(group_full_sum_area), nrow(group_full_sum_area))]
 i=1
+bi="Poicephalus rufiventris"
 coms<-expand.grid(exposure_threshold=c(0, 5), dispersal=c(0, 1))
 j=1
 distribution_threshold<-200
@@ -120,43 +121,37 @@ group_full_sum_area<-group_full_sum_area[SCINAME %in% distribution_all$sp]
 for (i in 1:length(group_full_sum_area$SCINAME)) {
   start_time<-Sys.time()
   print(paste("Start time:", start_time))
-  bi<-group_full_sum_area$SCINAME[i]
-  bi_x<-group_full[SCINAME==bi]
-  bi_y<-distribution_all[sp==bi]
-  
   for (j in 1:nrow(coms)){
     dispersal<-coms[j, "dispersal"]
     exposure_threshold<-coms[j, "exposure_threshold"]
-    
+    bi<-group_full_sum_area$SCINAME[i]
+    bi_x<-group_full[SCINAME==bi]
+    bi_y<-distribution_all[sp==bi]
     if (bi=="Aratinga maculata"){
       #asdf
     }
-    print(paste("20220303", i, length(group_full_sum_area$SCINAME), bi, 
+    print(paste("20220225", i, length(group_full_sum_area$SCINAME), bi, 
                 "exposure", exposure_threshold, "dispersal", dispersal,
                 "Dispersal distance", bi_x[1]$estimated_disp,
                 "Distribution area", bi_y[1]$N))
     
     target_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, gsub(" ", "_", bi))
-    fit_str<-sprintf("%s/fit.rda", target_folder)
+    fit_str<-sprintf("%s/fit_seasonal_2.rda", target_folder)
     if (!file.exists(fit_str)){
       next()
     }
     
     for (item_str in esm_ssp[esm_i]){
-      target<-sprintf("%s/%s_%d_dispersal_%d_10km.rda", target_folder, item_str,
+      target<-sprintf("%s/%s_%d_dispersal_%d_10km_seasonal_2.rda", target_folder, item_str,
                       exposure_threshold, dispersal)
       if (file.exists(target)){
         print("skip")
         next()
       }
       saveRDS(NULL, target)
-      check_point<- sprintf("%s/initial_disp_10km_exposure_%d_dispersal_%d.rda", 
+      check_point<- sprintf("%s/initial_disp_10km_exposure_%d_dispersal_%d_seasonal_2.rda", 
                             target_folder, exposure_threshold, dispersal)
-      initial_disp<-NULL
-      if (file.exists(check_point)){
-        initial_disp<-readRDS(check_point)
-        
-      }
+      
       fit<-readRDS(fit_str)
       
       tmp_sf<-NULL
@@ -169,7 +164,12 @@ for (i in 1:length(group_full_sum_area$SCINAME)) {
         tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/%s/RAW/%s.rda", 
                                 group, gsub(" ", "_", bi)))
       }
-      
+      if (group=="Birds"){
+        tmp_sf<-tmp_sf[which(tmp_sf$SEASONAL %in% SEASONAL),]
+      }
+      if (group=="Mammals"){
+        tmp_sf<-tmp_sf[which(tmp_sf$seasonal %in% SEASONAL),]
+      }
       if ((class(tmp_sf$Shape)[1]=="sfc_GEOMETRY")|(class(tmp_sf$Shape)[1]=="sfc_MULTISURFACE")){
         next()
       }
@@ -203,7 +203,7 @@ for (i in 1:length(group_full_sum_area$SCINAME)) {
       saveRDS(initial_disp, check_point)
       if (F){
         plot(mask_nb)
-        dddd<-readRDS( sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda",
+        dddd<-readRDS( sprintf("%s/initial_disp_exposure_%d_dispersal_%d_seasonal_2.rda",
                                target_folder, exposure_threshold, dispersal))
         points(dddd$x, dddd$y)
         plot(dddd$x, dddd$y)
@@ -238,7 +238,7 @@ for (i in 1:length(group_full_sum_area$SCINAME)) {
       for (year_i in predict_range){
         if (dispersal==1){
           current_time<-Sys.time()
-          print(paste("20220303 (start time", start_time, ", current time", 
+          print(paste("20220225 (start time", start_time, ", current time", 
                       current_time,
                       "):", i, length(group_full_sum_area$SCINAME), 
                       bi, "exposure", exposure_threshold, 
