@@ -36,6 +36,12 @@ layer_df<-expand.grid(GCM=GCMs, SSP=SSPs)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, sep="_")
 
 df_list<-readRDS(sprintf("../../Objects/IUCN_List/%s_df.rda", group))
+points_10km<-readRDS("../../Raster/points_10km.rda")
+colnames(points_10km)[c(1,2)]<-c("x_10km", "y_10km")
+mask_100km<-raster("../../Raster/mask_100km.tif")
+points_100km<-data.table(rasterToPoints(mask_100km))
+colnames(points_100km)[c(1,2)]<-c("x_100km", "y_100km")
+points_10km<-merge(points_10km, points_100km, by="mask_100km")
 i=1
 j=1
 k=2
@@ -46,7 +52,7 @@ k=2
 j=1
 for (j in c(1:nrow(layer_df))){
   layer<-layer_df[j,]
-  target_folder<-sprintf("../../Objects/Diversity_exposure_%d_dispersal_%d_10km/%s/%s", exposure, dispersal, group, layer$LABEL)
+  target_folder<-sprintf("../../Objects/Diversity_exposure_%d_dispersal_%d_10km_2_100km/%s/%s", exposure, dispersal, group, layer$LABEL)
   
   
   if (dir.exists(target_folder)){
@@ -57,9 +63,9 @@ for (j in c(1:nrow(layer_df))){
   
   i=1
   diversity_df<-list()
-  item<-df_list[SP=="Tragelaphus eurycerus"]
+  item<-df_list[SP=="Zosterops_olivaceus"]
   for (i in c(1:nrow(df_list))){
-    print(paste(j, nrow(layer_df), i, nrow(df_list)))
+    print(paste("exposure:", exposure, "dispersal:", dispersal, j, nrow(layer_df), i, nrow(df_list)))
     item<-df_list[i,]
     item$SP<-gsub(" ", "_", item$SP)
     
@@ -100,7 +106,7 @@ for (j in c(1:nrow(layer_df))){
       colnames(env_item)[3]<-"mask"
       
       #if (YYYY!=2020){
-        #env_item<-env_item[suitable==1]
+      #env_item<-env_item[suitable==1]
       #}
       if (nrow(env_item)==0){
         next()
@@ -110,10 +116,20 @@ for (j in c(1:nrow(layer_df))){
       env_item$YEAR<-YYYY
       env_item$sp<-item$SP
       env_item$res<-res
+      if (res=="10km"){
+        env_item<-merge(env_item, points_10km, by.x="mask", by.y="mask_10km")
+        
+        env_item<-env_item[, .(N=.N), by=c("x_100km", "y_100km", "mask_100km", "YEAR", "sp", "res")]
+        
+      }else{
+        colnames(env_item)[c(1:3)]<-c("x_100km", "y_100km", "mask_100km")
+        env_item$N<-1
+      }
       if (is.null(diversity)){
         diversity<-list(env_item)
+        names(diversity)<-item$SP
       }else{
-        diversity[[length(diversity)+1]]<-env_item
+        diversity[[item$SP]]<-env_item
       }
       diversity_df[[as.character(YYYY)]]<-diversity
     }

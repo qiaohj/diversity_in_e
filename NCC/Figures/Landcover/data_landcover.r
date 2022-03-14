@@ -29,12 +29,13 @@ mask_points_100km<-data.table(rasterToPoints(mask_100km))
 no_na_mask_100km<-!is.na(values(mask_100km))
 #mask_points_100km<-st_as_sf(mask_points_100km, coords = c("x", "y"), crs = st_crs(mask_100km))
 
-bi="Pachyptila crassirostris"
-coms<-expand.grid(exposure_threshold=c(0, 5), dispersal=c(0, 1))
+bi="Glyphonycteris sylvestris"
+coms<-expand.grid(exposure_threshold=c(5), dispersal=c(0, 1))
 
 i=1
 j=1
 group_df<-group_df[sample(nrow(group_df), nrow(group_df))]
+group_df<-group_df[group=="Mammals"]
 for (i in 1:length(group_df$sp)) {
   start_time<-Sys.time()
   bi<-group_df$sp[i]
@@ -56,8 +57,35 @@ for (i in 1:length(group_df$sp)) {
       target<-sprintf("%s/%s_%d_dispersal_%d_lc.rda", target_folder, item_str,
                       exposure_threshold, dispersal)
       if (file.exists(target)){
-        next()
+        size<-file.size(target)
+        if (size>100){
+          #next()
+        }
+        lc_2020_f<-sprintf("%s/exposure_%d_dispersal_%d_lc_2020.tif",
+                           target_folder, exposure_threshold, dispersal)
+        lc_2100_f<-sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", 
+                           target_folder, item_str, exposure_threshold, dispersal)
+        if (file.exists(lc_2020_f)&file.exists(lc_2100_f)){
+          next()
+          saveRDS(NULL, target)
+          dispersal_log<-list()
+          lc_2020<-raster(lc_2020_f)
+          lc_2100<-raster(lc_2100_f)
+          dispersal_log[["lc_2020"]]<-lc_2020
+          dispersal_log[["lc_2100"]]<-lc_2100
+          print("Writing result fast")
+          saveRDS(dispersal_log, target)
+          print("Done! Writing result")
+          next()
+        }
+        #ddd<-readRDS(target)
+        
+        #if (length(ddd)==2){
+        #  print("finished xx, skip")
+        #  next()
+        #}
       }
+      
       saveRDS(NULL, target)
       source<-sprintf("%s/%s_%d_dispersal_%d_10km.rda", target_folder, item_str,
                       exposure_threshold, dispersal)
@@ -82,13 +110,14 @@ for (i in 1:length(group_df$sp)) {
         if (file.exists(source)){
           disp_item<-readRDS(source)
           if (length(disp_item)==0){
+            print("no data, skip")
             next()
           }
           res<-"100km"
           mask<-mask_100km
           mask_p<-mask_points_100km
           disp_2020<- readRDS(sprintf("%s/initial_disp_exposure_%d_dispersal_%d.rda", 
-                                target_folder, exposure_threshold, dispersal))
+                                      target_folder, exposure_threshold, dispersal))
           mask_p$v<-NA
           mask_p[mask_100km %in% disp_2020$mask_100km]$v<-1
           values(mask)[no_na_mask_100km]<-mask_p$v
@@ -97,70 +126,84 @@ for (i in 1:length(group_df$sp)) {
         }
       }
       if (is.null(disp_item)){
+        print("no data 2, skip")
         next()
       }
-      mask_2020_file<-sprintf("%s/exposure_%d_dispersal_%d_disp_2020.tif", 
-                              target_folder, exposure_threshold, dispersal)
-      mask_2020_file_1km<-sprintf("%s/exposure_%d_dispersal_%d_disp_2020_1km.tif", 
-                              target_folder, exposure_threshold, dispersal)
-      writeRaster(mask, mask_2020_file, datatype="INT1U",
-                  overwrite=T)
-      gdalwarp(mask_2020_file, mask_2020_file_1km, tr=c(1000, 1000), r="near", ot="Byte", 
-               srcnodata=255, dstnodata=255, overwrite=T)
+      lc_2020_f<-sprintf("%s/exposure_%d_dispersal_%d_lc_2020.tif",
+                         target_folder, exposure_threshold, dispersal)
+      if (file.exists(lc_2020_f)){
+        lc_2020<-raster(lc_2020_f)
+      }else{
+        
+        
+        mask_2020_file<-sprintf("%s/exposure_%d_dispersal_%d_disp_2020.tif", 
+                                target_folder, exposure_threshold, dispersal)
+        mask_2020_file_1km<-sprintf("%s/exposure_%d_dispersal_%d_disp_2020_1km.tif", 
+                                    target_folder, exposure_threshold, dispersal)
+        writeRaster(mask, mask_2020_file, datatype="INT1U",
+                    overwrite=T)
+        gdalwarp(mask_2020_file, mask_2020_file_1km, tr=c(1000, 1000), r="near", ot="Byte", 
+                 srcnodata=255, dstnodata=255, overwrite=T)
+        print(mask_2020_file_1km)
+        mask_1km<-raster(mask_2020_file_1km)
+        lc_2020<-crop(r_sinu, extent(mask_1km))
+        extent(lc_2020)<-extent(mask_1km)
+        lc_2020<-mask(lc_2020, mask_1km)
+        writeRaster(lc_2020, lc_2000_f, datatype="INT1U",
+                    overwrite=T)
+      }
       
-      mask_1km<-raster(mask_2020_file_1km)
-      lc_2020<-crop(r_sinu, extent(mask_1km))
-      extent(lc_2020)<-extent(mask_1km)
-      lc_2020<-mask(lc_2020, mask_1km)
       dispersal_log<-list()
       dispersal_log[["lc_2020"]]<-lc_2020
-      writeRaster(lc_2020, sprintf("%s/exposure_%d_dispersal_%d_lc_2020.tif",
-                                   target_folder, exposure_threshold, dispersal), datatype="INT1U",
-                  overwrite=T)
-      disp_2100<-disp_item[["2100"]]
-      if (is.null(disp_2100)){
-        next()
-      }
-      if (nrow(disp_2100)==0){
-        next()
-      }
-      disp_2100<-disp_2100[suitable==1]
-      if (nrow(disp_2100)>0){
-        if (res=="100km"){
-          mask<-mask_100km
-          mask_p<-mask_points_100km
-          mask_p$v<-NA
-          mask_p[mask_100km %in% disp_2100$mask_100km]$v<-1
-          values(mask)[no_na_mask_100km]<-mask_p$v
-          mask<-crop(mask, c(min(disp_2100$x)-50000, max(disp_2100$x)+50000, 
-                             min(disp_2100$y)-50000, max(disp_2100$y)+50000))
-        }else{
-          mask<-mask_10km
-          mask_p<-mask_points_10km
-          mask_p$v<-NA
-          mask_p[mask_10km %in% disp_2100$mask_10km]$v<-1
-          values(mask)[no_na_mask_10km]<-mask_p$v
-          mask<-crop(mask, c(min(disp_2100$x)-5000, max(disp_2100$x)+5000, 
-                             min(disp_2100$y)-5000, max(disp_2100$y)+5000))
+      lc_2100_f<-sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", 
+                         target_folder, item_str, exposure_threshold, dispersal)
+      if (file.exists(lc_2100_f)){
+        lc_2100<-raster(lc_2100_f)
+      }else{
+        disp_2100<-disp_item[["2100"]]
+        if (!is.null(disp_2100)){
+          
+          if (nrow(disp_2100)>0){
+            
+            disp_2100<-disp_2100[suitable==1]
+            if (nrow(disp_2100)>0){
+              if (res=="100km"){
+                mask<-mask_100km
+                mask_p<-mask_points_100km
+                mask_p$v<-NA
+                mask_p[mask_100km %in% disp_2100$mask_100km]$v<-1
+                values(mask)[no_na_mask_100km]<-mask_p$v
+                mask<-crop(mask, c(min(disp_2100$x)-50000, max(disp_2100$x)+50000, 
+                                   min(disp_2100$y)-50000, max(disp_2100$y)+50000))
+              }else{
+                mask<-mask_10km
+                mask_p<-mask_points_10km
+                mask_p$v<-NA
+                mask_p[mask_10km %in% disp_2100$mask_10km]$v<-1
+                values(mask)[no_na_mask_10km]<-mask_p$v
+                mask<-crop(mask, c(min(disp_2100$x)-5000, max(disp_2100$x)+5000, 
+                                   min(disp_2100$y)-5000, max(disp_2100$y)+5000))
+              }
+              
+              mask_2100_file<-sprintf("%s/%s_exposure_%d_dispersal_%d_disp_2100.tif", 
+                                      target_folder, item_str, exposure_threshold, dispersal)
+              mask_2100_file_1km<-sprintf("%s/%s_exposure_%d_dispersal_%d_disp_2100_1km.tif", 
+                                          target_folder, item_str, exposure_threshold, dispersal)
+              writeRaster(mask, mask_2100_file,datatype="INT1U",
+                          overwrite=T)
+              gdalwarp(mask_2100_file, mask_2100_file_1km, tr=c(1000, 1000), r= "near", ot="Byte", 
+                       srcnodata=255, dstnodata=255, overwrite=T)
+              print(mask_2100_file_1km)
+              mask_1km<-raster(mask_2100_file_1km)
+              lc_2100<-crop(r_sinu, extent(mask_1km))
+              extent(lc_2100)<-extent(mask_1km)
+              lc_2100<-mask(lc_2100, mask_1km)
+              writeRaster(lc_2100, lc_2100_f, datatype="INT1U",
+                          overwrite=T)
+            }
+            dispersal_log[["lc_2100"]]<-lc_2100
+          }
         }
-        
-        mask_2100_file<-sprintf("%s/%s_exposure_%d_dispersal_%d_disp_2100.tif", 
-                                target_folder, item_str, exposure_threshold, dispersal)
-        mask_2100_file_1km<-sprintf("%s/%s_exposure_%d_dispersal_%d_disp_2100_1km.tif", 
-                                     target_folder, item_str, exposure_threshold, dispersal)
-        writeRaster(mask, mask_2100_file,datatype="INT1U",
-                    overwrite=T)
-        gdalwarp(mask_2100_file, mask_2100_file_1km, tr=c(1000, 1000), r= "near", ot="Byte", 
-                 srcnodata=255, dstnodata=255, overwrite=T)
-        
-        mask_1km<-raster(mask_2100_file_1km)
-        lc_2100<-crop(r_sinu, extent(mask_1km))
-        extent(lc_2100)<-extent(mask_1km)
-        lc_2100<-mask(lc_2100, mask_1km)
-        writeRaster(lc_2100, sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", 
-                                     target_folder, item_str, exposure_threshold, dispersal),datatype="INT1U",
-                    overwrite=T)
-        dispersal_log[["lc_2100"]]<-lc_2100
       }
       print("Writing result")
       saveRDS(dispersal_log, target)

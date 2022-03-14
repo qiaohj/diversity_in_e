@@ -14,7 +14,7 @@ print(sprintf("Current core number is %d", getDTthreads()))
 args = commandArgs(trailingOnly=TRUE)
 group<-args[1]
 if (is.na(group)){
-  group<-"Birds"
+  group<-"Mammals"
 }
 
 esm_i<-as.numeric(args[2])
@@ -95,7 +95,7 @@ predict_range<-c(2021:2100)
 i=2
 unique<-unique[sample(length(unique), length(unique))]
 x_size<-dim(mask_10km)[2]
-bi<-"Corapipo leucorrhoa"
+bi<-"Accipiter erythropus"
 
 group_full_sum_area<-group_full[, .(sum_are=sum(Shape_Area)), by="SCINAME"]
 group_full_sum_area<-group_full_sum_area[order(-1*sum_are),]
