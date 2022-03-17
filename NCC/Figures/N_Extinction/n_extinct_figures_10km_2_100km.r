@@ -36,7 +36,7 @@ if (F){
     sp_dis_100km_all<-NULL
     
     group<-"Mammals"
-    for (group in c("Mammals", "Birds")){
+    for (group in c("Birds", "Mammals")){
       for (j in c(1:nrow(layer_df))){
         layer<-layer_df[j,]
         for (k in c(1:length(dispersals))){
@@ -52,12 +52,13 @@ if (F){
             
             indices_df<-readRDS(target)
             if (is.null(indices_df)){
+              asdf
               next()
             }
             sp_dis<-readRDS(sprintf("%s/sp_dis.rda", target_folder))
             colnames(sp_dis)[which(colnames(sp_dis)=="N")]<-"N_CELL"
             colnames(sp_dis)[which(colnames(sp_dis)=="YEAR")]<-"year"
-            
+            sp_dis<-data.table(sp_dis)
             sp_dis_init<-sp_dis%>%dplyr::filter(year==2020)
             sp_dis_init<-sp_dis_init[, c("sp", "N_CELL")]
             colnames(sp_dis_init)<-c("sp", "N_CELL_2020")
@@ -195,6 +196,13 @@ if (F){
     sp_dis_100km_all$Label1<-paste(sp_dis_100km_all$GCM, sp_dis_100km_all$SSP)
     saveRDS(sp_dis_100km_all, sprintf("../../Figures/N_Extinction/sp_dis_all_%d_100km.rda", exposure))
   }
+  if (F){
+    exposure<-0
+    dffff<-readRDS(sprintf("../../Figures/N_Extinction/sp_dis_all_%d_100km.rda", exposure))
+    dffff<-dffff[year==2100]
+    ddd<-dffff[, .(N=.N), by=list(SSP, M, GCM, group, year)]
+    ddd[SSP=="SSP119"]
+  }
 }
 
 exposure<-0
@@ -202,22 +210,35 @@ exposure<-0
 sp_dis_all_sub_N_all<-NULL
 sp_dis_extinct<-NULL
 sp_dis_all_se_all<-NULL
+
 for (exposure in c(0, 5)){
   rda<-sprintf("../../Figures/N_Extinction/sp_dis_all_%d_10km_2_100km.rda", exposure)
   print(paste("Reading", rda))
   sp_dis_all<-readRDS(rda)
+  
   if (F){
     test<-sp_dis_all[, .(N=.N), by=list(GCM, SSP, N_type, N_SP, M, group, year)]
     test<-test[N_type=="EXTINCT"]
     test<-test[year==2100]
     test<-test[group=="Mammals"]
   }
+  
   colnames(sp_dis_all)[which(colnames(sp_dis_all)=="N_SP.x")]<-"N_SP"
+  
   sp_dis_all_sub_1<-sp_dis_all%>%dplyr::filter(year==2100)
   sp_dis_all_sub<-sp_dis_all_sub_1%>%dplyr::filter((Extinct_Type!="")|(N_type=="EXTINCT"))
   sp_dis_all_sub[which(sp_dis_all_sub$N_type!="EXTINCT"), "N_type"]<-"ENDANGERED"
+  if (F){
+    item_0<-sp_dis_all_sub%>%dplyr::filter(SSP=="SSP119"&M==0&group=="Birds"&N_type=="EXTINCT")
+    item_1<-sp_dis_all_sub%>%dplyr::filter(SSP=="SSP119"&M==1&group=="Birds"&N_type=="EXTINCT")
+    readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/Dispersal/Birds/Brachypteracias_leptosomus/EC-Earth3-Veg_SSP119_5_dispersal_1.rda")
+    readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/Dispersal/Birds/Brachypteracias_leptosomus/EC-Earth3-Veg_SSP119_5_dispersal_1_10km.rda")
+    xxx<-data.table(sp_dis_all)
+    
+  }
   sp_dis_all_sub_N<-sp_dis_all_sub%>%dplyr::group_by(group, Label1, GCM, SSP, M, N_type, N_SP, TYPE)%>%
     dplyr::summarise(N_SP_EXTINCT=n_distinct(sp))
+  print(table(sp_dis_all_sub_N$N_SP))
   sp_dis_all_sub_N$persentile<-sp_dis_all_sub_N$N_SP_EXTINCT/sp_dis_all_sub_N$N_SP
   
   sp_dis_all_se<-sp_dis_all_sub%>%dplyr::group_by(group, SSP, M, N_SP, TYPE)%>%
@@ -225,25 +246,52 @@ for (exposure in c(0, 5)){
   sp_dis_all_se$persentile<-sp_dis_all_se$N_SP_EXTINCT/sp_dis_all_se$N_SP
   
   if (exposure==0){
-    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, "  (no climate resilience)", sep="")
+    #sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (no climate resilience)", sep="")
     sp_dis_all_sub_N$exposure<-" no climate resilience"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (no climate resilience)", sep="")
+    #sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, " (no climate resilience)", sep="")
     sp_dis_all_sub_1$exposure<-" no climate resilience"
-    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (no climate resilience)", sep="")
+    #sp_dis_all_se$Label<-paste(sp_dis_all_se$group, " (no climate resilience)", sep="")
     sp_dis_all_se$exposure<-" no climate resilience"
     
   }else{
-    sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (climate resilience)", sep="")
+    #sp_dis_all_sub_N$Label<-paste(sp_dis_all_sub_N$group, " (climate resilience)", sep="")
     sp_dis_all_sub_N$exposure<-"climate resilience"
-    sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, "  (climate resilience)", sep="")
+    #sp_dis_all_sub_1$Label<-paste(sp_dis_all_sub_1$group, " (climate resilience)", sep="")
     sp_dis_all_sub_1$exposure<-"climate resilience"
-    sp_dis_all_se$Label<-paste(sp_dis_all_se$group, "  (climate resilience)", sep="")
+    #sp_dis_all_se$Label<-paste(sp_dis_all_se$group, " (climate resilience)", sep="")
     sp_dis_all_se$exposure<-"climate resilience"
   }
   sp_dis_extinct<-bind_dplyr(sp_dis_extinct, sp_dis_all_sub_1)
   sp_dis_all_sub_N_all<-bind_dplyr(sp_dis_all_sub_N_all, sp_dis_all_sub_N)
   sp_dis_all_se_all<-bind_dplyr(sp_dis_all_se_all, sp_dis_all_se)
+  if (F){
+    fff<-data.table(sp_dis_all_sub_N)
+    fff<-fff[SSP=="SSP119"]
+    fff[, .(N=.N), by=list(group, GCM, SSP, M, N_type)]
+  }
 }
+
+GCMs<-c("EC-Earth3-Veg", "MRI-ESM2-0", "UKESM1")
+SSPs<-c("SSP119", "SSP245", "SSP585")
+full_combinations<-expand.grid(group=c("Birds", "Mammals"),
+                               GCM=GCMs, SSP=SSPs,
+                               M=c(0, 1), 
+                               N_type=c("EXTINCT", "ENDANGERED"),
+                               exposure=c(" no climate resilience", "climate resilience"),
+                               stringsAsFactors = F)
+#full_combinations$Label<-sprintf("%s (%s)", full_combinations$group, full_combinations$exposure)
+full_combinations$Label1<-sprintf("%s %s", full_combinations$GCM, full_combinations$SSP)
+full_combinations$exposure_number<-0
+full_combinations[which(full_combinations$exposure=="climate resilience"),]$exposure_number<-5
+
+data.table(sp_dis_all_sub_N_all)[, .(N=.N), by=list(group, GCM, SSP, M, N_type, exposure)]
+sp_dis_all_sub_N_all<-merge(sp_dis_all_sub_N_all, full_combinations, 
+                            by=c("group", "GCM", "SSP", "M", "N_type", "exposure", "Label1"), all=T)
+sp_dis_all_sub_N_all$TYPE<-sprintf("Diversity_exposure_%d_dispersal_%d_10km_2_100km",
+                                   sp_dis_all_sub_N_all$exposure_number, sp_dis_all_sub_N_all$M)
+sp_dis_all_sub_N_all[which(sp_dis_all_sub_N_all$group=="Birds"), "N_SP"]<-7815
+sp_dis_all_sub_N_all[which(sp_dis_all_sub_N_all$group=="Mammals"), "N_SP"]<-3656
+sp_dis_all_sub_N_all[is.na(sp_dis_all_sub_N_all)]<-0
 
 sp_mean_gcm<-sp_dis_all_sub_N_all%>%
   dplyr::group_by(GCM, SSP, M, N_type)%>%
@@ -259,19 +307,16 @@ sp_mean4<-sp_mean_gcm%>%
 write.csv(sp_mean4, sprintf("../../Figures/N_Extinction/Extinction_all_exposure_10km_2_100km.csv"))
 
 sp_mean<-sp_dis_all_sub_N_all%>%
-  dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, Label, exposure)%>%
+  dplyr::group_by(group, SSP, M, N_type, N_SP, TYPE, exposure)%>%
   dplyr::summarise(persentile_MEAN=mean(persentile),
-                   persentile_SD=sd(persentile),
-                   N_SP=sum(N_SP))
-
+                   persentile_SD=sd(persentile))
 
 sp_mean$exposure<-gsub("\\(", "", sp_mean$exposure)
 sp_mean$exposure<-gsub("\\)", "", sp_mean$exposure)
 sp_mean_all<-sp_dis_all_sub_N_all%>%
   dplyr::group_by(M, SSP)%>%
   dplyr::summarise(persentile_MEAN=mean(persentile),
-                   persentile_SD=sd(persentile),
-                   N_SP=sum(N_SP))
+                   persentile_SD=sd(persentile))
 
 write.csv(sp_mean, sprintf("../../Figures/N_Extinction/Extinction_10km_2_100km.csv"))
 
@@ -291,7 +336,7 @@ sp_mean$x_label<-as.numeric(as.factor(sp_mean$SSP))
 sp_mean$N_type<-factor(sp_mean$N_type, levels=c("ENDANGERED", "EXTINCT"))
 
 sp_mean_eee<-sp_mean%>%dplyr::filter(N_type=="EXTINCT")
-sp_mean<-inner_join(sp_mean, sp_mean_eee, by=c("group", "SSP", "M", "N_SP", "TYPE", "Label", "exposure"))
+sp_mean<-inner_join(sp_mean, sp_mean_eee, by=c("group", "SSP", "M", "N_SP", "TYPE", "exposure"))
 sp_mean$persentile_MEAN<-sp_mean$persentile_MEAN.x
 sp_mean$persentile_MEAN2<-sp_mean$persentile_MEAN.x
 
@@ -372,14 +417,15 @@ p
 
 
 
-ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_extinct_only.pdf"), width=10, height=6)
-ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_extinct_only.png"), width=10, height=6)
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_10km_2_100km_extinct_only.pdf"), width=10, height=6)
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_10km_2_100km_extinct_only.png"), width=10, height=6)
 
 sp_dis_extinct<-data.frame(sp_dis_extinct)
+
 sp_dis_extinct[which(sp_dis_extinct$M==0), "Label"]<-
   paste(sp_dis_extinct[which(sp_dis_extinct$M==0), "SSP"], "(no dispersal)")
 sp_dis_extinct[which(sp_dis_extinct$M==1), "Label"]<-
-  paste(sp_dis_extinct[which(sp_dis_extinct$M==0), "SSP"], "(with dispersal)")
+  paste(sp_dis_extinct[which(sp_dis_extinct$M==1), "SSP"], "(with dispersal)")
 
 p<-ggplot(sp_dis_extinct)+
   geom_histogram(aes(x=st_N_CELL), fill=colors_black[4], bins=20)+
@@ -392,9 +438,9 @@ p<-ggplot(sp_dis_extinct)+
   #ggtitle(sprintf("Distribution>%d", ttt))+
   facet_grid(exposure~Label)
 p
-saveRDS(p, "../../Figures/NB_hist_combined/nb_range_size.rda")
-ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.pdf"), width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist.png"), width=12, height=6)
+saveRDS(p, "../../Figures/NB_hist_combined/nb_range_size_10km_2_100km.rda")
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_10km_2_100km.pdf"), width=12, height=6)
+ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_10km_2_100km.png"), width=12, height=6)
 
 table(sp_dis_extinct$N_type)
 sp_dis_extinct$IS_Extinct<-as.factor(ifelse(sp_dis_extinct$N_type=="EXTINCT", "EXTINCT", "EXTANT"))
@@ -417,9 +463,9 @@ for (g in c("Birds", "Mammals")){
     xlab("Range size")+
     ylab("Number of species")+
     facet_grid(exposure~Label)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.pdf", g), 
+  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s_10km_2_100km.pdf", g), 
          width=12, height=6)
-  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s.png", g),
+  ggsave(p, filename=sprintf("../../Figures/N_Extinction/Extinction_hist_%s_10km_2_100km.png", g),
          width=12, height=6)
   
 }

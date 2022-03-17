@@ -62,16 +62,17 @@ mammal_full_sum_area<-mammal_full[, .(sum_are=sum(SHAPE_Area)), by="binomial"]
 mammal_full_sum_area<-mammal_full_sum_area[order(sum_are),]
 bi<-mammal_full_sum_area[mammal_full_sum_area$sum_are<=1.5*min(mammal_full_sum_area$sum_are)]$binomial[1]
 mammal_full_sum_area<-mammal_full_sum_area[sample(nrow(mammal_full_sum_area), nrow(mammal_full_sum_area))]
+bi<-"Carollia_castanea"
 for (i in 1:length(mammal_full_sum_area$binomial)) {
   
   bi<-mammal_full_sum_area$binomial[i]
   #bi="Pseudophryne occidentalis"
   print(paste(i, length(unique), bi))
   target_folder<-sprintf("../../Objects/Dispersal/Mammals/%s", gsub(" ", "_", bi))
-  if (dir.exists(target_folder)){
+  if (file.exists(sprintf("%s/fit.rda", target_folder))){
     next()
   }
-  dir.create(target_folder)
+  #dir.create(target_folder)
   tmp_sf<-NULL
   print("extracting the matched polygons")
   if (file.exists(sprintf("../../Objects/IUCN_Distribution/Mammals/st_simplify/%s.rda", gsub(" ", "_", bi)))){
@@ -79,11 +80,13 @@ for (i in 1:length(mammal_full_sum_area$binomial)) {
   }else{
     tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Mammals/RAW/%s.rda", gsub(" ", "_", bi)))
   }
-  
+  tmp_sf<-readRDS(sprintf("../../Objects/IUCN_Distribution/Mammals/RAW/%s.rda", gsub(" ", "_", bi)))
   if ((class(tmp_sf$Shape)[1]=="sfc_GEOMETRY")|(class(tmp_sf$Shape)[1]=="sfc_MULTISURFACE")){
     next()
   }
-  
+  tmp_sf<-tmp_sf[which((tmp_sf$presence %in% PRESENCE)&
+                         (tmp_sf$origin %in% ORIGIN)&
+                         (tmp_sf$seasonal %in% SEASONAL)),]
   tmp_sf<-tmp_sf[!st_is_empty(tmp_sf),]
   if (nrow(tmp_sf)==0){
     next()

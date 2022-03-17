@@ -30,12 +30,12 @@ no_na_mask_100km<-!is.na(values(mask_100km))
 #mask_points_100km<-st_as_sf(mask_points_100km, coords = c("x", "y"), crs = st_crs(mask_100km))
 
 bi="Glyphonycteris sylvestris"
-coms<-expand.grid(exposure_threshold=c(5), dispersal=c(0, 1))
+coms<-expand.grid(exposure_threshold=c(0, 5), dispersal=c(0, 1))
 
 i=1
 j=1
 group_df<-group_df[sample(nrow(group_df), nrow(group_df))]
-group_df<-group_df[group=="Mammals"]
+#group_df<-group_df[group=="Mammals"]
 for (i in 1:length(group_df$sp)) {
   start_time<-Sys.time()
   bi<-group_df$sp[i]
@@ -66,18 +66,23 @@ for (i in 1:length(group_df$sp)) {
         lc_2100_f<-sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", 
                            target_folder, item_str, exposure_threshold, dispersal)
         if (file.exists(lc_2020_f)&file.exists(lc_2100_f)){
-          next()
-          saveRDS(NULL, target)
-          dispersal_log<-list()
-          lc_2020<-raster(lc_2020_f)
-          lc_2100<-raster(lc_2100_f)
-          dispersal_log[["lc_2020"]]<-lc_2020
-          dispersal_log[["lc_2100"]]<-lc_2100
-          print("Writing result fast")
-          saveRDS(dispersal_log, target)
-          print("Done! Writing result")
-          next()
+          if (file.size(lc_2020_f)>50&file.size(lc_2100_f)>50){  
+            next()
+          }
+          if (F){
+            #saveRDS(NULL, target)
+            dispersal_log<-list()
+            lc_2020<-raster(lc_2020_f)
+            lc_2100<-raster(lc_2100_f)
+            dispersal_log[["lc_2020"]]<-lc_2020
+            dispersal_log[["lc_2100"]]<-lc_2100
+            print("Writing result fast")
+            saveRDS(dispersal_log, target)
+            print("Done! Writing result")
+            next()
+          }
         }
+        #next()
         #ddd<-readRDS(target)
         
         #if (length(ddd)==2){
@@ -200,8 +205,9 @@ for (i in 1:length(group_df$sp)) {
               lc_2100<-mask(lc_2100, mask_1km)
               writeRaster(lc_2100, lc_2100_f, datatype="INT1U",
                           overwrite=T)
+              dispersal_log[["lc_2100"]]<-lc_2100
             }
-            dispersal_log[["lc_2100"]]<-lc_2100
+            
           }
         }
       }

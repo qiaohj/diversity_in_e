@@ -26,7 +26,8 @@ i=1
 j=1
 group_df<-group_df[sample(nrow(group_df), nrow(group_df))]
 threshold<-0.1
-if (F){
+if (T){
+  #group_df<-group_df[group=="Birds"]
   for (i in 1:length(group_df$sp)) {
     start_time<-Sys.time()
     bi<-group_df$sp[i]
@@ -51,9 +52,9 @@ if (F){
           target<-sprintf("%s/%s_%d_dispersal_%d_lc_log.rda", target_folder, item_str,
                           exposure_threshold, dispersal)
           if (file.exists(target)){
-            if (file.size(target)>100){
+            #if (file.size(target)>100){
               next()
-            }
+            #}
           }
           saveRDS(NULL, target)
           rr<-readRDS(source)
@@ -74,7 +75,12 @@ if (F){
             if (raster::inMemory(rr[[2]])){
               r_2100<-rr[[2]]
             }else{
-              r_2100<-raster(sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", target_folder, item_str, exposure_threshold, dispersal))
+              if (file.exists(sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", target_folder, item_str, exposure_threshold, dispersal))){
+                r_2100<-raster(sprintf("%s/%s_exposure_%d_dispersal_%d_lc_2100.tif", target_folder, item_str, exposure_threshold, dispersal))
+              }else{
+                r_2100<-rr[[2]]
+              }
+              
             }
             p_2100<-data.table(rasterToPoints(r_2100))
             colnames(p_2100)[3]<-"X2020_LC_Type5_sinu_1km"
@@ -101,6 +107,8 @@ if (F){
     }
   }
 }
+
+asdf
 
 if (F){
   

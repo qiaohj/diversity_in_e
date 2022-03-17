@@ -106,6 +106,7 @@ for (mm in c("min", "max")){
 glist[[1]]
 #df_fit_10km_100km<-rbindlist(df_fit_10km_100km)
 pp<-ggarrange(plotlist=glist, nrow=2, ncol=6)
+
 ggsave(pp, filename="../../Figures/niches/niche_comp_10km_100km.png", width=15, height=8)
 
 fit_10km_ebird<-merge(fit_10km, fit_ebird, by=c("sp", "group"))
@@ -215,8 +216,8 @@ for (mm in c("min", "max")){
       #                      midpoint = quantile(item$density, 0.2))+
       scale_color_gradient(low=colors_blue[6], high=colors_red[8])+
       theme_bw()+
-      labs(x=sprintf("%s in %s resolution", mm_label, "10km"),
-           y=sprintf("%s in %s resolution", mm_label, "100km"),
+      labs(x=sprintf("%s in all area", mm_label),
+           y=sprintf("%s in breeding area", mm_label),
            color="Density")+
       theme(legend.position = "none")
     glist[[paste(mm, var)]]<-p

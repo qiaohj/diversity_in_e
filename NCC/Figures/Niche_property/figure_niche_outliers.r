@@ -145,7 +145,23 @@ df_all$scaled_range_SD_bio14<-df_all$scaled_range_bio14_sd_max-df_all$scaled_ran
 plot(df_all$scaled_range_real_bio14, df_all$scaled_range_SD_bio14)
 
 df_all$real_nb_size<-df_all$scaled_range_real_bio1*df_all$scaled_range_real_bio12
+df_all$real_nb_volume<-df_all$scaled_range_real_bio1*df_all$scaled_range_real_bio5*df_all$scaled_range_real_bio6*
+  df_all$scaled_range_real_bio12*df_all$scaled_range_real_bio13*df_all$scaled_range_real_bio14
+
+plot(df_all$scaled_range_real_bio1, df_all$scaled_range_SD_bio1)
+plot(df_all$scaled_range_real_bio5, df_all$scaled_range_SD_bio5)
+plot(df_all$scaled_range_real_bio6, df_all$scaled_range_SD_bio6)
+plot(df_all$scaled_range_real_bio12, df_all$scaled_range_SD_bio12)
+plot(df_all$scaled_range_real_bio13, df_all$scaled_range_SD_bio13)
+plot(df_all$scaled_range_real_bio14, df_all$scaled_range_SD_bio14)
+plot(df_all$real_nb_volume, df_all$sd_nb_volume)
+
+
+
 df_all$sd_nb_size<-df_all$scaled_range_SD_bio1*df_all$scaled_range_SD_bio12
+df_all$sd_nb_volume<-df_all$scaled_range_SD_bio1*df_all$scaled_range_SD_bio5*df_all$scaled_range_SD_bio6*
+  df_all$scaled_range_SD_bio12*df_all$scaled_range_SD_bio13*df_all$scaled_range_SD_bio14
+
 
 plot(df_all$sd_nb_size, df_all$real_nb_size)
 
@@ -213,7 +229,11 @@ cor_df<-data.frame(p_bio1_max=cor(df_all$bio1_max, df_all$range_bio1_sd_max, met
                    
                    p_nb=cor(df_all$sd_nb_size, df_all$real_nb_size, method="spearman"),
                    mean_diff_nb=mean(df_all$sd_nb_size-df_all$real_nb_size),
-                   sd_diff_nb=sd(df_all$sd_nb_size-df_all$real_nb_size)
+                   sd_diff_nb=sd(df_all$sd_nb_size-df_all$real_nb_size),
+                   
+                   p_nb_volume=cor(df_all$sd_nb_volume, df_all$real_nb_volume, method="spearman"),
+                   mean_diff_nb_volume=mean(df_all$sd_nb_volume-df_all$real_nb_volume),
+                   sd_diff_nb_volume=sd(df_all$sd_nb_volume-df_all$real_nb_volume)
                    
                    )
 
@@ -270,6 +290,7 @@ ggsave(p, filename="../../Figures/niche_property/bio1_max.png")
 
 
 df_all$nb_size_density <- get_density(df_all$sd_nb_size, df_all$real_nb_size, n = 100)
+df_all$nb_volume_density <- get_density(df_all$sd_nb_volume, df_all$real_nb_volume, n = 100)
 
 p<-ggplot(df_all)+geom_point(aes(x=sd_nb_size, y=real_nb_size, color=nb_size_density))+
   #xlim(0, 11500)+
@@ -289,58 +310,74 @@ ggsave(p, filename="../../Figures/niche_property/Niche_area.pdf")
 ggsave(p, filename="../../Figures/niche_property/Niche_area.png")
 
 
-
-p_v<-cor(df_all[target=="1850"]$sd_nb_size, df_all[target=="1970"]$sd_nb_size)
-mean<-mean(df_all[target=="1850"]$sd_nb_size- df_all[target=="1970"]$sd_nb_size)
-
-
-df_g<-data.frame(NB_1850=df_all[target=="1850"]$sd_nb_size,
-                 NB_1970=df_all[target=="1970"]$sd_nb_size)
-df_g$diff_nb_range<-df_g$NB_1850-df_g$NB_1970
-
-df_g$nb_size_density <- get_density(df_g$NB_1850, df_g$NB_1970, n = 100)
-df_all$nb_size_d
-
-p<-ggplot(df_all)+geom_point(aes(x=sd_nb_size, y=real_nb_size, color=nb_size_density))+
+p<-ggplot(df_all)+geom_point(aes(x=sd_nb_volume, y=real_nb_volume, color=nb_volume_density))+
   #xlim(0, 11500)+
   #ylim(0, 8000)+
+  geom_text(x=2, y=22, 
+            label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
+                          cor_df$p_nb_volume, cor_df$mean_diff_nb_volume))+
+  scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
+                        midpoint = quantile(df_all$nb_volume_density, 0.01))+
+  theme_bw()+
+  labs(x="Species niche volume (excluding outliers)",
+       y="Species niche volume (including outliers)",
+       color="Density")+
+  theme(legend.position = "none")
+p
+ggsave(p, filename="../../Figures/niche_property/Niche_area.pdf")
+ggsave(p, filename="../../Figures/niche_property/Niche_area.png")
+
+
+p_v<-cor(df_all[target=="1850"]$sd_nb_volume, df_all[target=="1970"]$sd_nb_volume)
+mean<-mean(df_all[target=="1850"]$sd_nb_volume- df_all[target=="1970"]$sd_nb_volume)
+
+
+df_g<-data.frame(NB_1850=df_all[target=="1850"]$sd_nb_volume,
+                 NB_1970=df_all[target=="1970"]$sd_nb_volume)
+df_g$diff_nb_range<-df_g$NB_1850-df_g$NB_1970
+
+df_g$nb_volume_density <- get_density(df_g$NB_1850, df_g$NB_1970, n = 100)
+df_all$nb_volume_d
+
+p<-ggplot(df_all)+geom_point(aes(x=sd_nb_volume, y=real_nb_volume, color=nb_volume_density))+
+  xlim(0, 1200)+
+  ylim(0, 1200)+
   geom_abline(intercept = 0, slope = 1, color="black", 
               linetype="dashed", size=1.5, alpha=0.5)+
-  geom_text(x=4.5, y=23, 
+  geom_text(x=300, y=1230, 
             label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
-                          cor_df$p_nb, cor_df$mean_diff_nb))+
+                          cor_df$p_nb_volume, cor_df$mean_diff_nb_volume))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_all$nb_size_density, 0.01))+
-  xlim(0, 23)+ylim(0, 23)+
+                        midpoint = quantile(df_all$nb_volume_density, 0.01))+
   theme_bw()+
-  labs(x="Species niche area (excluding outliers)",
-       y="Species niche area (including outliers)",
+  labs(x="niche breadth volume (excluding outliers)",
+       y="niche breadth volume (including outliers)",
        color="Density")+
   theme(legend.position = "none")
 p
 
-p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_size_density))+
-  #xlim(0, 11500)+
-  #ylim(0, 8000)+
+p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_volume_density))+
+  xlim(0, 1200)+
+  ylim(0, 1200)+
   geom_abline(intercept = 0, slope = 1, color="black", 
               linetype="dashed", size=1.5, alpha=0.5)+
-  geom_text(x=2.5, y=12, 
+  geom_text(x=300, y=1230, 
             label=sprintf("ρ=%.3f, mean(x-y)=%.3f", 
                           p_v, mean))+
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
-                        midpoint = quantile(df_g$nb_size_density, 0.01))+
-  xlim(0, 12)+ylim(0, 12)+
+                        midpoint = quantile(df_g$nb_volume_density, 0.01))+
+  
   theme_bw()+
-  labs(x="Species niche area 1850 - 2020",
-       y="Species niche area 1970 - 2020",
+  labs(x="niche breadth volume 1850 - 2020",
+       y="niche breadth volume 1970 - 2020",
        color="Density")+
   theme(legend.position = "none")
 p2
-ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.pdf")
-ggsave(p2, filename="../../Figures/niche_property/Niche_area_1850_1970.png")
+ggsave(p2, filename="../../Figures/niche_property/Niche_volume_1850_1970.pdf")
+ggsave(p2, filename="../../Figures/niche_property/Niche_volume_1850_1970.png")
 library(ggpubr)
 pp<-ggarrange(p, p2, nrow = 1, ncol=2, labels=c("A", "B"))
 pp
-ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.pdf",width=10, height=4)
-ggsave(pp, filename="../../Figures/niche_property/Niche_area_combined.png",width=10, height=4)
+ggsave(pp, filename="../../Figures/niche_property/Niche_volume_combined.pdf",width=10, height=4)
+ggsave(pp, filename="../../Figures/niche_property/Niche_volume_combined.png",width=10, height=4)
 
