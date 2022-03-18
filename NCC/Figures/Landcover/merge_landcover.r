@@ -52,6 +52,7 @@ if (T){
           target<-sprintf("%s/%s_%d_dispersal_%d_lc_log.rda", target_folder, item_str,
                           exposure_threshold, dispersal)
           if (file.exists(target)){
+            print("skip")
             #if (file.size(target)>100){
               next()
             #}

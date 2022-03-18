@@ -24,6 +24,10 @@ if (F){
     item_df<-data.frame(Name=item$Name, Country=item$Country, index=i)
     df_index[[length(df_index)+1]]<-item_df
   }
+  df_index<-rbindlist(df_index)
+  saveRDS(df_index, "../../Objects/Island/mountain_id_list.rda")
+  writeRaster(mountain_blank, "../../Objects/Island/mountain_index_10km.tif", overwrite=T)
+  
   #mountains<-crop(mask, extent(mountain))
   mountains<-mask(mask, mountain)
   writeRaster(mountains, "../../Objects/Island/mountain_10km.tif", overwrite=T)
