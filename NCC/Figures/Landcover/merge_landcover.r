@@ -26,7 +26,7 @@ i=1
 j=1
 group_df<-group_df[sample(nrow(group_df), nrow(group_df))]
 threshold<-0.1
-if (T){
+if (F){
   #group_df<-group_df[group=="Birds"]
   for (i in 1:length(group_df$sp)) {
     start_time<-Sys.time()
@@ -161,9 +161,16 @@ hist(all_df_iqr$change_per)
 
 all_df_iqr_se<-all_df_iqr[, .(change_per=mean(change_per), sd_change_per=sd(change_per)),
                           by=list(group, dispersal, exposure, ssp)]
+all_df_iqr$dispersal<-ifelse(all_df_iqr$dispersal==0, "no dispersal", "with dispersal")
+all_df_iqr$exposure<-ifelse(all_df_iqr$exposure==0, " no climate resilience", "climate resilience")
 
-ggplot(all_df_iqr)+geom_density(aes(x=change_per, fill=ssp, color=ssp), alpha=0.2)+facet_grid(dispersal~exposure)+theme_bw()
-
+p<-ggplot(all_df_iqr)+geom_histogram(aes(x=change_per*100, fill=ssp), alpha=0.5, bins=50)+
+  facet_grid(exposure~dispersal, scale="free")+theme_bw()+
+  scale_color_manual(values=color_ssp)+
+  scale_fill_manual(values=color_ssp)+
+  xlab("Change of landcover (%)")+ylab("Number of species")+
+  labs(fill="SSP", color="SSP")
+ggsave(p, filename="../../Figures/Landcover/landcover_change_percent.png", width=8, height=5)
 all_df_iqr$loss_99<-all_df_iqr$change_per<=-0.99
 all_df_iqr$loss_95<-all_df_iqr$change_per<=-0.95
 all_df_iqr$loss_90<-all_df_iqr$change_per<=-0.90
@@ -191,16 +198,20 @@ all_df_iqr_90_se$threshold<-"90%"
 
 all_df_iqr_all<-rbindlist(list(all_df_iqr_90_se, all_df_iqr_95_se, all_df_iqr_99_se))
 
+colos_per<-color_ssp
+names(colos_per)<-c("90%", "95%", "99%")
 p<-ggplot()+
   geom_bar(data=all_df_iqr_all, 
            stat="identity", position="dodge2", 
            aes(y=per*100, x=ssp, fill=threshold, group=group), width=2, color="grey")+
   xlab("SSP scenario")+
+  scale_fill_manual(values=colos_per)+
   #ggtitle(sprintf("Distribution>%d", ttt))+
   #ylim(c(0, 1))+
   theme_bw()+
   #theme(axis.text.x = element_text(angle = 15, vjust = 0.7, hjust=0.5))+
-  facet_grid(exposure~dispersal)+
+  facet_grid(exposure~dispersal, scale="free")+
   labs(fill = "Threshold")+
-  ylab("Endangrous because of loss of landcover")
+  ylab("Extinction risk because of loss of landcover (%)")
 p
+ggsave(p, filename="../../Figures/Landcover/landcover_loss_percent.png", width=8, height=5)

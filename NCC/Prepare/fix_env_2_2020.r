@@ -104,7 +104,7 @@ layer_df<-expand.grid(GCM=GCMs, SSP=SSPs, Y=predict_range)
 layer_df$LABEL<-paste(layer_df$GCM, layer_df$SSP, layer_df$Y, sep="_")
 mask<-data.frame(rasterToPoints(raster("../../Raster/mask_100km.tif")))
 env_layers<-list()
-var_tamplate<-"/media/huijieqiao/QNAS/Sp_Richness_GCM/Raster/ENV/Bioclim/%s/%s/%d/%s_eck4.tif"
+var_tamplate<-"/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Raster/Bioclim/%s/%s/%d/%s_eck4.tif"
 i=645
 for (i in c(1:nrow(layer_df))){
   print(paste("Init layer list:", i, nrow(layer_df)))

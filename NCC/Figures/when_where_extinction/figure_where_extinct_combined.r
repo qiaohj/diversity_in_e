@@ -27,7 +27,7 @@ if (T){
     }
     
     myPalette <- colorRampPalette(c(color_two_map[2], color_two_map[1]))
-    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final.rda")
+    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final_10km.rda")
     
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
     ratio_final$label<-paste(ratio_final$SSP, "Climate resilience year:", ratio_final$exposure)
@@ -47,7 +47,7 @@ if (T){
     
     ratio_final_with_highest<-ratio_final_with_highest%>%dplyr::filter(mean_V>=highest_v)
     
-    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final.rda")
+    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final_10km.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
     n_ext_final$label<-paste(n_ext_final$SSP, "Climate resilience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
@@ -110,7 +110,8 @@ if (T){
                           limits=c(0, 50), oob=squish,
                           breaks=seq(0, 50, by=10),
                           labels=c(as.character(seq(0, 50, by=10))[1:5], 
-                                   sprintf(">50, up to %d", round(max(n_ext_final$sum_V)))))+
+                                   sprintf(">50, up to %d", round(max(200)))))+
+      #sprintf(">50, up to %d", round(max(n_ext_final$sum_V)))))+
       #ggtitle(title2)+
       labs(fill = "Number of extinct species")+
       theme(
@@ -162,7 +163,7 @@ if (T){
       )
     p_df_highest
     ggsave(p_df_highest, 
-           filename=sprintf("../../Figures/when_where_extinction_all/highest_combined_final_without_da.png"), 
+           filename=sprintf("../../Figures/when_where_extinction_all/highest_combined_final_without_da_10km.png"), 
            width=8, height=4)
     #da=1
     if (da==0){
@@ -174,7 +175,7 @@ if (T){
     }
     
     myPalette <- colorRampPalette(c(color_two_map[2], color_two_map[1]))
-    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final.rda")
+    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final_10km.rda")
     
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
     ratio_final$label<-paste(ratio_final$SSP, "Climate resilience year:", ratio_final$exposure)
@@ -195,7 +196,7 @@ if (T){
     ratio_final_with_highest<-ratio_final_with_highest%>%dplyr::filter(mean_V>=highest_v)
     
     
-    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final.rda")
+    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final_10km.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
     n_ext_final$label<-paste(n_ext_final$SSP, "Climate resilience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
@@ -252,7 +253,7 @@ if (T){
       )
     p_df_highest
     ggsave(p_df_highest, 
-           filename=sprintf("../../Figures/when_where_extinction_all/highest_combined_final_with_da.png"), 
+           filename=sprintf("../../Figures/when_where_extinction_all/highest_combined_final_with_da_10km.png"), 
            width=8, height=4)
     
     p_ratio_with_da<-ggplot(ratio_final)+
@@ -292,7 +293,8 @@ if (T){
                           limits=c(0, 50), oob=squish,
                           breaks=seq(0, 50, by=10),
                           labels=c(as.character(seq(0, 50, by=10))[1:5], 
-                                   sprintf(">50, up to %d", round(max(n_ext_final$sum_V)))))+
+                                   #sprintf(">50, up to %d", round(max(n_ext_final$sum_V)))))+
+                                   sprintf(">50, up to %d", round(max(200)))))+
       #ggtitle(title2)+
       labs(fill = "Number of extinct species")+
       theme(
@@ -326,18 +328,18 @@ if (T){
                   p_ratio_with_da_formatted, ncol=1, nrow=4, labels=c("A", "B", "C", "D"))
     
     ggsave(pp, 
-           filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all.png"), 
+           filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_10km.png"), 
            width=7, height=14)
     
     ggsave(pp, 
-           filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all.pdf"), 
+           filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_10km.pdf"), 
            width=7, height=14)
   }
 }   
 
 all_p_list<-list()
 for (da in c(0, 1)){
-    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final_group.rda")
+    ratio_final<-readRDS("../../Figures/when_where_extinction_all/ratio_final_group_10km.rda")
     ratio_final<-ratio_final%>%dplyr::filter((dispersal==da))
     ratio_final$label<-paste(ratio_final$SSP, "Climate resilience year:", ratio_final$exposure)
     ratio_final<-ratio_final%>%dplyr::filter(mean_V>0)
@@ -349,7 +351,7 @@ for (da in c(0, 1)){
       paste(ratio_final[which(ratio_final$exposure==5), "SSP"], "climate resilience", sep=", ")
     
     
-    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final_group.rda")
+    n_ext_final<-readRDS("../../Figures/when_where_extinction_all/n_ext_final_group_10km.rda")
     n_ext_final<-n_ext_final%>%dplyr::filter((dispersal==da))
     n_ext_final$label<-paste(n_ext_final$SSP, "Climate resilience year:", n_ext_final$exposure)
     n_ext_final<-n_ext_final%>%dplyr::filter(sum_V>0)
@@ -471,10 +473,10 @@ for (g in c("Birds", "Mammals")){
                 )
   
   ggsave(pp, 
-         filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_%s.png", g), 
+         filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_%s_10km.png", g), 
          width=7, height=13)
   
   ggsave(pp, 
-         filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_%s.pdf", g), 
+         filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_%s_10km.pdf", g), 
          width=7, height=13)
 }
