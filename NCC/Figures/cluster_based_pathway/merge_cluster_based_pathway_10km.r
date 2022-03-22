@@ -54,9 +54,10 @@ for (l_i in c(index)){
   for (exposure in c(exposure)){
     
     for (group in c(group)){
-      target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d.rda",
+      target_rda<-sprintf("../../Objects/cluster_based_pathway_10km/merged/%s_%s_exposure_%d.rda",
                           group, layer_item$LABEL, exposure)
       if (file.exists(target_rda)){
+        print("skip")
         next()
       }
       saveRDS(NULL, target_rda)
@@ -73,10 +74,16 @@ for (l_i in c(index)){
         print(sprintf("combination:%d/%d %s, exposure:%d, sp:%d/%d, %s, %s", 
                       l_i, nrow(layer_df), layer_item$LABEL, exposure, sp_i, nrow(df_sp_list),
                       sp_test$SP, group))
-        target_folder<-sprintf("../../Objects/cluster_based_pathway/%s/%s/%s/exposure_%d", 
+        target_folder<-sprintf("../../Objects/cluster_based_pathway_10km/%s/%s/%s/exposure_%d", 
                                group, sp_test$SP, layer_item$LABEL, exposure)
         #smooth_path_rds<-sprintf("%s/smoothed_pathway.rda", target_folder)
         path_rds<-sprintf("%s/pathways.rda", target_folder)
+        if (!file.exists(path_rds)){
+          target_folder<-sprintf("../../Objects/cluster_based_pathway/%s/%s/%s/exposure_%d", 
+                                 group, sp_test$SP, layer_item$LABEL, exposure)
+          #smooth_path_rds<-sprintf("%s/smoothed_pathway.rda", target_folder)
+          path_rds<-sprintf("%s/pathways.rda", target_folder)
+        }
         #if ((file.exists(smooth_path_rds))&(file.exists(path_rds))){
         if (file.exists(path_rds)){
           #next()
@@ -164,6 +171,11 @@ for (l_i in c(index)){
       saveRDS(smooth_path_full, target_rda)
     }
   }
+}
+if (F){
+  d1<-readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/cluster_based_pathway_10km/merged/Mammals_UKESM1_SSP245_exposure_0.rda")
+  d3<-readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/cluster_based_pathway_10km/merged/Mammals_EC-Earth3-Veg_SSP119_exposure_0_copy.rda")
+  d2<-readRDS("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Objects/cluster_based_pathway/merged/Mammals_UKESM1_SSP245_exposure_0.rda")
 }
 
 #write.table(rm, file="~/xxx.sh", quote=F, row.names = F, col.names = F)

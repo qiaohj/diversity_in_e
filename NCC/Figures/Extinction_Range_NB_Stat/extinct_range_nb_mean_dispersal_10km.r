@@ -1,7 +1,14 @@
 library(data.table)
+library(raster)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 
 
+points_10km<-readRDS("../../Raster/points_10km.rda")
+colnames(points_10km)[c(1,2)]<-c("x_10km", "y_10km")
+mask_100km<-raster("../../Raster/mask_100km.tif")
+points_100km<-data.table(rasterToPoints(mask_100km))
+colnames(points_100km)[c(1,2)]<-c("x_100km", "y_100km")
+points_10km<-merge(points_10km, points_100km, by="mask_100km")
 
 exposure<-c(0, 5)
 SSPs<-c("SSP119", "SSP245", "SSP585")
@@ -14,7 +21,7 @@ if (T){
   if (F){
     write.csv(bird_disp, "../../Objects/estimate_disp_dist/estimate_disp_dist_bird.csv", row.names=F)
   }
-  tempelate<-"../../Objects/Dispersal/Birds/%s/%s_%s_%d_dispersal_1.rda"
+  tempelate<-"../../Objects/Dispersal/Birds/%s/%s_%s_%d_dispersal_1_10km.rda"
   i_e=1
   i=9
   bird_disp<-bird_disp[sample(nrow(bird_disp), nrow(bird_disp)),]
@@ -22,8 +29,8 @@ if (T){
     
     sp<-bird_disp[i, ]$iucn_name
     print(paste(i, nrow(bird_disp), sp))
-    target<-sprintf("../../Objects/Dispersal_distances/Birds/%s.rda", gsub(" ", "_", sp))
-    target_info<-sprintf("../../Objects/Dispersal_distances/Birds/%s_info.rda", gsub(" ", "_", sp))
+    target<-sprintf("../../Objects/Dispersal_distances_10km/Birds/%s.rda", gsub(" ", "_", sp))
+    target_info<-sprintf("../../Objects/Dispersal_distances_10km/Birds/%s_info.rda", gsub(" ", "_", sp))
     if (file.exists(target)){
       next()
     }
@@ -37,13 +44,18 @@ if (T){
         next()
       }
       item<-readRDS(rda_file)
-      year=2039
+      year=2022
       
       for (year in c(2022:2100)){
         
         y1<-year-1
         y2<-year  
         item1<-item[[as.character(y1)]]
+        item1<-merge(item1, points_10km, by.x="mask_10km", by.y="mask_10km")
+        item1<-item1[, .(N=.N), by=c("x_100km", "y_100km", "mask_100km", "YEAR", "group",
+                                       "sp", "GCM", "SSP", "extinct_year", "dispersal", "res")]
+        colnames(item1)[1:3]<-c("x", "y", "mask")
+        
         if (!("disp" %in% colnames(item1))){
           next()
         }
@@ -51,10 +63,10 @@ if (T){
         if (is.null(item2)){
           break()
         }
-        me_item<-merge(item1, item2, by=c("x", "y", "mask_100km"))
-        me_item$dispersal_dist<-me_item$disp.x
+        me_item<-item1
+        me_item$dispersal_dist<-me_item$disp
         #me_item[accumulative_disp.x>50000]$dispersal_dist<-me_item[accumulative_disp.x>50000]$accumulative_disp.y
-        N_Reset_Cell<-nrow(me_item[accumulative_disp.x>50000])
+        N_Reset_Cell<-nrow(me_item[accumulative_disp>5000])
         N_New_Cell<-nrow(item2[!(mask_100km %in% item1$mask_100km)])
         #me_item<-me_item[dispersal_dist>0]
         cols<-c("x", "y", "mask_100km",  "dispersal_dist", "accumulative_disp.x", "accumulative_disp.y")
@@ -180,11 +192,12 @@ if (F){
       next()
     }
     item_info<-readRDS(target_info)
+    
     item_info_se<-item_info[, .(N_Reset_Cell=sum(N_Reset_Cell),
                                 N_New_Cell=sum(N_New_Cell),
                                 mean_N_New_Cell=mean(N_New_Cell),
                                 mean_N_Reset_Cell=mean(N_Reset_Cell)),
-                            by=c("iucn_name", "exposure", "SSP", "GCM")]
+                            by=list(iucn_name, exposure, SSP, GCM)]
     all_item_se<-item[, .(mean_dist=mean(dispersal_dist), sd_dist=sd(dispersal_dist)), 
                       by=c("iucn_name", "exposure", "SSP", "GCM")]
     all_item_se<-merge(all_item_se, item_info_se, by=c("iucn_name", "exposure", "SSP", "GCM"))
@@ -230,6 +243,7 @@ if (F){
   all_df_2[iucn_name=="Abditomys latidens"]
   
   all_df_all<-rbindlist(list(all_df, all_df_2))
+  colnames(all_df_all)[1]
   saveRDS(all_df_all, "../../Objects/Dispersal_distances/all_mean_disp_dist.rda")
 }
 

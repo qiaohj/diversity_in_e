@@ -64,7 +64,7 @@ for (l_i in c(1:nrow(layer_df))){
     
     for (group in c("Birds", "Mammals")){
       print(paste(group, exposure, layer_item$LABEL))
-      smooth_path<-readRDS(sprintf("../../Objects/cluster_based_pathway_10km/merged/%s_%s_exposure_%d.rda",
+      smooth_path<-readRDS(sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d.rda",
                                    group, layer_item$LABEL, exposure))
       smooth_path$line_group<-paste(smooth_path$sp, smooth_path$path_group)
       xy<-c("x", "y")
@@ -97,12 +97,12 @@ for (l_i in c(1:nrow(layer_df))){
       info_item$exposure<-ifelse(exposure==1, " no exposure", "5-year exposure")
       all_info<-bind(all_info, info_item)
       for (persent in persents){
-        if (file.exists(sprintf("../../Figures/cluster_based_pathway_10km/%s_%s_exposure_%d_sub_%d.png", 
+        if (file.exists(sprintf("../../Figures/cluster_based_pathway/%s_%s_exposure_%d_sub_%d.png", 
                                 group, layer_item$LABEL, exposure, persent * 100))){
           next()
         }
         print(paste(group, exposure, layer_item$LABEL, persent))
-        target_rda<-sprintf("../../Objects/cluster_based_pathway_10km/merged/%s_%s_exposure_%d_sub_%d.rda",
+        target_rda<-sprintf("../../Objects/cluster_based_pathway/merged/%s_%s_exposure_%d_sub_%d.rda",
                             group, layer_item$LABEL, exposure, persent * 100)
         if (file.exists(target_rda)){
           smooth_path_sub<-readRDS(target_rda)
@@ -122,7 +122,7 @@ for (l_i in c(1:nrow(layer_df))){
           scale_alpha_continuous()+
           scale_color_manual(values = color_groups)
         ggsave(p, filename=
-                 sprintf("../../Figures/cluster_based_pathway_10km/%s_%s_exposure_%d_sub_%d.png", 
+                 sprintf("../../Figures/cluster_based_pathway/%s_%s_exposure_%d_sub_%d.png", 
                          group, layer_item$LABEL, exposure, persent * 100), 
                width=width, height = height)
       }

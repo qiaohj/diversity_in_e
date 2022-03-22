@@ -86,12 +86,18 @@ for (l_i in c(1:nrow(layer_df))){
       }
       dir.create(target_folder, showWarnings = F, recursive = T)
       source_folder<-sprintf("../../Objects/Dispersal/%s/%s", sp_test$group, sp_test$SP)
-      if (!file.exists(sprintf("%s/%s_%d_dispersal_1_10km.rda", 
-                               source_folder, layer_item$LABEL, exposure))){
+      f<-sprintf("%s/%s_%d_dispersal_1_10km.rda", 
+                 source_folder, layer_item$LABEL, exposure)
+      res<-"10km"
+      if (!file.exists(f)){
+        f<-sprintf("%s/%s_%d_dispersal_1.rda", 
+                   source_folder, layer_item$LABEL, exposure)
+        res<-"100km"
+      }
+      if (!file.exists(f)){
         next()
       }
-      dis_details_10km<-readRDS(sprintf("%s/%s_%d_dispersal_1_10km.rda", 
-                                   source_folder, layer_item$LABEL, exposure))
+      dis_details_10km<-readRDS(f)
       dis_details_10km<-rbindlist(dis_details_10km)
       if (is.null(dis_details_10km)){
         next()
@@ -99,13 +105,15 @@ for (l_i in c(1:nrow(layer_df))){
       if (nrow(dis_details_10km)==0){
         next()
       }
-      dis_details<-merge(dis_details_10km, points_10km, by.x="mask_10km", by.y="mask_10km")
-      if (nrow(dis_details)==0){
-        next()
+      if ( res=="10km"){
+        dis_details<-merge(dis_details_10km, points_10km, by.x="mask_10km", by.y="mask_10km")
+        if (nrow(dis_details)==0){
+          next()
+        }
+        dis_details<-dis_details[, .(N=.N), by=c("x_100km", "y_100km", "mask_100km", "YEAR", "exposure", "suitable")]
+        
+        colnames(dis_details)[c(1:2)]<-c("x", "y")
       }
-      dis_details<-dis_details[, .(N=.N), by=c("x_100km", "y_100km", "mask_100km", "YEAR", "exposure", "suitable")]
-      
-      colnames(dis_details)[c(1:2)]<-c("x", "y")
       
       dis_details$continent<-raster::extract(r_continent, dis_details[, c("x", "y")])
       dis_details<-dis_details[!is.na(continent)]

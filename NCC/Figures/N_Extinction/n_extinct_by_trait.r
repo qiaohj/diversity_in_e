@@ -281,14 +281,15 @@ full_Com<-data.table(expand.grid(SSP=c("SSP245", "SSP585", "SSP119"),
                                  exposure=c(0, 5),
                                  order=unique(extinct_bird_with_order$order),
                                  stringsAsFactors = F))
-extinct_bird_with_order<-merge(full_Com, extinct_bird_with_order, by=c("SSP", "GCM", "M", "exposure", "order"), all=T)
+extinct_bird_with_order<-merge(full_Com, extinct_bird_with_order, 
+                               by=c("SSP", "GCM", "M", "exposure", "order"), all=T)
 extinct_bird_with_order[is.na(N)]$N<-0
 extinct_bird_with_order<-merge(extinct_bird_with_order, bird_disp_target_with_order, by="order")
 extinct_bird_with_order$extinct_proportion<-extinct_bird_with_order$N/extinct_bird_with_order$N_all_sp * 100
 extinct_bird_with_order<-extinct_bird_with_order[, .(N=mean(N), sd_N=sd(N),
                                                    extinct_proportion=mean(extinct_proportion), 
                                                    sd_extinct_proportion=sd(extinct_proportion)), 
-                                               by=list(SSP, M, exposure, order)]
+                                               by=list(SSP, M, exposure, order, N_all_sp)]
 extinct_bird_with_order$dispersal<-ifelse(extinct_bird_with_order$M==0, "no dispersal", "with dispersal")
 extinct_bird_with_order$exposure<-ifelse(extinct_bird_with_order$exposure==0, " no climate resilience", "climate resilience")
 write.csv(extinct_bird_with_order, "../../Figures/N_Extinction/Extinction_bird_order_10km_2_100km_extinct_only.csv", row.names = F)
@@ -296,11 +297,13 @@ write.csv(extinct_bird_with_order, "../../Figures/N_Extinction/Extinction_bird_o
 extinct_bird_with_order_df<-extinct_bird_with_order[, .(N=mean(N), sd_N=sd(N),
                                                      extinct_proportion=mean(extinct_proportion), 
                                                      sd_extinct_proportion=sd(extinct_proportion)), 
-                                                 by=list(SSP, order)]
+                                                 by=list(SSP, order, N_all_sp)]
 extinct_bird_with_order_df$N_int<-sprintf("%.1f", extinct_bird_with_order_df$N)
+extinct_bird_with_order_df$order_label<-sprintf("%s (%d)", extinct_bird_with_order_df$order, extinct_bird_with_order_df$N_all_sp)
 p<-ggplot(extinct_bird_with_order_df)+
-  geom_bar(aes(y=order, x=extinct_proportion), fill="lightgrey", stat="identity", position="dodge")+
-  geom_text(aes(y=order, x=extinct_proportion, label=N_int), hjust=-0.2)+#, hjust="inward")+
+  geom_bar(aes(y=order_label, x=extinct_proportion), 
+           fill="grey", stat="identity", position="dodge")+
+  geom_text(aes(y=order_label, x=extinct_proportion, label=N_int), size=3, hjust=-0.2)+#, hjust="inward")+
   #geom_errorbar(aes(x=order, 
   #                  ymin=extinct_proportion-sd_extinct_proportion,
   #                  ymax=extinct_proportion+sd_extinct_proportion,color=order), width=0.5, position=position_dodge(.9))+
@@ -308,8 +311,8 @@ p<-ggplot(extinct_bird_with_order_df)+
   theme_bw()+
   theme(legend.position = "none")+
   ylab("Order")+xlab("Mean extinction proportion (%)")+
-  scale_x_continuous(expand = expansion(mult = c(0, 0.3)))+
-  scale_y_discrete(limits=rev(unique(extinct_bird_with_order_df$order)))
+  scale_x_continuous(expand = expansion(mult = c(0, 0.2)))+
+  scale_y_discrete(limits=rev(unique(extinct_bird_with_order_df$order_label)))
 p
 ggsave(p, filename="../../Figures/N_Extinction/Extinction_bird_order_10km_2_100km_extinct_only.png", width=8, height=7)
 
@@ -527,7 +530,7 @@ extinct_mammal_with_order$extinct_proportion<-extinct_mammal_with_order$N/extinc
 extinct_mammal_with_order<-extinct_mammal_with_order[, .(N=mean(N), sd_N=sd(N),
                                                      extinct_proportion=mean(extinct_proportion), 
                                                      sd_extinct_proportion=sd(extinct_proportion)), 
-                                                 by=list(SSP, M, exposure, order)]
+                                                 by=list(SSP, M, exposure, order, N_all_sp)]
 extinct_mammal_with_order$dispersal<-ifelse(extinct_mammal_with_order$M==0, "no dispersal", "with dispersal")
 extinct_mammal_with_order$exposure<-ifelse(extinct_mammal_with_order$exposure==0, " no climate resilience", "climate resilience")
 extinct_mammal_with_order$order<-stringr::str_to_title(extinct_mammal_with_order$order)
@@ -536,11 +539,16 @@ write.csv(extinct_mammal_with_order, "../../Figures/N_Extinction/Extinction_mamm
 extinct_mammal_with_order_df<-extinct_mammal_with_order[, .(N=mean(N), sd_N=sd(N),
                                                             extinct_proportion=mean(extinct_proportion), 
                                                             sd_extinct_proportion=sd(extinct_proportion)), 
-                                                        by=list(SSP, order)]
+                                                        by=list(SSP, order, N_all_sp)]
 extinct_mammal_with_order_df$N_int<-sprintf("%.1f", extinct_mammal_with_order_df$N)
+extinct_mammal_with_order_df$N_Label<-sprintf("%s / %d", extinct_mammal_with_order_df$N_int, extinct_mammal_with_order_df$N_all_sp)
+extinct_mammal_with_order_df$Y_Label<-sprintf("%s (%d)", 
+                                              extinct_mammal_with_order_df$order, 
+                                              extinct_mammal_with_order_df$N_all_sp)
+
 p<-ggplot(extinct_mammal_with_order_df)+
-  geom_bar(aes(y=order, x=extinct_proportion), fill="lightgrey", stat="identity", position="dodge")+
-  geom_text(aes(y=order, x=extinct_proportion, label=N_int), hjust=-0.2)+#, hjust="inward")+
+  geom_bar(aes(y=Y_Label, x=extinct_proportion), fill="grey", stat="identity", position="dodge")+
+  geom_text(aes(y=Y_Label, x=extinct_proportion, label=N_int), hjust=-0.1, size=3)+#, hjust="inward")+
   #geom_errorbar(aes(x=order, 
   #                  ymin=extinct_proportion-sd_extinct_proportion,
   #                  ymax=extinct_proportion+sd_extinct_proportion,color=order), width=0.5, position=position_dodge(.9))+
@@ -548,10 +556,11 @@ p<-ggplot(extinct_mammal_with_order_df)+
   theme_bw()+
   theme(legend.position = "none")+
   ylab("Order")+xlab("Mean extinction proportion (%)")+
-  scale_x_continuous(expand = expansion(mult = c(0, 0.3)))+
-  scale_y_discrete(limits=rev(unique(extinct_mammal_with_order_df$order)))
+  scale_x_continuous(expand = expansion(mult = c(0, 0.2)))+
+  scale_y_discrete(limits=rev(unique(extinct_mammal_with_order_df$Y_Label)))
 p
-ggsave(p, filename="../../Figures/N_Extinction/Extinction_mammal_order_10km_2_100km_extinct_only.png", width=8, height=6)
+ggsave(p, filename="../../Figures/N_Extinction/Extinction_mammal_order_10km_2_100km_extinct_only.png",
+       width=9, height=5)
 
 extinct_mammal_with_order_df<-extinct_mammal_with_order[, .(N=mean(N), sd_N=sd(N),
                                                         extinct_proportion=mean(extinct_proportion), 
