@@ -19,13 +19,13 @@ if (F){
   sp_df_eck4<-st_transform(sp_df, crs = st_crs(mask_bak))
   #writeOGR(sp_df_eck4, "../../Data/Raw/IUCN/MAMMALS", "MAMMALS_TERRESTRIAL_ONLY_ECK4", driver="ESRI Shapefile")
   
-  mammals_df<-data.frame(sp_df_eck4)
+  mammals_df<-data.frame(sp_df)
   
   mammals_df$geometry<-NULL
   
   colnames(mammals_df)
   mammals_df<-data.table(mammals_df)
-  
+  mammals_df$mammals_df<-NULL
   saveRDS(mammals_df, "../../Data/Mammals/mammals_df.rda")
   
   unique <- unique(mammals_df$binomial)

@@ -281,3 +281,9 @@ p_100km
 p<-ggpubr::ggarrange(plotlist=list(p_10km, p_100km), nrow=2, ncol=1, labels=c("10km", "100km"))
 
 ggsave(p, filename="../../Figures/N_Extinction/compare_10km_100km.png", width=7, height=10)
+
+
+sp_mean_2_10km$res<-"10km"
+sp_mean_2_100km$res<-"100km"
+sp_xx<-rbindlist(list(sp_mean_2_10km, sp_mean_2_100km))
+write.csv(sp_xx, "../../Figures/N_Extinction/compare_10km_100km.csv", row.names = F)

@@ -8,76 +8,114 @@ library(sf)
 library(fasterize)
 rm(list=ls())
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
-sp_list<-readRDS("../../Objects/extincted_species_list.rda")
-sp_list<-sp_list[N>200|estimated_disp>100]
-cols<-c("Scientific", "group.x")
-table(unique(sp_list[, ..cols])$group.x)
 
 
 
 
-group<-"Birds"
-if (group=="Birds"){
-  group_df<-readRDS("../../Data/Birds/bird_df.rda")
-  group_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
-  #group_disp$estimated_disp
-  #group_disp2<-readRDS("../../Objects_PNAS/estimate_disp_dist/estimate_disp_dist_mammal.rda")
-  #dd<-merge(data.frame(group_disp[, c("iucn_name", "estimated_disp")]), 
-  #          data.frame(group_disp2[, c("iucn_name", "estimated_disp")]), 
-  #          by.x="iucn_name", by.y="iucn_name", all.x=T, all.y=F)
-  group_full<-merge(group_df, group_disp, by.x="SCINAME", by.y="iucn_name", all=F)
-  unique <- unique(group_full$SCINAME)
-  unique<-as.character(unique)
-  
-}else{
-  group_df<-readRDS("../../Data/Mammals/mammal_df.rda")
-  group_disp<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
-  group_full<-merge(group_df, group_disp, by.x="binomial", by.y="Scientific", all=F)
-  
-  unique <- unique(group_full$binomial)
-  unique<-as.character(unique)
-  colnames(group_full)[1]<-"SCINAME"
-  colnames(group_full)[27]<-"Shape_Area"
-  colnames(group_disp)[1]<-"iucn_name"
-  
-}
+
+group_disp_birds<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_bird.rda")
+colnames(group_disp_birds)[5]<-"sp"
+colnames(group_disp_birds)[4]<-"Migration"
+group_disp_birds$group<-"Birds"
+group_disp_mammals<-readRDS("../../Objects/estimate_disp_dist/estimate_disp_dist_mammal.rda")
+colnames(group_disp_mammals)[1]<-"sp"
+group_disp_mammals$group<-"Mammals"
 
 
-unique<-unique[sample(length(unique), length(unique))]
+group_full<-rbindlist(list(group_disp_birds, group_disp_mammals), fill = T)
+group_full$BodyMass.Value<-NULL
+group_full$log_body_mass<-NULL
+cols<-c("group", "sp", "HWI", "Diet", "Migration", "body_mass", "estimated_disp", "ForStrat")
+group_full<-group_full[, ..cols]
+table(group_full$group)
+group_full$is_migratory_bird<-F
 
-group_full_sum_area<-group_full[, .(sum_are=sum(Shape_Area)), by="SCINAME"]
-group_full_sum_area<-group_full_sum_area[order(-1*sum_are),]
+group_full<-group_full[sp!=" NA"]
 
-
-bi<-group_full_sum_area[group_full_sum_area$sum_are<=1.5*min(group_full_sum_area$sum_are)]$SCINAME[1]
-group_full_sum_area<-group_full_sum_area[sample(nrow(group_full_sum_area), nrow(group_full_sum_area))]
-i=1
-bi="Poicephalus rufiventris"
-coms<-expand.grid(exposure_threshold=c(0, 5), dispersal=c(0, 1))
-j=1
-distribution_threshold<-200
-dispersal_threshold<-100
-#dispersal_threshold<-890
-#distribution_threshold<-2000
-
-distribution_all<-readRDS("../../Objects/N_cell_init_distribution.rda")
-group_full_sum_area<-merge(group_full_sum_area, distribution_all, by.x="SCINAME", by.y="sp")
-group_full_sum_area<-merge(group_full_sum_area, group_disp, by.x="SCINAME", by.y="iucn_name")
-
-
-final_df<-list()
-for (i in 1:length(group_full_sum_area$SCINAME)) {
-  item<-group_full_sum_area[i]
-  bi<-group_full_sum_area$SCINAME[i]
-  target_folder<-sprintf("../../Objects/Dispersal/%s/%s", group, gsub(" ", "_", bi))
-  fit_str<-sprintf("%s/fit_seasonal_2.rda", target_folder)
-  if (file.exists(fit_str)){
-    
-    final_df[[as.character(i)]]<-item
+unique_sp<-group_full[, .(N=.N), by=list(group, sp)]
+unique_sp_t<-unique_sp[N>1]
+item1<-group_full[sp=="Cuculus saturatus"][1]
+item2<-group_full[sp=="Corapipo leucorrhoa"][2]
+item3<-group_full[sp=="Tangara cyanoptera"][2]
+group_full<-group_full[!(sp %in% unique_sp_t$sp)]
+group_full<-rbindlist(list(group_full, item1, item2, item3))
+group_full$in_ebird<-F
+group_full$res<-""
+i<-2
+for (i in 1:nrow(group_full)){
+  print(paste(i, nrow(group_full)))
+  item<-group_full[i]
+  #f1<-sprintf("../../Objects/Dispersal/%s/%s/initial_disp_10km_exposure_0_dispersal_0.rda", 
+  #            item$group, gsub(" ", "_", item$sp))
+  f1<-list.files(sprintf("../../Objects/Dispersal/%s/%s/", item$group, gsub(" ", "_", item$sp)), pattern="initial_disp_10km_*")
+  res<-""
+  mig_bird<-F
+  ebird_bird<-F
+  if (length(f1)>1){
+    res<-"10km"
+  }else{
+    f1<-list.files(sprintf("../../Objects/Dispersal/%s/%s/", item$group, gsub(" ", "_", item$sp)), pattern="initial_disp_ex*")
+    if (length(f1)>1){
+      res<-"100km"
+    }
   }
+  if (res!=""){
+   
+    f1<-sprintf("../../Objects/Dispersal/%s/%s/fit_seasonal_2.rda", 
+                item$group, gsub(" ", "_", item$sp))
+    if (file.exists(f1)){
+      mig_bird<- T
+    }
+    
+    f1<-sprintf("../../Objects/Dispersal/%s/%s/fit_ebird.rda", 
+                item$group, gsub(" ", "_", item$sp))
+    if (file.exists(f1)){
+      ebird_bird<- T
+    }
+  }
+  group_full[i]$in_ebird<-ebird_bird
+  group_full[i]$is_migratory_bird<-mig_bird
+  group_full[i]$res<-res
 }
-final_df<-rbindlist(final_df)
 
-dim(final_df[N<=200&estimated_disp<=100])
-dim(final_df[N>200|estimated_disp>100])
 
+sp_v_bird<-data.table(readRDS("../../Objects/Diversity_exposure_0_dispersal_0_10km_2_100km/Birds/EC-Earth3-Veg_SSP119/sp_dis.rda"))
+sp_v_bird<-sp_v_bird[YEAR==2020]
+sp_v_mammal<-data.table(readRDS("../../Objects/Diversity_exposure_0_dispersal_0_10km_2_100km/Mammals/EC-Earth3-Veg_SSP119/sp_dis.rda"))
+sp_v_mammal<-sp_v_mammal[YEAR==2020]
+dddd<-readRDS("../../Objects/Diversity_exposure_0_dispersal_0/Mammals/EC-Earth3-Veg_SSP119/sp_dis.rda")
+length(unique(dddd$sp))
+sp_v_mammal[!(sp %in% unique(dddd$sp))]$sp
+sp_list<-c(sp_v_bird$sp, sp_v_mammal$sp)
+sp_list<-gsub("_", " ", sp_list)
+group_full_filter<-group_full[sp %in% sp_list]
+table(group_full_filter$in_ebird)
+table(group_full_filter$group)
+#for resolution
+group_full_filter[, .(N=.N), by=list(group, res, is_migratory_bird)]
+group_full_filter[, .(N=.N), by=list(group, res)]
+
+write.csv(group_full_filter, "../../Objects/species_list.csv", row.names = F)
+
+group_full_filter<-data.table(read.csv("../../Objects/species_list.csv", head=T, stringsAsFactors = F))
+
+poly<-readRDS(sprintf("../../Objects/IUCN_Distribution/Mammals/RAW/%s.rda", "Abrocoma_budini"))
+
+xmin<-st_bbox(st_geometry(poly))[1]-200000
+xmax<-st_bbox(st_geometry(poly))[3]+200000
+ymin<-st_bbox(st_geometry(poly))[2]-200000
+ymax<-st_bbox(st_geometry(poly))[4]+200000
+
+plot(st_geometry(poly), xlim=c(xmin, xmax),  ## with c()
+     ylim=c(ymin, ymax))
+
+par(mfrow=c(1,2))   
+mask_10km<-raster("../../Raster/mask_10km.tif")
+plot(mask_10km, xlim=c(xmin, xmax),  ## with c()
+     ylim=c(ymin, ymax))
+plot(st_geometry(poly), add=T)
+
+mask_100km<-raster("../../Raster/mask_100km.tif")
+plot(mask_100km, xlim=c(xmin, xmax),  ## with c()
+     ylim=c(ymin, ymax))
+plot(st_geometry(poly), add=T)

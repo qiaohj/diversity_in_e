@@ -6,7 +6,7 @@ library(ggpubr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 
 df_with_family<-data.table(read.csv("../../Data/Dispersal_distance/bird.csv", stringsAsFactors = F))
-
+df_with_family[sp=="Cuculus saturatus"]
 formulas<-c("log_max_dis~Diet",
             "log_max_dis~HWI",
             "log_max_dis~body_mass",
