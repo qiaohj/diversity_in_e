@@ -80,10 +80,11 @@ if (F){
   saveRDS(result, "../../Figures/Extinction_cliff/Extinction_cliff_10km.rda")
 }
 
-cliff<-readRDS("../../Figures/Extinction_cliff/Extinction_cliff.rda")
+cliff<-readRDS("../../Figures/Extinction_cliff/Extinction_cliff_10km.rda")
+cliff<-rbindlist(cliff)
 cliff[exposure==" no exposure"]$exposure<-" no climate resilience"
 cliff[exposure=="5-year exposure"]$exposure<-"climate resilience"
-
+cliff<-cliff[!is.na(N_extinct_Cell)]
 range(cliff$N_extinct_Cell)
 hist(cliff$N_extinct_Cell)
 
@@ -114,9 +115,9 @@ p<-ggplot(cliff)+geom_density(aes(x=N_extinct_Cell, color=da))+
   scale_color_manual(values=color_da)+
   theme_bw()
 p
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff.pdf"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_10km.pdf"), 
        width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff.png"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_10km.png"), 
        width=12, height=6)
 
 
@@ -141,9 +142,9 @@ p<-ggplot(cliff_se_all)+
   scale_fill_manual(values=color_da)+
   theme_bw()
 p
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year.pdf"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_10km.pdf"), 
        width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year.png"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_10km.png"), 
        width=12, height=6)
 
 cliff$extinct_proportion_st<-cliff$N_extinct_Cell/cliff$N_st_Cell
@@ -177,9 +178,10 @@ p<-ggplot(cliff_se_all)+
   scale_color_manual(values=color_da)+
   scale_fill_manual(values=color_da)+
   theme_bw()
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_inital_cell.pdf"), 
+p
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_inital_cell_10km.pdf"), 
        width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_inital_cell.png"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_inital_cell_10km.png"), 
        width=12, height=6)
 
 p<-ggplot(cliff_se_all)+
@@ -196,9 +198,9 @@ p<-ggplot(cliff_se_all)+
   scale_fill_manual(values=color_da)+
   scale_y_continuous(breaks=seq(0, 1, 0.2), labels = seq(0, 1, 0.2))+
   theme_bw()
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell.pdf"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell_10km.pdf"), 
        width=12, height=6)
-ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell.png"), 
+ggsave(p, filename=sprintf("../../Figures/Extinction_cliff/Extinction_cliff_by_year_max_cell_10km.png"), 
        width=12, height=6)
 p
  

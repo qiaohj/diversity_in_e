@@ -88,14 +88,13 @@ for (j in c(3, 6, 9)){
         smooth_path_item[, max_index:=max(indice), by=line_group]
         smooth_path_item$indice<-smooth_path_item$indice/smooth_path_item$max_index
         #smooth_path_item$alpha2<-order(smooth_path_item)
-        p<-p_bak+geom_path(data=smooth_path_item, aes(x=x, y=y, color=indice, 
+        
+        p<-p_bak+geom_path(data=smooth_path_item, aes(x=x, y=y, alpha=alpha, color=group,
                                                       group=line_group))+
-          #geom_point(data=smooth_path_item[smooth_path_item$is_head,], aes(x=x, y=y), size=0.05, color="#cb181d")+
-          #scale_alpha_continuous()+
-          scale_color_gradient(low="#577fb0", high="#be261b")+coord_fixed()
-        p
-        #scale_color_manual(values = color_groups)+
-        #scale_fill_manual(values = color_groups)
+          geom_point(data=smooth_path_item[smooth_path_item$is_head,], aes(x=x, y=y, color=group), size=0.05)+
+          scale_alpha_continuous()+
+          scale_color_manual(values = color_groups)+
+          scale_fill_manual(values = color_groups)
         
         width<-13
         height<-6
@@ -115,7 +114,7 @@ for (j in c(3, 6, 9)){
 library(magick)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 exposure<-5
-label<-"UKESM1_SSP119"
+label<-"UKESM1_SSP585"
 g<-"Birds"
 year<-2021
 persent<-0.2

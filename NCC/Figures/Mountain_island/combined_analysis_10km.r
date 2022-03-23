@@ -490,7 +490,7 @@ for (S in c("SSP585", "SSP245", "SSP119")){
   p<-ggplot(n_species_se[(SSP==S)&(type %in% c("Islands", "Mountains", "Continent", "Mixed"))])+
     geom_tile(aes(x=estimated_disp_cut, y=nb_volume_cut, fill=extinct_proportion))+
     labs(fill="extinction proportion")+
-    xlab("estimated max natal dispersal (km)")+ylab("niche breadth volume")+
+    xlab("estimated max natal dispersal (km)")+ylab("niche volume")+
     scale_fill_gradient(low=colors_blue[5], high=colors_red[5])+
     facet_grid(exposure~type_factor)+theme_bw()+
     ggtitle(S)+
