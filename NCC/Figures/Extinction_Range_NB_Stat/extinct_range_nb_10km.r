@@ -304,120 +304,170 @@ table(df_bio12[range_bio12_sd_min<0]$group)
 mean_disp_dist<-readRDS("../../Objects/Dispersal_distances/all_mean_disp_dist.rda")
 mean_disp_dist$exposure<-ifelse(mean_disp_dist$exposure==0, " no climate resilience", "climate resilience")
 #colnames(mean_disp_dist)[1]<-"sp"
-mean_disp_dist$sp<-gsub(" ", "_", mean_disp_dist$sp)
+mean_disp_dist$sp<-gsub(" ", "_", mean_disp_dist$iucn_name)
 mean_disp_dist[sp=="Abditomys_latidens"]
-df_with_mean<-merge(df, mean_disp_dist, by.x=c("sp", "SSP", "GCM", "exposure", "group"), by.y=c("sp", "ssp", "esm", "exposure", "group"))
+df_with_mean<-merge(df, mean_disp_dist, by.x=c("sp", "SSP", "GCM", "exposure", "group"),
+                    by.y=c("sp", "SSP", "GCM", "exposure", "group"))
 df_with_mean<-df_with_mean[mean_disp!=estimated_disp]
-df_with_mean$mean_disp<-df_with_mean$mean_disp/1000
+df_with_mean$mean_disp<-df_with_mean$mean_dist/1000
 df_with_mean$scaled_nb_volume<-scale(df_with_mean$nb_volume)
 df_with_mean$scaled_mean_disp<-scale(df_with_mean$mean_disp)*-1
 df_with_mean$scaled_estimated_disp<-scale(df_with_mean$estimated_disp)
 df_with_mean$scaled_N_CELL<-scale(df_with_mean$N_CELL)
+
+disp_2020_vocc_sp_full_list_all<-readRDS("../../Figures/VoCC/sp_vocc.rda")
+cols<-c("sp",  "bio1_voccMag", "bio5_voccMag", "bio6_voccMag", "bio12_voccMag", "bio13_voccMag", "bio14_voccMag",
+        "GCM", "SSP", "dispersal", "exposure")
+vocc_sp<-disp_2020_vocc_sp_full_list_all[, ..cols]
+vocc_sp$exposure<-ifelse(vocc_sp$exposure==0, " no climate resilience", "climate resilience")
+
+df_with_mean_vocc<-merge(df_with_mean, vocc_sp, by=c("sp", "GCM", "SSP", "dispersal", "exposure"))
+df_with_mean_vocc$scaled_bio1_voccMag<-scale(df_with_mean_vocc$bio1_voccMag)
+
+SSPx<-SSPs[1]
+GCMx<-GCMs[1]
+dda<-unique(df_with_mean_vocc$da)[1]
+g<-unique(df_with_mean_vocc$group)[1]
+exp<-unique(df_with_mean_vocc$exposure)[1]
 all_result<-NULL
 for (SSPx in SSPs){
   for (GCMx in GCMs){
-    for (dda in unique(df$da)){
-      for (exp in unique(df$exposure)){
-        for (g in unique(df$group)){
-          item<-df_with_mean[(SSP=="SSP245")&(GCM=="MRI-ESM2-0")&(da=="with dispersal")&(exposure==" no climate resilience")&(group==g)]
+    for (dda in unique(df_with_mean_vocc$da)){
+      for (exp in unique(df_with_mean_vocc$exposure)){
+        for (g in unique(df_with_mean_vocc$group)){
+          label<-paste(SSPx, GCMx, dda, exp, g)
+          print(label)
+          item<-df_with_mean_vocc[(SSP==SSPx)&(GCM==GCMx)&(da==dda)&
+                               (exposure==exp)&(group==g)]
           item<-item[!is.na(family)]
-          
-          m_glmer <- glmer(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp+
+          if (nrow(item[is_extinct=="YES"])==0){
+            next()
+          }
+          if (!is.null(all_result)){
+            if (label %in% all_result$label){
+              next()
+            }
+          }
+          if (label %in% c("SSP245 EC-Earth3-Veg with dispersal  no climate resilience Birds")){
+            m_glmer <- glmer(is_extinct ~ scaled_nb_volume+scaled_estimated_disp+scaled_bio1_voccMag+
                              (1 | family), data = item, family = binomial)
-          #m_glmer <- glmer(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_mean_dist+
-          #                   (1 | family), data = item, family = binomial)
-          
-          
-          
-          m_glm <- glm(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp, 
-                       data = item, family = binomial)
-          #m_glm <- glm(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_mean_dist, 
-          #             data = item, family = binomial)
-          #logistic.display(m_glm)
-          
+            m_glm <- glm(is_extinct ~ scaled_nb_volume+scaled_estimated_disp+scaled_bio1_voccMag, 
+                         data = item, family = binomial)
+            
+            
+            
+            
+          }else{
+            m_glmer <- glmer(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp+scaled_bio1_voccMag+
+                               (1 | family), data = item, family = binomial)
+            m_glm <- glm(is_extinct ~ scaled_nb_volume+scaled_N_CELL+scaled_estimated_disp+scaled_bio1_voccMag, 
+                         data = item, family = binomial)
+            
+          }
           ano<-anova(m_glmer, m_glm)
           
           summ<-summary(m_glm)
+          ccc3<-data.table(summ$coefficients)
+          ccc3$var<-row.names(summ$coefficients)
+          
           #m_glm<-glm(is_extinct~nb_volume+N_CELL+estimated_disp, data=item, family="binomial")
           result_item<-data.frame(SSP=SSPx, GCM=GCMx, da=dda, exposure=exp, group=g)
           
           result_item$aic<-summ$aic
           result_item$anova_pr<-ano$`Pr(>Chisq)`[2]
           result_item$anova_Chisq<-ano$Chisq[2]
-          ccc3<-summ$coefficients
-          result_item$Intercept_Estimate<-ccc3[1,1]
-          result_item$Intercept_Std_Error<-ccc3[1,2]
-          result_item$Intercept_z_value<-ccc3[1,3]
-          result_item$Intercept_Pr<-ccc3[1,4]
+         
+          result_item$Intercept_Estimate<-ccc3[1]$Estimate
+          result_item$Intercept_Std_Error<-ccc3[1]$`Std. Error`
+          result_item$Intercept_z_value<-ccc3[1]$`z value`
+          result_item$Intercept_Pr<-ccc3[1]$`Pr(>|z|)`
           
-          result_item$nb_volume_Estimate<-ccc3[2,1]
-          result_item$nb_volume_Std_Error<-ccc3[2,2]
-          result_item$nb_volume_z_value<-ccc3[2,3]
-          result_item$nb_volume_Pr<-ccc3[2,4]
-          
-          result_item$N_CELL_Estimate<-ccc3[3,1]
-          result_item$N_CELL_Std_Error<-ccc3[3,2]
-          result_item$N_CELL_z_value<-ccc3[3,3]
-          result_item$N_CELL_Pr<-ccc3[3,4]
-          
-          result_item$estimated_disp_Estimate<-ccc3[4,1]
-          result_item$estimated_disp_Std_Error<-ccc3[4,2]
-          result_item$estimated_disp_z_value<-ccc3[4,3]
-          result_item$estimated_disp_Pr<-ccc3[4,4]
-          
-          #result_item$mean_disp_Estimate<-ccc3[4,1]
-          #result_item$mean_disp_Std_Error<-ccc3[4,2]
-          #result_item$mean_disp_z_value<-ccc3[4,3]
-          #result_item$mean_disp_Pr<-ccc3[4,4]
-          
-          
-          ccc<-summ$coefficients[,4]
-          result_item$p_value_nb_volume<-ccc[2]
-          result_item$p_value_nb_volume_label<-""
-          if (result_item$p_value_nb_volume<0.05){
-            result_item$p_value_nb_volume_label<-"p<0.05*"
-          }
-          if (result_item$p_value_nb_volume<0.01){
-            result_item$p_value_nb_volume_label<-"p<0.01**"
-          }
-          if (result_item$p_value_nb_volume<0.001){
-            result_item$p_value_nb_volume_label<-"p<0.001***"
-          }
-          result_item$p_value_N_CELL<-ccc[3]
-          result_item$p_value_N_CELL_label<-""
-          if (result_item$p_value_N_CELL<0.05){
-            result_item$p_value_N_CELL_label<-"p<0.05*"
-          }
-          if (result_item$p_value_N_CELL<0.01){
-            result_item$p_value_N_CELL_label<-"p<0.01**"
-          }
-          if (result_item$p_value_N_CELL<0.001){
-            result_item$p_value_N_CELL_label<-"p<0.001***"
-          }
-          result_item$p_value_estimated_disp<-ccc[4]
-          result_item$p_value_estimated_disp_label<-""
-          if (result_item$p_value_estimated_disp<0.05){
-            result_item$p_value_estimated_disp_label<-"p<0.05*"
-          }
-          if (result_item$p_value_estimated_disp<0.01){
-            result_item$p_value_estimated_disp_label<-"p<0.01**"
-          }
-          if (result_item$p_value_estimated_disp<0.001){
-            result_item$p_value_estimated_disp_label<-"p<0.001***"
+          if (nrow(ccc3[var=="scaled_nb_volume"])>0){
+            result_item$nb_volume_Estimate<-ccc3[var=="scaled_nb_volume"]$Estimate
+            result_item$nb_volume_Std_Error<-ccc3[var=="scaled_nb_volume"]$`Std. Error`
+            result_item$nb_volume_z_value<-ccc3[var=="scaled_nb_volume"]$`z value`
+            result_item$nb_volume_Pr<-ccc3[var=="scaled_nb_volume"]$`Pr(>|z|)`
+          }else{
+            result_item$nb_volume_Estimate<-2
+            result_item$nb_volume_Std_Error<-2
+            result_item$nb_volume_z_value<-2
+            result_item$nb_volume_Pr<-2
           }
           
-          #result_item$p_value_mean_disp<-ccc[4]
-          #result_item$p_value_mean_disp_label<-""
-          #if (result_item$p_value_mean_disp<0.05){
-          #  result_item$p_value_mean_disp_label<-"p<0.05*"
-          #}
-          #if (result_item$p_value_mean_disp<0.01){
-          #  result_item$p_value_mean_disp_label<-"p<0.01**"
-          #}
-          #if (result_item$p_value_mean_disp<0.001){
-          #  result_item$p_value_mean_disp_label<-"p<0.001***"
-          #}
-          
+          if (nrow(ccc3[var=="scaled_estimated_disp"])>0){
+            result_item$estimated_disp_Estimate<-ccc3[var=="scaled_estimated_disp"]$Estimate
+            result_item$estimated_disp_Std_Error<-ccc3[var=="scaled_estimated_disp"]$`Std. Error`
+            result_item$estimated_disp_z_value<-ccc3[var=="scaled_estimated_disp"]$`z value`
+            result_item$estimated_disp_Pr<-ccc3[var=="scaled_estimated_disp"]$`Pr(>|z|)`
+          }else{
+            result_item$estimated_disp_Estimate<-2
+            result_item$estimated_disp_Std_Error<-2
+            result_item$estimated_disp_z_value<-2
+            result_item$estimated_disp_Pr<-2
+          }
+          if (nrow(ccc3[var=="scaled_N_CELL"])>0){
+            result_item$N_CELL_Estimate<-ccc3[var=="scaled_N_CELL"]$Estimate
+            result_item$N_CELL_Std_Error<-ccc3[var=="scaled_N_CELL"]$`Std. Error`
+            result_item$N_CELL_z_value<-ccc3[var=="scaled_N_CELL"]$`z value`
+            result_item$N_CELL_Pr<-ccc3[var=="scaled_N_CELL"]$`Pr(>|z|)`
+          }else{
+            result_item$N_CELL_Estimate<-2
+            result_item$N_CELL_Std_Error<-2
+            result_item$N_CELL_z_value<-2
+            result_item$N_CELL_Pr<-2
+          }
+          if (nrow(ccc3[var=="scaled_bio1_voccMag"])>0){
+            result_item$vocc_bio1_Estimate<-ccc3[var=="scaled_bio1_voccMag"]$Estimate
+            result_item$vocc_bio1_Std_Error<-ccc3[var=="scaled_bio1_voccMag"]$`Std. Error`
+            result_item$vocc_bio1_z_value<-ccc3[var=="scaled_bio1_voccMag"]$`z value`
+            result_item$vocc_bio1_Pr<-ccc3[var=="scaled_bio1_voccMag"]$`Pr(>|z|)`
+          }else{
+            result_item$vocc_bio1_Estimate<-2
+            result_item$vocc_bio1_Std_Error<-2
+            result_item$vocc_bio1_z_value<-2
+            result_item$vocc_bio1_Pr<-2
+          }
+          result_item$nb_volume_Pr_label<-"."
+          if (result_item$nb_volume_Pr<0.05){
+            result_item$nb_volume_Pr_label<-"p<0.05*"
+          }
+          if (result_item$nb_volume_Pr<0.01){
+            result_item$nb_volume_Pr_label<-"p<0.01**"
+          }
+          if (result_item$nb_volume_Pr<0.001){
+            result_item$nb_volume_Pr_label<-"p<0.001***"
+          }
+          result_item$N_CELL_Pr_label<-"."
+          if (result_item$N_CELL_Pr<0.05){
+            result_item$N_CELL_Pr_label<-"p<0.05*"
+          }
+          if (result_item$N_CELL_Pr<0.01){
+            result_item$N_CELL_Pr_label<-"p<0.01**"
+          }
+          if (result_item$N_CELL_Pr<0.001){
+            result_item$N_CELL_Pr_label<-"p<0.001***"
+          }
+          result_item$estimated_disp_Pr_label<-"."
+          if (result_item$estimated_disp_Pr<0.05){
+            result_item$estimated_disp_Pr_label<-"p<0.05*"
+          }
+          if (result_item$estimated_disp_Pr<0.01){
+            result_item$estimated_disp_Pr_label<-"p<0.01**"
+          }
+          if (result_item$estimated_disp_Pr<0.001){
+            result_item$estimated_disp_Pr_label<-"p<0.001***"
+          }
+          result_item$vocc_bio1_Pr_label<-"."
+          if (result_item$vocc_bio1_Pr<0.05){
+            result_item$vocc_bio1_Pr_label<-"p<0.05*"
+          }
+          if (result_item$vocc_bio1_Pr<0.01){
+            result_item$vocc_bio1_Pr_label<-"p<0.01**"
+          }
+          if (result_item$vocc_bio1_Pr<0.001){
+            result_item$vocc_bio1_Pr_label<-"p<0.001***"
+          }
+          result_item$label<-label
           all_result<-bind_dplyr(all_result, result_item)
           #for m_glmer
           if (F){

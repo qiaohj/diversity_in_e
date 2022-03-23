@@ -60,7 +60,201 @@ colnames(fit_ebird)[1:12]<-paste(colnames(fit_ebird)[1:12], "ebird", sep="_")
 
 fit_10km_100km<-merge(fit_10km, fit_100km, by=c("sp", "group"))
 
-cor(fit_10km_100km$range_bio14_sd_max_10km, fit_10km_100km$range_bio14_sd_max_100km)
+#Bio1
+fit_10km_100km$scaled_range_bio1_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio1_sd_min_100km,
+    fit_10km_100km$range_bio1_sd_max_100km,
+    fit_10km_100km$range_bio1_sd_min_10km,
+    fit_10km_100km$range_bio1_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio1_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio1_sd_max_100km,
+    fit_10km_100km$range_bio1_sd_min_100km,
+    fit_10km_100km$range_bio1_sd_min_10km,
+    fit_10km_100km$range_bio1_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio1_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio1_sd_min_10km,
+    fit_10km_100km$range_bio1_sd_max_10km,
+    fit_10km_100km$range_bio1_sd_min_100km,
+    fit_10km_100km$range_bio1_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio1_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio1_sd_max_10km,
+    fit_10km_100km$range_bio1_sd_min_10km,
+    fit_10km_100km$range_bio1_sd_min_100km,
+    fit_10km_100km$range_bio1_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+#bio5
+fit_10km_100km$scaled_range_bio5_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio5_sd_min_100km,
+    fit_10km_100km$range_bio5_sd_max_100km,
+    fit_10km_100km$range_bio5_sd_min_10km,
+    fit_10km_100km$range_bio5_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio5_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio5_sd_max_100km,
+    fit_10km_100km$range_bio5_sd_min_100km,
+    fit_10km_100km$range_bio5_sd_min_10km,
+    fit_10km_100km$range_bio5_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio5_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio5_sd_min_10km,
+    fit_10km_100km$range_bio5_sd_max_10km,
+    fit_10km_100km$range_bio5_sd_min_100km,
+    fit_10km_100km$range_bio5_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio5_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio5_sd_max_10km,
+    fit_10km_100km$range_bio5_sd_min_10km,
+    fit_10km_100km$range_bio5_sd_min_100km,
+    fit_10km_100km$range_bio5_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+#bio6
+fit_10km_100km$scaled_range_bio6_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio6_sd_min_100km,
+    fit_10km_100km$range_bio6_sd_max_100km,
+    fit_10km_100km$range_bio6_sd_min_10km,
+    fit_10km_100km$range_bio6_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio6_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio6_sd_max_100km,
+    fit_10km_100km$range_bio6_sd_min_100km,
+    fit_10km_100km$range_bio6_sd_min_10km,
+    fit_10km_100km$range_bio6_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio6_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio6_sd_min_10km,
+    fit_10km_100km$range_bio6_sd_max_10km,
+    fit_10km_100km$range_bio6_sd_min_100km,
+    fit_10km_100km$range_bio6_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio6_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio6_sd_max_10km,
+    fit_10km_100km$range_bio6_sd_min_10km,
+    fit_10km_100km$range_bio6_sd_min_100km,
+    fit_10km_100km$range_bio6_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+#bio12
+fit_10km_100km$scaled_range_bio12_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio12_sd_min_100km,
+    fit_10km_100km$range_bio12_sd_max_100km,
+    fit_10km_100km$range_bio12_sd_min_10km,
+    fit_10km_100km$range_bio12_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio12_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio12_sd_max_100km,
+    fit_10km_100km$range_bio12_sd_min_100km,
+    fit_10km_100km$range_bio12_sd_min_10km,
+    fit_10km_100km$range_bio12_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio12_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio12_sd_min_10km,
+    fit_10km_100km$range_bio12_sd_max_10km,
+    fit_10km_100km$range_bio12_sd_min_100km,
+    fit_10km_100km$range_bio12_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio12_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio12_sd_max_10km,
+    fit_10km_100km$range_bio12_sd_min_10km,
+    fit_10km_100km$range_bio12_sd_min_100km,
+    fit_10km_100km$range_bio12_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+#bio13
+fit_10km_100km$scaled_range_bio13_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio13_sd_min_100km,
+    fit_10km_100km$range_bio13_sd_max_100km,
+    fit_10km_100km$range_bio13_sd_min_10km,
+    fit_10km_100km$range_bio13_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio13_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio13_sd_max_100km,
+    fit_10km_100km$range_bio13_sd_min_100km,
+    fit_10km_100km$range_bio13_sd_min_10km,
+    fit_10km_100km$range_bio13_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio13_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio13_sd_min_10km,
+    fit_10km_100km$range_bio13_sd_max_10km,
+    fit_10km_100km$range_bio13_sd_min_100km,
+    fit_10km_100km$range_bio13_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio13_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio13_sd_max_10km,
+    fit_10km_100km$range_bio13_sd_min_10km,
+    fit_10km_100km$range_bio13_sd_min_100km,
+    fit_10km_100km$range_bio13_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+#bio14
+fit_10km_100km$scaled_range_bio14_sd_min_100km<-scale(
+  c(fit_10km_100km$range_bio14_sd_min_100km,
+    fit_10km_100km$range_bio14_sd_max_100km,
+    fit_10km_100km$range_bio14_sd_min_10km,
+    fit_10km_100km$range_bio14_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio14_sd_max_100km<-scale(
+  c(fit_10km_100km$range_bio14_sd_max_100km,
+    fit_10km_100km$range_bio14_sd_min_100km,
+    fit_10km_100km$range_bio14_sd_min_10km,
+    fit_10km_100km$range_bio14_sd_max_10km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio14_sd_min_10km<-scale(
+  c(fit_10km_100km$range_bio14_sd_min_10km,
+    fit_10km_100km$range_bio14_sd_max_10km,
+    fit_10km_100km$range_bio14_sd_min_100km,
+    fit_10km_100km$range_bio14_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+fit_10km_100km$scaled_range_bio14_sd_max_10km<-scale(
+  c(fit_10km_100km$range_bio14_sd_max_10km,
+    fit_10km_100km$range_bio14_sd_min_10km,
+    fit_10km_100km$range_bio14_sd_min_100km,
+    fit_10km_100km$range_bio14_sd_max_100km))[c(1:nrow(fit_10km_100km))]
+
+
+
+
+
+fit_10km_100km$scaled_nb_bio1_sd_10km<-fit_10km_100km$scaled_range_bio1_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio1_sd_min_10km
+fit_10km_100km$scaled_nb_bio1_sd_100km<-fit_10km_100km$scaled_range_bio1_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio1_sd_min_100km
+fit_10km_100km$scaled_nb_bio5_sd_10km<-fit_10km_100km$scaled_range_bio5_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio5_sd_min_10km
+fit_10km_100km$scaled_nb_bio5_sd_100km<-fit_10km_100km$scaled_range_bio5_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio5_sd_min_100km
+fit_10km_100km$scaled_nb_bio6_sd_10km<-fit_10km_100km$scaled_range_bio6_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio6_sd_min_10km
+fit_10km_100km$scaled_nb_bio6_sd_100km<-fit_10km_100km$scaled_range_bio6_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio6_sd_min_100km
+fit_10km_100km$scaled_nb_bio12_sd_10km<-fit_10km_100km$scaled_range_bio12_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio12_sd_min_10km
+fit_10km_100km$scaled_nb_bio12_sd_100km<-fit_10km_100km$scaled_range_bio12_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio12_sd_min_100km
+fit_10km_100km$scaled_nb_bio14_sd_10km<-fit_10km_100km$scaled_range_bio14_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio14_sd_min_10km
+fit_10km_100km$scaled_nb_bio14_sd_100km<-fit_10km_100km$scaled_range_bio14_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio14_sd_min_100km
+fit_10km_100km$scaled_nb_bio13_sd_10km<-fit_10km_100km$scaled_range_bio13_sd_max_10km - 
+  fit_10km_100km$scaled_range_bio13_sd_min_10km
+fit_10km_100km$scaled_nb_bio13_sd_100km<-fit_10km_100km$scaled_range_bio13_sd_max_100km - 
+  fit_10km_100km$scaled_range_bio13_sd_min_100km
+
+fit_10km_100km$nb_volume_10km<-fit_10km_100km$scaled_nb_bio1_sd_10km*
+  fit_10km_100km$scaled_nb_bio5_sd_10km*fit_10km_100km$scaled_nb_bio6_sd_10km*
+  fit_10km_100km$scaled_nb_bio12_sd_10km*fit_10km_100km$scaled_nb_bio13_sd_10km*
+  fit_10km_100km$scaled_nb_bio14_sd_10km
+fit_10km_100km$nb_volume_100km<-fit_10km_100km$scaled_nb_bio1_sd_100km*
+  fit_10km_100km$scaled_nb_bio5_sd_100km*fit_10km_100km$scaled_nb_bio6_sd_100km*
+  fit_10km_100km$scaled_nb_bio12_sd_100km*fit_10km_100km$scaled_nb_bio13_sd_100km*
+  fit_10km_100km$scaled_nb_bio14_sd_100km
+
+fit_10km_100km$density<-get_density(fit_10km_100km$nb_volume_10km, fit_10km_100km$nb_volume_100km, n=100)
+
+cor_v<-cor(fit_10km_100km$nb_volume_10km, fit_10km_100km$nb_volume_100km)
+max_v<-max(fit_10km_100km$nb_volume_10km, fit_10km_100km$nb_volume_100km)
+min_v<-min(fit_10km_100km$nb_volume_10km, fit_10km_100km$nb_volume_100km)
+
+p<-ggplot(fit_10km_100km)+geom_point(aes(x=nb_volume_10km, y=nb_volume_100km, color=density))+
+  coord_fixed()+xlim(min_v, max_v)+ ylim(min_v, max_v)+
+  geom_abline(linetype=2, color="grey")+
+  #geom_text(x=min(item$v_10km), y=max(item$v_100km), 
+  #          label=sprintf("ρ=%.3f", 
+  #                        cor_v))+
+  ggtitle(sprintf("ρ=%.3f", cor_v))+
+  #scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
+  #                      midpoint = quantile(item$density, 0.2))+
+  scale_color_gradient(low=colors_blue[6], high=colors_red[8])+
+  theme_bw()+
+  labs(x="niche volume in 10km",
+       y="niche volume in 100km",
+       color="Density")+
+  theme(legend.position = "none")
+p
+ggsave(p, filename="../../Figures/niches/niche_volume_comp_10km_100km.png", width=6, height=5)
+
+cor(fit_10km_100km$nb_volume_10km, fit_10km_100km$nb_volume_100km)
 mm<-"min"
 var<-"bio14"
 df_fit_10km_100km<-list()
@@ -115,6 +309,220 @@ fit_10km_ebird<-fit_10km_ebird[!is.na(fit_10km_ebird$range_bio1_sd_min_ebird),]
 fit_10km_ebird<-fit_10km_ebird[!is.nan(fit_10km_ebird$range_bio1_sd_min_ebird),]
 fit_10km_ebird<-fit_10km_ebird[!is.infinite(fit_10km_ebird$range_bio1_sd_min_ebird),]
 cor(fit_10km_ebird$range_bio1_sd_min_10km, fit_10km_ebird$range_bio1_sd_min_ebird)
+
+
+
+#Bio1
+fit_10km_ebird$scaled_range_bio1_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio1_sd_min_ebird,
+    fit_10km_ebird$range_bio1_sd_max_ebird,
+    fit_10km_ebird$range_bio1_sd_min_10km,
+    fit_10km_ebird$range_bio1_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio1_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio1_sd_max_ebird,
+    fit_10km_ebird$range_bio1_sd_min_ebird,
+    fit_10km_ebird$range_bio1_sd_min_10km,
+    fit_10km_ebird$range_bio1_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio1_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio1_sd_min_10km,
+    fit_10km_ebird$range_bio1_sd_max_10km,
+    fit_10km_ebird$range_bio1_sd_min_ebird,
+    fit_10km_ebird$range_bio1_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio1_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio1_sd_max_10km,
+    fit_10km_ebird$range_bio1_sd_min_10km,
+    fit_10km_ebird$range_bio1_sd_min_ebird,
+    fit_10km_ebird$range_bio1_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+#bio5
+fit_10km_ebird$scaled_range_bio5_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio5_sd_min_ebird,
+    fit_10km_ebird$range_bio5_sd_max_ebird,
+    fit_10km_ebird$range_bio5_sd_min_10km,
+    fit_10km_ebird$range_bio5_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio5_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio5_sd_max_ebird,
+    fit_10km_ebird$range_bio5_sd_min_ebird,
+    fit_10km_ebird$range_bio5_sd_min_10km,
+    fit_10km_ebird$range_bio5_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio5_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio5_sd_min_10km,
+    fit_10km_ebird$range_bio5_sd_max_10km,
+    fit_10km_ebird$range_bio5_sd_min_ebird,
+    fit_10km_ebird$range_bio5_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio5_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio5_sd_max_10km,
+    fit_10km_ebird$range_bio5_sd_min_10km,
+    fit_10km_ebird$range_bio5_sd_min_ebird,
+    fit_10km_ebird$range_bio5_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+#bio6
+fit_10km_ebird$scaled_range_bio6_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio6_sd_min_ebird,
+    fit_10km_ebird$range_bio6_sd_max_ebird,
+    fit_10km_ebird$range_bio6_sd_min_10km,
+    fit_10km_ebird$range_bio6_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio6_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio6_sd_max_ebird,
+    fit_10km_ebird$range_bio6_sd_min_ebird,
+    fit_10km_ebird$range_bio6_sd_min_10km,
+    fit_10km_ebird$range_bio6_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio6_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio6_sd_min_10km,
+    fit_10km_ebird$range_bio6_sd_max_10km,
+    fit_10km_ebird$range_bio6_sd_min_ebird,
+    fit_10km_ebird$range_bio6_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio6_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio6_sd_max_10km,
+    fit_10km_ebird$range_bio6_sd_min_10km,
+    fit_10km_ebird$range_bio6_sd_min_ebird,
+    fit_10km_ebird$range_bio6_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+#bio12
+fit_10km_ebird$scaled_range_bio12_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio12_sd_min_ebird,
+    fit_10km_ebird$range_bio12_sd_max_ebird,
+    fit_10km_ebird$range_bio12_sd_min_10km,
+    fit_10km_ebird$range_bio12_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio12_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio12_sd_max_ebird,
+    fit_10km_ebird$range_bio12_sd_min_ebird,
+    fit_10km_ebird$range_bio12_sd_min_10km,
+    fit_10km_ebird$range_bio12_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio12_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio12_sd_min_10km,
+    fit_10km_ebird$range_bio12_sd_max_10km,
+    fit_10km_ebird$range_bio12_sd_min_ebird,
+    fit_10km_ebird$range_bio12_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio12_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio12_sd_max_10km,
+    fit_10km_ebird$range_bio12_sd_min_10km,
+    fit_10km_ebird$range_bio12_sd_min_ebird,
+    fit_10km_ebird$range_bio12_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+#bio13
+fit_10km_ebird$scaled_range_bio13_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio13_sd_min_ebird,
+    fit_10km_ebird$range_bio13_sd_max_ebird,
+    fit_10km_ebird$range_bio13_sd_min_10km,
+    fit_10km_ebird$range_bio13_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio13_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio13_sd_max_ebird,
+    fit_10km_ebird$range_bio13_sd_min_ebird,
+    fit_10km_ebird$range_bio13_sd_min_10km,
+    fit_10km_ebird$range_bio13_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio13_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio13_sd_min_10km,
+    fit_10km_ebird$range_bio13_sd_max_10km,
+    fit_10km_ebird$range_bio13_sd_min_ebird,
+    fit_10km_ebird$range_bio13_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio13_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio13_sd_max_10km,
+    fit_10km_ebird$range_bio13_sd_min_10km,
+    fit_10km_ebird$range_bio13_sd_min_ebird,
+    fit_10km_ebird$range_bio13_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+#bio14
+fit_10km_ebird$scaled_range_bio14_sd_min_ebird<-scale(
+  c(fit_10km_ebird$range_bio14_sd_min_ebird,
+    fit_10km_ebird$range_bio14_sd_max_ebird,
+    fit_10km_ebird$range_bio14_sd_min_10km,
+    fit_10km_ebird$range_bio14_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio14_sd_max_ebird<-scale(
+  c(fit_10km_ebird$range_bio14_sd_max_ebird,
+    fit_10km_ebird$range_bio14_sd_min_ebird,
+    fit_10km_ebird$range_bio14_sd_min_10km,
+    fit_10km_ebird$range_bio14_sd_max_10km))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio14_sd_min_10km<-scale(
+  c(fit_10km_ebird$range_bio14_sd_min_10km,
+    fit_10km_ebird$range_bio14_sd_max_10km,
+    fit_10km_ebird$range_bio14_sd_min_ebird,
+    fit_10km_ebird$range_bio14_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+fit_10km_ebird$scaled_range_bio14_sd_max_10km<-scale(
+  c(fit_10km_ebird$range_bio14_sd_max_10km,
+    fit_10km_ebird$range_bio14_sd_min_10km,
+    fit_10km_ebird$range_bio14_sd_min_ebird,
+    fit_10km_ebird$range_bio14_sd_max_ebird))[c(1:nrow(fit_10km_ebird))]
+
+
+
+
+
+fit_10km_ebird$scaled_nb_bio1_sd_10km<-fit_10km_ebird$scaled_range_bio1_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio1_sd_min_10km
+fit_10km_ebird$scaled_nb_bio1_sd_ebird<-fit_10km_ebird$scaled_range_bio1_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio1_sd_min_ebird
+fit_10km_ebird$scaled_nb_bio5_sd_10km<-fit_10km_ebird$scaled_range_bio5_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio5_sd_min_10km
+fit_10km_ebird$scaled_nb_bio5_sd_ebird<-fit_10km_ebird$scaled_range_bio5_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio5_sd_min_ebird
+fit_10km_ebird$scaled_nb_bio6_sd_10km<-fit_10km_ebird$scaled_range_bio6_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio6_sd_min_10km
+fit_10km_ebird$scaled_nb_bio6_sd_ebird<-fit_10km_ebird$scaled_range_bio6_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio6_sd_min_ebird
+fit_10km_ebird$scaled_nb_bio12_sd_10km<-fit_10km_ebird$scaled_range_bio12_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio12_sd_min_10km
+fit_10km_ebird$scaled_nb_bio12_sd_ebird<-fit_10km_ebird$scaled_range_bio12_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio12_sd_min_ebird
+fit_10km_ebird$scaled_nb_bio14_sd_10km<-fit_10km_ebird$scaled_range_bio14_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio14_sd_min_10km
+fit_10km_ebird$scaled_nb_bio14_sd_ebird<-fit_10km_ebird$scaled_range_bio14_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio14_sd_min_ebird
+fit_10km_ebird$scaled_nb_bio13_sd_10km<-fit_10km_ebird$scaled_range_bio13_sd_max_10km - 
+  fit_10km_ebird$scaled_range_bio13_sd_min_10km
+fit_10km_ebird$scaled_nb_bio13_sd_ebird<-fit_10km_ebird$scaled_range_bio13_sd_max_ebird - 
+  fit_10km_ebird$scaled_range_bio13_sd_min_ebird
+
+fit_10km_ebird$nb_volume_10km<-fit_10km_ebird$scaled_nb_bio1_sd_10km*
+  fit_10km_ebird$scaled_nb_bio5_sd_10km*fit_10km_ebird$scaled_nb_bio6_sd_10km*
+  fit_10km_ebird$scaled_nb_bio12_sd_10km*fit_10km_ebird$scaled_nb_bio13_sd_10km*
+  fit_10km_ebird$scaled_nb_bio14_sd_10km
+fit_10km_ebird$nb_volume_ebird<-fit_10km_ebird$scaled_nb_bio1_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio5_sd_ebird*fit_10km_ebird$scaled_nb_bio6_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio12_sd_ebird*fit_10km_ebird$scaled_nb_bio13_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio14_sd_ebird
+
+fit_10km_ebird$nb_volume_10km<-fit_10km_ebird$scaled_nb_bio5_sd_10km*
+  fit_10km_ebird$scaled_nb_bio5_sd_10km*fit_10km_ebird$scaled_nb_bio5_sd_10km*
+  fit_10km_ebird$scaled_nb_bio12_sd_10km*fit_10km_ebird$scaled_nb_bio13_sd_10km*
+  fit_10km_ebird$scaled_nb_bio12_sd_10km
+fit_10km_ebird$nb_volume_ebird<-fit_10km_ebird$scaled_nb_bio5_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio5_sd_ebird*fit_10km_ebird$scaled_nb_bio5_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio12_sd_ebird*fit_10km_ebird$scaled_nb_bio13_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio12_sd_ebird
+
+fit_10km_ebird$nb_volume_10km<-fit_10km_ebird$scaled_nb_bio5_sd_10km*
+  fit_10km_ebird$scaled_nb_bio12_sd_10km*fit_10km_ebird$scaled_nb_bio13_sd_10km*10
+fit_10km_ebird$nb_volume_ebird<-fit_10km_ebird$scaled_nb_bio5_sd_ebird*
+  fit_10km_ebird$scaled_nb_bio12_sd_ebird*fit_10km_ebird$scaled_nb_bio13_sd_ebird*10
+
+
+fit_10km_ebird$density<-get_density(fit_10km_ebird$nb_volume_10km, fit_10km_ebird$nb_volume_ebird, n=100)
+
+
+cor_v<-cor(fit_10km_ebird$nb_volume_10km, fit_10km_ebird$nb_volume_ebird)
+max_v<-max(fit_10km_ebird$nb_volume_10km, fit_10km_ebird$nb_volume_ebird)
+min_v<-min(fit_10km_ebird$nb_volume_10km, fit_10km_ebird$nb_volume_ebird)
+
+p<-ggplot(fit_10km_ebird)+geom_point(aes(x=nb_volume_10km, y=nb_volume_ebird, color=density))+
+  coord_fixed()+xlim(min_v, max_v)+ ylim(min_v, max_v)+
+  geom_abline(linetype=2, color="grey")+
+  #geom_text(x=min(item$v_10km), y=max(item$v_ebird), 
+  #          label=sprintf("ρ=%.3f", 
+  #                        cor_v))+
+  ggtitle(sprintf("ρ=%.3f", cor_v))+
+  #scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
+  #                      midpoint = quantile(item$density, 0.2))+
+  scale_color_gradient(low=colors_blue[6], high=colors_red[8])+
+  theme_bw()+
+  labs(x="niche volume in 10km",
+       y="niche volume in ebird",
+       color="Density")+
+  theme(legend.position = "none")
+p
+ggsave(p, filename="../../Figures/niches/niche_volume_comp_10km_ebird.png", width=6, height=5)
+
+
 mm<-"max"
 var<-"bio6"
 

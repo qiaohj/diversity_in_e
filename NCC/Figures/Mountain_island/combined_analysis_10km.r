@@ -433,15 +433,15 @@ mean_disp_all$exposure<-ifelse(mean_disp_all$exposure==0, " no climate resilienc
 
 mean_disp_all$estimated_disp_cut<-cut2(mean_disp_all$estimated_disp, cuts=quantile(mean_disp_all$estimated_disp, 
                                                                                    seq(0, 1, 0.2)), digits=0)
-levels(mean_disp_all$estimated_disp_cut)<-c("<50", "[50, 86)", "[86, 96)", "[96, 122]", ">122")
+levels(mean_disp_all$estimated_disp_cut)<-c("<50", "[50, 87)", "[87, 96)", "[96, 122)", "[122, 403]")
 mean_disp_all$nb_volume_cut<-cut2(mean_disp_all$nb_volume, cuts=quantile(mean_disp_all$nb_volume, 
                                                                          seq(0, 1, 0.2)), digits=2)
-levels(mean_disp_all$nb_volume_cut)<-c("<0.4", "[0.4, 1.6)", "[1.6, 5.0)", "[5.0, 23.0]", ">23.0")
+levels(mean_disp_all$nb_volume_cut)<-c("<0.26", "[0.26, 1.19)", "[1.19, 3.72)", "[3.72, 16.12)", "[16.12, 450.14]")
 
 mean_disp_all$N_CELL_cut<-cut2(mean_disp_all$N_CELL, cuts=quantile(mean_disp_all$N_CELL, 
                                                                          seq(0, 1, 0.2)))
 
-levels(mean_disp_all$N_CELL_cut)<-c("<14", "[ 14, 64)", "[64, 235)", "[235, 860]", ">860")
+levels(mean_disp_all$N_CELL_cut)<-c("<15", "[ 15, 66)", "[66, 237)", "[237, 866)", "[866, 25203]")
 mean_disp_all$split<-sprintf("nb:%d da:%d", mean_disp_all$nb_volume_cut, mean_disp_all$estimated_disp_cut)
 
 extinct_sp<-readRDS("../../Figures/N_Extinction/sp_dis_all_0_10km.rda")
