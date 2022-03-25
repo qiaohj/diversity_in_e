@@ -53,3 +53,39 @@ df_compare_se<-df_compare_filter[, .(change_mig_per=mean(change_mig_per), change
                           by=list(dispersal, exposure, ssp)]
 
 write.csv(df_compare_se, "../../Figures/Area_change_mig/area_change_compare.csv", row.names = F)
+
+
+df_se<-df[YEAR==2100]
+df_se$Extincted_mig<-df_se$N_mig==0
+df_se$Extincted_all<-df_se$N_all==0
+df_sex<-df_se[, .(N=.N), by=list(dispersal, exposure, esm, ssp,Extincted_mig)]
+df_sex$per<-df_sex$N/1050
+df_sexx<-df_sex[,.(per=mean(per*100),
+                   sd_per=sd(per*100)), 
+                by=list(dispersal, exposure, ssp, Extincted_mig)]
+
+df_sey<-df_se[, .(N=.N), by=list(dispersal, exposure, esm, ssp,Extincted_all)]
+df_sey$per<-df_sey$N/1050
+df_sey<-df_sey[,.(per=mean(per*100),
+                   sd_per=sd(per*100)), 
+                by=list(dispersal, exposure, ssp, Extincted_all)]
+
+write.csv(df_sexx, "../../Figures/Area_change_mig/extinction_per.csv", row.names = F)
+
+df_sexx$dispersal<-ifelse(df_sexx$dispersal==0, "no dispersal", "with dispersal")
+df_sexx$exposure<-ifelse(df_sexx$exposure==0, " no climate resilience", "climate resilience")
+p<-ggplot(df_sexx[Extincted_mig==T], aes())+
+  geom_bar(stat="identity", position="stack", 
+           aes(y=per, x=ssp, fill=ssp))+
+  geom_errorbar(position=position_dodge(0.1), width=0.1,
+                aes(ymin=per-sd_per, 
+                    ymax=per+sd_per, x=ssp)) +
+  
+  xlab("SSP scenario")+
+  theme_bw()+
+  facet_grid(exposure~dispersal)+
+  scale_fill_manual(values=color_ssp)+
+  ylab("%s of species that lose all suitable breeding habitat")
+p
+
+ggsave(p, filename="../../Figures/Area_change_mig/extinction_per.png", width=6, height=4)

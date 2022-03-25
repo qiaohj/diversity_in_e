@@ -58,6 +58,7 @@ dim(unique((Santini_se[!is.infinite(Santini_se$max_dis), "sp"])))
 
 #Mammals Trait
 mammals_trait<-read.table("../../Data/Dispersal_distance/EltonTraits/MamFuncDat.txt", sep="\t", head=T, stringsAsFactors = F)
+table(mammals_trait$ForStrat.Value)
 mammals_trait_bak<-mammals_trait
 DietType<-c("omnivore", "herbivore", "carnivore")
 herbivore<-c("Diet.Scav", "Diet.Fruit", "Diet.Nect", "Diet.Seed", "Diet.PlantO")

@@ -531,7 +531,7 @@ for (S in c("SSP585", "SSP245", "SSP119")){
   p<-ggplot(n_species_se[(SSP==S)&(type %in% c("Islands", "Mountains", "Continent", "Mixed"))])+
     geom_tile(aes(x=estimated_disp_cut, y=N_CELL_cut, fill=extinct_proportion))+
     labs(fill="extinction proportion")+
-    xlab("estimated max natal dispersal (km)")+ylab("niche breadth volume")+
+    xlab("estimated max natal dispersal (km)")+ylab("niche volume")+
     scale_fill_gradient(low=colors_blue[5], high=colors_red[5])+
     facet_grid(exposure~type_factor)+theme_bw()+
     ggtitle(S)+
@@ -547,7 +547,7 @@ ggplot(n_species_se[type %in% c("island", "mountain", "continent", "mixed")])+
   geom_line(aes(x=split_number, y=extinct_proportion, color=type))+
   geom_point(aes(x=split_number, y=extinct_proportion, color=type))+
   labs(fill="extinction proportion")+
-  xlab("estimated max natal dispersal")+ylab("niche breadth volume")+
+  xlab("estimated max natal dispersal")+ylab("niche volume")+
   scale_color_manual(values=type_colors)+
   
   facet_grid(exposure~SSP, scale="free")+theme_bw()
@@ -578,12 +578,12 @@ ggplot(mean_disp_all_mean)+
   geom_boxplot(aes(x=estimated_disp_cut, y=nb_volume, color=type))+
   scale_color_manual(values=type_colors)+
   labs(color="Group", linetype="")+
-  xlab("estimated max natal dispersal")+ylab("niche breadth volume")+
+  xlab("estimated max natal dispersal")+ylab("niche volume")+
   theme_bw()
 
 
 
-#change of env
+#change of envs
 species_env_change<-readRDS("../../Objects/Island/species_env_change.rda")
 species_env_change$type<-"Mixed"
 species_env_change[sp %in% island_species$sp]$type<-"Islands"

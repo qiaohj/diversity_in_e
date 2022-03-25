@@ -319,13 +319,13 @@ p<-ggplot(df_all)+geom_point(aes(x=sd_nb_volume, y=real_nb_volume, color=nb_volu
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
                         midpoint = quantile(df_all$nb_volume_density, 0.01))+
   theme_bw()+
-  labs(x="Species niche volume (excluding outliers)",
-       y="Species niche volume (including outliers)",
+  labs(x="niche volume (excluding outliers)",
+       y="niche volume (including outliers)",
        color="Density")+
   theme(legend.position = "none")
 p
-ggsave(p, filename="../../Figures/niche_property/Niche_area.pdf")
-ggsave(p, filename="../../Figures/niche_property/Niche_area.png")
+ggsave(p, filename="../../Figures/niche_property/Niche_volume.pdf")
+ggsave(p, filename="../../Figures/niche_property/Niche_volume.png")
 
 
 p_v<-cor(df_all[target=="1850"]$sd_nb_volume, df_all[target=="1970"]$sd_nb_volume)
@@ -350,8 +350,8 @@ p<-ggplot(df_all)+geom_point(aes(x=sd_nb_volume, y=real_nb_volume, color=nb_volu
   scale_color_gradient2(low="grey50", mid=colors_blue[6], high=colors_red[8],
                         midpoint = quantile(df_all$nb_volume_density, 0.01))+
   theme_bw()+
-  labs(x="niche breadth volume (excluding outliers)",
-       y="niche breadth volume (including outliers)",
+  labs(x="niche volume (excluding outliers)",
+       y="niche volume (including outliers)",
        color="Density")+
   theme(legend.position = "none")
 p
@@ -368,8 +368,8 @@ p2<-ggplot(df_g)+geom_point(aes(x=NB_1850, y=NB_1970, color=nb_volume_density))+
                         midpoint = quantile(df_g$nb_volume_density, 0.01))+
   
   theme_bw()+
-  labs(x="niche breadth volume 1850 - 2020",
-       y="niche breadth volume 1970 - 2020",
+  labs(x="niche volume 1850 - 2020",
+       y="niche volume 1970 - 2020",
        color="Density")+
   theme(legend.position = "none")
 p2

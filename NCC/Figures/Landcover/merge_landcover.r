@@ -174,6 +174,7 @@ ggsave(p, filename="../../Figures/Landcover/landcover_change_percent.png", width
 all_df_iqr$loss_99<-all_df_iqr$change_per<=-0.99
 all_df_iqr$loss_95<-all_df_iqr$change_per<=-0.95
 all_df_iqr$loss_90<-all_df_iqr$change_per<=-0.90
+all_df_iqr$loss_100<-all_df_iqr$change_per<=-1
 all_df_iqr_sp<-all_df_iqr[, .(N_sp=length(unique(sp))), by=list(dispersal, exposure, esm, ssp)]
 all_df_iqr_99<-all_df_iqr[, .(N=.N/3), by=list(dispersal, exposure, esm, ssp, loss_99)]
 all_df_iqr_99<-merge(all_df_iqr_99, all_df_iqr_sp, by=c("dispersal", "exposure", "esm", "ssp"))
@@ -196,10 +197,17 @@ all_df_iqr_90<-all_df_iqr_90[loss_90==T]
 all_df_iqr_90_se<-all_df_iqr_90[, .(per=mean(per)), by=list(dispersal, exposure, ssp)]
 all_df_iqr_90_se$threshold<-"90%"
 
-all_df_iqr_all<-rbindlist(list(all_df_iqr_90_se, all_df_iqr_95_se, all_df_iqr_99_se))
+all_df_iqr_100<-all_df_iqr[, .(N=.N/3), by=list(dispersal, exposure, esm, ssp, loss_100)]
+all_df_iqr_100<-merge(all_df_iqr_100, all_df_iqr_sp, by=c("dispersal", "exposure", "esm", "ssp"))
+all_df_iqr_100$per<-all_df_iqr_100$N/all_df_iqr_100$N_sp
+all_df_iqr_100<-all_df_iqr_100[loss_100==T]
+all_df_iqr_100_se<-all_df_iqr_100[, .(per=mean(per)), by=list(dispersal, exposure, ssp)]
+all_df_iqr_100_se$threshold<-"100%"
 
-colos_per<-color_ssp
-names(colos_per)<-c("90%", "95%", "99%")
+all_df_iqr_all<-rbindlist(list(all_df_iqr_90_se, all_df_iqr_95_se, all_df_iqr_99_se, all_df_iqr_100_se))
+
+colos_per<-c(color_ssp, "black")
+names(colos_per)<-c("90%", "95%", "99%", "100%")
 p<-ggplot()+
   geom_bar(data=all_df_iqr_all, 
            stat="identity", position="dodge2", 
@@ -215,3 +223,5 @@ p<-ggplot()+
   ylab("Extinction risk because of loss of landcover (%)")
 p
 ggsave(p, filename="../../Figures/Landcover/landcover_loss_percent.png", width=8, height=5)
+
+write.csv(all_df_iqr_all, "../../Figures/Landcover/landcover_loss_percent.csv", row.names = F)

@@ -268,6 +268,7 @@ ggsave(p, filename="../../Figures/N_Extinction/Extinction_bird_estimated_disp_10
 
 #For order
 birds_trait<-data.table(read.table("../../Data/Dispersal_distance/EltonTraits/Dataset_HWI.csv", sep=",", head=T, stringsAsFactors = F))
+table(birds_trait$Diet)
 birds_trait<-birds_trait[, .(N=.N), by=list(Order, iucn_name)]
 colnames(birds_trait)<-c ("order", "sp", "xxx")
 birds_trait$sp<-gsub(" ", "_", birds_trait$sp)

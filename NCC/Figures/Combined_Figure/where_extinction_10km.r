@@ -155,6 +155,7 @@ if (T){
         legend.position = "none"
         #axis.title.y=element_blank()
       )
+    print(paste(nrow(item_df), ll))
     p2_insert<-ggplot()+geom_density(data=item_df, aes(x=sum_V, y=..density.. * nrow(item_df) * binwidth), 
                                          bw=binwidth, fill="grey50", color="grey50", alpha=0.2)+
       scale_x_log10()+

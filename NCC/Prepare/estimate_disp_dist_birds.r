@@ -585,3 +585,4 @@ birds_trait$Scientific
 new_df_birds$iucn_name
 item<-merge(new_df_birds, birds_trait, by.x="iucn_name", by.y="Scientific")
 plot(item$log_body_mass, item$log_elton)
+birds_trait$Diet.Vunk
