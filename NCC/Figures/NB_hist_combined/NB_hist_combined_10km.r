@@ -1,5 +1,5 @@
 library(ggplot2)
-library(purrr)
+library(ggpubr)
 setwd("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Script/diversity_in_e")
 nb_prec<-readRDS("../../Figures/NB_hist_combined/nb_prec_10km.rda")
 nb_prec<-nb_prec+theme(strip.background.x = element_blank(),

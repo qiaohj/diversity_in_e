@@ -210,11 +210,24 @@ exposure<-0
 sp_dis_all_sub_N_all<-NULL
 sp_dis_extinct<-NULL
 sp_dis_all_se_all<-NULL
+df_bird<-readRDS("../../Objects/iucn_birds_area.rda")
+df_bird<-data.table(df_bird)
+df_bird<-df_bird[area>0]
+df_bird<-df_bird[, .(area=max(area/1e6)), by=list(SCINAME)]
+colnames(df_bird)[1]<-"sp"
+df_mammal<-readRDS("../../Objects/iucn_mammals_area.rda")
+df_mammal<-data.table(df_mammal)
+df_mammal<-df_mammal[area>0]
+df_mammal<-df_mammal[, .(area=max(area/1e6)), by=list(binomial)]
+colnames(df_mammal)[1]<-"sp"
 
+df_area<-rbindlist(list(df_bird, df_mammal))
+df_area$sp<-gsub(" ", "_", df_area$sp)
 for (exposure in c(0, 5)){
   rda<-sprintf("../../Figures/N_Extinction/sp_dis_all_%d_10km_2_100km.rda", exposure)
   print(paste("Reading", rda))
   sp_dis_all<-readRDS(rda)
+  sp_dis_all_area<-merge(sp_dis_all, df_area, by="sp")
   
   if (F){
     test<-sp_dis_all[, .(N=.N), by=list(GCM, SSP, N_type, N_SP, M, group, year)]
@@ -289,7 +302,7 @@ sp_dis_all_sub_N_all<-merge(sp_dis_all_sub_N_all, full_combinations,
                             by=c("group", "GCM", "SSP", "M", "N_type", "exposure", "Label1"), all=T)
 sp_dis_all_sub_N_all$TYPE<-sprintf("Diversity_exposure_%d_dispersal_%d_10km_2_100km",
                                    sp_dis_all_sub_N_all$exposure_number, sp_dis_all_sub_N_all$M)
-sp_dis_all_sub_N_all[which(sp_dis_all_sub_N_all$group=="Birds"), "N_SP"]<-7815
+sp_dis_all_sub_N_all[which(sp_dis_all_sub_N_all$group=="Birds"), "N_SP"]<-7813
 sp_dis_all_sub_N_all[which(sp_dis_all_sub_N_all$group=="Mammals"), "N_SP"]<-3656
 sp_dis_all_sub_N_all[is.na(sp_dis_all_sub_N_all)]<-0
 

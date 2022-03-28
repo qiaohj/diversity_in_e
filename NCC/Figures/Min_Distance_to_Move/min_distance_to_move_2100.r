@@ -42,6 +42,7 @@ if (F){
 }
 source("commonFuns/colors.r")
 df_all<-readRDS("../../Figures/Min_distance_to_Dispersal/full.rda")
+df_all[is.na(dispersal)]$dispersal<-0
 df_all%>%dplyr::group_by(GCM, SSP, year, group, dispersal)%>%
   dplyr::summarise(N=n())
 df_sp_list<-list()
@@ -59,8 +60,8 @@ df_all_SSP<-df_all%>%dplyr::group_by(SSP, group, year, extinct_year)%>%
   dplyr::summarise(dist_min_mean=mean(dist_min),
                    dist_min_sd=sd(dist_min),
                    dist_min_CI=CI(dist_min)[2]-CI(dist_min)[3])
-              
-df_allxxx<-df_all%>%dplyr::group_by(group, year)%>%
+        
+df_allxxx<-df_all%>%dplyr::group_by(SSP, group, year)%>%
   dplyr::summarise(dist_min_mean=mean(dist_min),
                    dist_min_sd=sd(dist_min),
                    dist_min_CI=CI(dist_min)[2]-CI(dist_min)[3])
@@ -81,8 +82,28 @@ df_all_se<-df_all%>%dplyr::group_by(SSP, group, year)%>%
   dplyr::summarise(mean_dist_mean=mean(dist_min),
                    sd_dist_mean=sd(dist_min),
                    ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
-write.csv(df_all_se, sprintf("../../Figures/Min_distance_to_Dispersal/mean.csv"))
 
+df_all_se2<-df_all%>%dplyr::group_by(SSP, year)%>%
+  dplyr::summarise(mean_dist_mean=mean(dist_min),
+                   sd_dist_mean=sd(dist_min),
+                   ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
+df_all_se2$group<-"ALL"
+df_all_se<-rbind(df_all_se, df_all_se2)
+write.csv(df_all_se, sprintf("../../Figures/Min_distance_to_Dispersal/mean_100km.csv"))
+
+df_all_sexx<-df_all%>%dplyr::group_by(year, group)%>%
+  dplyr::summarise(mean_dist_mean=mean(dist_min),
+                   sd_dist_mean=sd(dist_min),
+                   ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
+df_all_sexx%>%dplyr::filter(year==2040)
+df_all_sexx%>%dplyr::filter(year==2100)
+
+df_all_sexx<-df_all%>%dplyr::group_by(year)%>%
+  dplyr::summarise(mean_dist_mean=mean(dist_min),
+                   sd_dist_mean=sd(dist_min),
+                   ci_dist_mean=CI(dist_min)[1]-CI(dist_min)[2])
+data.table(df_all_sexx)[year==2040]
+data.table(df_all_sexx)[year==2100]
 
 for (yyy in c(2040, 2100)){
   df_all_se<-df_all%>%dplyr::filter(extinct_year>yyy)%>%dplyr::group_by(SSP, group, year)%>%

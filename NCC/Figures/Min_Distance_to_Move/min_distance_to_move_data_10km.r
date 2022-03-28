@@ -28,7 +28,7 @@ predict_range<-c(2021:2100)
 YYYY<-2021
 for (YYYY in predict_range){
   print(paste(group, YYYY))
-  target_rda<-sprintf("../../Objects/Min_distance_to_Dispersal/%s/%d.rda", group, YYYY)
+  target_rda<-sprintf("../../Objects/Min_distance_to_Dispersal/%s/%d_10km.rda", group, YYYY)
   if (file.exists(target_rda)){
     print("skip")
     next()

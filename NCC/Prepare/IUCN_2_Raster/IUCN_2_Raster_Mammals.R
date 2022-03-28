@@ -15,6 +15,36 @@ if (F){
   ORIGIN<-c(1,2,3,5,6)
   SEASONAL<-c(1,2)
   sp_df<-sf::st_read(dsn="../../Shape/IUCN/MAMMALS", layer="MAMMALS_TERRESTRIAL_ONLY") 
+  i<-1
+  sp_df$area<--1
+  
+  for (i in c(1:nrow(sp_df))){
+    print(paste(i, nrow(sp_df)))
+    if (sp_df[i,]$area>0){
+      print("skip")
+      next()
+    }
+    tryCatch(
+      {
+        sp_df[i,]$area<-as.numeric(st_area(sp_df[i,]))
+      },
+      error=function(cond) {
+       
+      },
+      warning=function(cond) {
+        
+      },
+      finally={
+      
+      }
+    )    
+   
+  }
+  
+  sp_df$geometry<-NULL
+  sp_df[which(sp_df$area==-1),]
+  saveRDS(sp_df, "../../Objects/iucn_mammals_area.rda")
+  plot(sp_df[which(sp_df$area>0), "area"], sp_df[which(sp_df$area>0), "SHAPE_Area"])
   mask_bak<-raster("../../Raster/mask_10km.tif")
   sp_df_eck4<-st_transform(sp_df, crs = st_crs(mask_bak))
   #writeOGR(sp_df_eck4, "../../Data/Raw/IUCN/MAMMALS", "MAMMALS_TERRESTRIAL_ONLY_ECK4", driver="ESRI Shapefile")

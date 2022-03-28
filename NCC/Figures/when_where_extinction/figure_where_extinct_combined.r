@@ -19,10 +19,10 @@ if (T){
     da=0
     print(paste(da))
     if (da==0){
-      title1<-"Extinct proportion (no dispersal)"
+      title1<-"Extinction proportion (no dispersal)"
       title2<-"Number of extinct species (no dispersal)"
     }else{
-      title1<-"Extinct proportion (with dispersal)"
+      title1<-"Extinction proportion (with dispersal)"
       title2<-"Number of extinct species (with dispersal)"
     }
     
@@ -71,7 +71,7 @@ if (T){
     
     df_highest$type<-"Both highest quartile"
     df_highest[which(is.na(df_highest$mean_V)), "type"]<-"Highest quartile in raw extinction"
-    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinct proportion"
+    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinction proportion"
     
     p_ratio_no_da<-ggplot(ratio_final)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
@@ -83,7 +83,7 @@ if (T){
                           labels=c("0%", "10%", "20%", "30%", "40%", "50%",
                                    sprintf(">60%%, up to %.0f%%", max(ratio_final$mean_V)*100)))+
       #ggtitle(title1)+
-      labs(fill = "Extinct proportion")+
+      labs(fill = "Extinction proportion")+
       theme(
         axis.line = element_blank(),
         axis.text.x = element_blank(),
@@ -138,10 +138,10 @@ if (T){
       facet_grid(exposure~SSP)+
       scale_fill_manual(breaks=c("Both highest quartile", 
                                  "Highest quartile in raw extinction", 
-                                 "Highest quartile in extinct proportion"),
+                                 "Highest quartile in extinction proportion"),
                         labels=c("Both highest quartile", 
                                  "Highest quartile in raw extinction", 
-                                 "Highest quartile in extinct proportion"),
+                                 "Highest quartile in extinction proportion"),
                         values=c(colors_red[7], colors_blue[7], colors_green[7]))+
       #ggtitle(title2)+
       labs(fill = "")+
@@ -167,10 +167,10 @@ if (T){
            width=8, height=4)
     #da=1
     if (da==0){
-      title1<-"Extinct proportion (no dispersal)"
+      title1<-"Extinction proportion (no dispersal)"
       title2<-"Number of extinct species (no dispersal)"
     }else{
-      title1<-"Extinct proportion (with dispersal)"
+      title1<-"Extinction proportion (with dispersal)"
       title2<-"Number of extinct species (with dispersal)"
     }
     
@@ -220,7 +220,7 @@ if (T){
     
     df_highest$type<-"Both highest quartile"
     df_highest[which(is.na(df_highest$mean_V)), "type"]<-"Highest quartile in raw extinction"
-    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinct proportion"
+    df_highest[which(is.na(df_highest$sum_V)), "type"]<-"Highest quartile in extinction proportion"
     
     p_df_highest<-ggplot(df_highest)+
       geom_tile(data=mask_p, aes(x=x, y=y), fill=mask_color)+
@@ -228,10 +228,10 @@ if (T){
       facet_grid(exposure~SSP)+
       scale_fill_manual(breaks=c("Both highest quartile", 
                                  "Highest quartile in raw extinction", 
-                                 "Highest quartile in extinct proportion"),
+                                 "Highest quartile in extinction proportion"),
                         labels=c("Both highest quartile", 
                                  "Highest quartile in raw extinction", 
-                                 "Highest quartile in extinct proportion"),
+                                 "Highest quartile in extinction proportion"),
                         values=c(colors_red[7], colors_blue[7], colors_green[7]))+
       #ggtitle(title2)+
       labs(fill = "")+
@@ -266,7 +266,7 @@ if (T){
                           labels=c("0%", "10%", "20%", "30%", "40%", "50%",
                                    sprintf(">60%%, up to %.0f%%", max(ratio_final$mean_V)*100)))+
       #ggtitle(title1)+
-      labs(fill = "Extinct proportion")+
+      labs(fill = "Extinction proportion")+
       theme(
         axis.line = element_blank(),
         axis.text.x = element_blank(),
@@ -325,7 +325,7 @@ if (T){
     pp<-ggarrange(p_n_ext_no_da_formatted,
                   p_ratio_no_da_formatted, 
                   p_n_ext_with_da_formatted, 
-                  p_ratio_with_da_formatted, ncol=1, nrow=4, labels=c("A", "B", "C", "D"))
+                  p_ratio_with_da_formatted, ncol=1, nrow=4)
     
     ggsave(pp, 
            filename=sprintf("../../Figures/when_where_extinction_all/combined_final_da_all_10km.png"), 
@@ -385,7 +385,7 @@ for (da in c(0, 1)){
         facet_grid(exposure~SSP)+
         ggg+
         #ggtitle(paste(g, title1, sep=" - "))+
-        labs(fill = "Extinct proportion")+
+        labs(fill = "Extinction proportion")+
         theme(
           axis.line = element_blank(),
           axis.text.x = element_blank(),

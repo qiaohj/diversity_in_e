@@ -33,7 +33,32 @@ if (F){
 if (F){
   mask_bak<-raster("../../Raster/mask_10km.tif")
   mask_high<-raster("/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Raster/mask_high_res.tif")
-  vessel <- sf::st_read(dsn = "/home/huijieqiao/Experiments/IUCN/BIRDS/BOTW.gdb", layer = "All_Species")
+  vessel <- sf::st_read(dsn = "/media/huijieqiao/Speciation_Extin/Sp_Richness_GCM/Shape/IUCN/BIRDS/BOTW.gdb", layer = "All_Species")
+  
+  vessel$area<--1
+  
+  for (i in c(1:nrow(vessel))){
+    print(paste(i, nrow(vessel)))
+    if (vessel[i,]$area>0){
+      print("skip")
+      next()
+    }
+    tryCatch(
+      {
+        vessel[i,]$area<-as.numeric(st_area(vessel[i,]))
+      },
+      error=function(cond) {
+        
+      },
+      warning=function(cond) {
+        
+      },
+      finally={
+        
+      }
+    )    
+  }
+  
   #vessel_simpl <- st_simplify(vessel,
   #                            preserveTopology = TRUE, 
   #                            dTolerance = 10000)

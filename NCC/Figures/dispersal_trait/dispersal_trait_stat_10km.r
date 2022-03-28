@@ -43,12 +43,25 @@ df_se<-df_all_merged%>%group_by(SSP, GCM, label, da, exposure, status)%>%
 unique(df_se$exposure)
 df_se<-df_se%>%dplyr::filter(da=="with dispersal")
 
-
-df_se_across_GCM<-df_se%>%dplyr::group_by(SSP, label, da, status)%>%
+full_combination<-expand.grid(SSP=unique(df_se$SSP),
+                              GCM=unique(df_se$GCM),
+                              label=unique(df_se$label),
+                              da=unique(df_se$da),
+                              exposure=unique(df_se$exposure),
+                              status=unique(df_se$status),
+                              stringsAsFactors = F)
+df_se_full<-merge(full_combination, df_se, by=c("SSP", "GCM", "label", "da", "exposure", "status"), all=T)
+df_se_full[is.na(df_se_full$N), "N"]<-0
+df_se_across_GCM<-df_se_full%>%dplyr::group_by(SSP, label, da, exposure, status)%>%
   dplyr::summarise(mean_N=mean(N),
                    sd_N=sd(N),
                    CI_N=CI(N)[1]-CI(N)[2])
+write.table(df_se_across_GCM, "../../Figures/dispersal_traits/dispersal_stat_10km.csv", sep=",", row.names = F)
 
+df_se_across_GCM<-df_se_full%>%dplyr::group_by(SSP, label, da, status)%>%
+  dplyr::summarise(mean_N=mean(N),
+                   sd_N=sd(N),
+                   CI_N=CI(N)[1]-CI(N)[2])
 
 p<-ggplot(df_se_across_GCM)+
   geom_errorbar(aes(x=SSP, ymin=mean_N/1000-sd_N/1000, ymax=mean_N/1000+sd_N/1000, 
